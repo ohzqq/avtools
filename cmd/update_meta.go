@@ -11,7 +11,7 @@ import (
 )
 
 // metaCmd represents the meta command
-var metaCmd = &cobra.Command{
+var updateMetaCmd = &cobra.Command{
 	Use:   "meta",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -26,7 +26,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	updateCmd.AddCommand(metaCmd)
+	updateCmd.AddCommand(updateMetaCmd)
 
 	// Here you will define your flags and configuration settings.
 

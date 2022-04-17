@@ -11,7 +11,7 @@ import (
 )
 
 // audioCmd represents the audio command
-var audioCmd = &cobra.Command{
+var extractAudioCmd = &cobra.Command{
 	Use:   "audio",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -26,7 +26,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	extractCmd.AddCommand(audioCmd)
+	extractCmd.AddCommand(extractAudioCmd)
 
 	// Here you will define your flags and configuration settings.
 

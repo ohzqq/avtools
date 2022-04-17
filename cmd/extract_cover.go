@@ -11,7 +11,7 @@ import (
 )
 
 // coverCmd represents the cover command
-var coverCmd = &cobra.Command{
+var extractCoverCmd = &cobra.Command{
 	Use:   "cover",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -26,7 +26,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	extractCmd.AddCommand(coverCmd)
+	extractCmd.AddCommand(extractCoverCmd)
 
 	// Here you will define your flags and configuration settings.
 

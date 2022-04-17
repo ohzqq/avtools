@@ -1,50 +1,61 @@
-package media
+package fftools
 
 import (
 	//"os"
+	"strings"
 	"os/exec"
 )
 
 type FFmpegCmd struct {
-	exec.Cmd
+	Cmd *exec.Cmd
 	Input string
-	VF string
-	AF string
-	CV string
-	CA string
-	VParams string
-	CParams string
+	VideoFilter string
+	AudioFilter string
+	CodecVideo string
+	CodecAudio string
+	VideoParams string
+	AudioParams string
 }
 
-func FFcmd() *FFmpegCmd (
-	return exec.Command("ffmpeg")
-)
+func New() *FFmpegCmd {
+	ff := FFmpegCmd{}
+	ff.Cmd = exec.Command("ffmpeg", "-hide_banner")
+	return &ff
+}
 
 func (ff *FFmpegCmd) FFArgs(args ...string) {
-	ff.Args = args
+	ff.Cmd.Args = args
 }
 
-func (ff *FFmpegCmd) Input(input ...string) string {
+func (ff *FFmpegCmd) Files(input ...string) string {
+	return strings.Join(input, " ")
 }
 
 func (ff *FFmpegCmd) VF(filters ...string) string {
+	return strings.Join(filters , " ")
 }
 
 func (ff *FFmpegCmd) AF(filters ...string) string {
+	return strings.Join(filters , " ")
 }
 
 func (ff *FFmpegCmd) FilterComplex(filter string) string {
+	return filter
 }
 
 func (ff *FFmpegCmd) CV(codec string) string {
+	return codec
 }
 
 func (ff *FFmpegCmd) CA(codec string) string {
+	return codec
 }
 
 func (ff *FFmpegCmd) VParams(params ...string) string {
+	return strings.Join(params, " ")
 }
 
 func (ff *FFmpegCmd) AParams(params ...string) string {
+	return strings.Join(params, " ")
 }
 
