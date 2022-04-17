@@ -24,7 +24,7 @@ func New() *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Args(args ...string) {
-	ff.Cmd.Args = append(cmd.Args, args...)
+	ff.Cmd.Args = append(ff.Cmd.Args, args...)
 }
 
 func (ff *FFmpegCmd) Files(input ...string) string {
@@ -59,3 +59,51 @@ func (ff *FFmpegCmd) AParams(params ...string) string {
 	return strings.Join(params, " ")
 }
 
+func (p profile) Start(s string) profile {
+	var in []string
+	for _, arg := range p {
+		if arg == "ss" {
+			in = append(in, arg + " " + s)
+		} else {
+			in = append(in, arg)
+		}
+	}
+	return profile(in)
+}
+
+func (p profile) End(e string) profile {
+	var in []string
+	for _, arg := range p {
+		if arg == "to" || arg == "t" {
+			in = append(in, arg + " " + e)
+		} else {
+			in = append(in, arg)
+		}
+	}
+	return profile(in)
+}
+
+func (p profile) Input(input ...string) profile {
+	var in []string
+	i := 0
+	for _, arg := range p {
+		if arg == "i" {
+			in = append(in, arg + " " + input[i])
+			i++
+		} else {
+			in = append(in, arg)
+		}
+	}
+	return profile(in)
+}
+
+
+func (p profile) String() string {
+	var cmdString strings.Builder
+	for _, arg := range p {
+		cmdString.WriteString("-")
+		cmdString.WriteString(arg)
+		cmdString.WriteString(" ")
+	}
+	return cmdString.String()
+}

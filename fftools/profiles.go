@@ -56,7 +56,6 @@ func Cfg() *FFCfg {
 	cfg.Profiles = cfg.listProfiles()
 	cfg.Padding = cfg.defCfg.GetInt("padding")
 	cfg.Output = cfg.defCfg.GetString("output")
-	fmt.Printf("%v", cfg.Profile("convert").String("poot", "too"))
 	return &cfg
 }
 
@@ -70,20 +69,4 @@ func (ff *FFCfg) listProfiles() []string {
 
 func (ff *FFCfg) Profile(pro string) (profile) {
 	return profile(ff.proCfg.GetStringSlice(pro))
-}
-
-func (p profile) Input(input ...string) string {
-	var cmdString strings.Builder
-	i := 0
-	for _, arg := range p {
-		cmdString.WriteString("-")
-		cmdString.WriteString(arg)
-		if arg == "i" {
-			cmdString.WriteString(" ")
-			cmdString.WriteString(input[i])
-			i++
-		}
-		cmdString.WriteString(" ")
-	}
-	return cmdString.String()
 }
