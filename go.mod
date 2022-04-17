@@ -1,3 +1,3 @@
-module github.com/ohzqq/go-media-tools
+module github.com/ohzqq/fftools
 
 go 1.18

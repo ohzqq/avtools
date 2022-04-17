@@ -1,2 +1,2 @@
-# go-media-tools
+# FFmpeg Tools
 A convenience tool for running common ffmpeg commands.
