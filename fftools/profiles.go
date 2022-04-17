@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"os"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 	"github.com/spf13/cobra"
@@ -22,8 +23,8 @@ func InitConfig() {
 		cobra.CheckErr(err)
 
 		// Search config in home directory with name ".fftools" (without extension).
-		viper.AddConfigPath(home)
-		viper.AddConfigPath(filepath.Join(home, "/home/nina/Sync/code/fftools/tmp/"))
+		//viper.AddConfigPath(home)
+		viper.AddConfigPath(filepath.Join(home, "Sync/code/fftools/tmp/"))
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".fftools.yml")
 	}
@@ -36,3 +37,53 @@ func InitConfig() {
 	}
 }
 
+//type profile map[string]string
+type profile []string
+type defaults map[string]interface{}
+
+type FFCfg struct {
+	Profiles []string
+	Padding int
+	Output string
+	proCfg *viper.Viper
+	defCfg *viper.Viper
+}
+
+func Cfg() *FFCfg {
+	cfg := FFCfg{}
+	cfg.proCfg = viper.Sub("profiles")
+	cfg.defCfg = viper.Sub("defaults")
+	cfg.Profiles = cfg.listProfiles()
+	cfg.Padding = cfg.defCfg.GetInt("padding")
+	cfg.Output = cfg.defCfg.GetString("output")
+	fmt.Printf("%v", cfg.Profile("convert").String("poot", "too"))
+	return &cfg
+}
+
+func (ff *FFCfg) listProfiles() []string {
+	var profiles []string
+	for pro, _ := range viper.GetStringMap("profiles") {
+		profiles = append(profiles, pro)
+	}
+	return profiles
+}
+
+func (ff *FFCfg) Profile(pro string) (profile) {
+	return profile(ff.proCfg.GetStringSlice(pro))
+}
+
+func (p profile) Input(input ...string) string {
+	var cmdString strings.Builder
+	i := 0
+	for _, arg := range p {
+		cmdString.WriteString("-")
+		cmdString.WriteString(arg)
+		if arg == "i" {
+			cmdString.WriteString(" ")
+			cmdString.WriteString(input[i])
+			i++
+		}
+		cmdString.WriteString(" ")
+	}
+	return cmdString.String()
+}

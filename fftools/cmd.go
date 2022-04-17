@@ -23,8 +23,8 @@ func New() *FFmpegCmd {
 	return &ff
 }
 
-func (ff *FFmpegCmd) FFArgs(args ...string) {
-	ff.Cmd.Args = args
+func (ff *FFmpegCmd) Args(args ...string) {
+	ff.Cmd.Args = append(cmd.Args, args...)
 }
 
 func (ff *FFmpegCmd) Files(input ...string) string {
