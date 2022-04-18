@@ -3,7 +3,7 @@ package fftools
 import (
 	"path/filepath"
 	"os"
-	"fmt"
+	//"fmt"
 	//"strings"
 
 	"github.com/spf13/viper"
@@ -37,49 +37,32 @@ func InitConfig() {
 	}
 }
 
-//type profile map[string]string
-type defaults map[string]interface{}
+type Profile map[string]string
 
 type FFCfg struct {
-	Profiles map[string]profile
+	Profiles map[string]Profile
 	ProfileList []string
 	Padding int
 	Output string
-	proCfg []interface{}
-	defCfg *viper.Viper
-}
-
-type Profile struct {
-	Pre string
-	VideoCodec string
-	VideoFilters string
-	VideoParams string
-	AudioCodec string
-	AudioFilters string
-	AudioParams string
-	FilterComplex string
-	Post string
 }
 
 func Cfg() *FFCfg {
 	cfg := FFCfg{}
-	list, profiles := parseProfiles(viper.Get("profiles"))
+	list, profiles := parseProfiles(viper.Get("Profiles"))
 	//cfg.proCfg = 
-	cfg.defCfg = viper.Sub("defaults")
+	defCfg := viper.Sub("Defaults")
 	cfg.Profiles = profiles
 	cfg.ProfileList = list
-	cfg.Padding = cfg.defCfg.GetInt("padding")
-	cfg.Output = cfg.defCfg.GetString("output")
+	cfg.Padding = defCfg.GetInt("Padding")
+	cfg.Output = defCfg.GetString("Output")
 	return &cfg
 }
 
-type profile map[string]string
-
-func parseProfiles(p interface{}) ([]string, map[string]profile) {
+func parseProfiles(p interface{}) ([]string, map[string]Profile) {
 	var name string
 	var list []string
 	prof := make(map[string]string)
-	profiles := make(map[string]profile)
+	profiles := make(map[string]Profile)
 	for _, pro := range p.([]interface{}) {
 		for k, v := range pro.(map[interface{}]interface{}) {
 			prof[k.(string)] = v.(string)
@@ -88,20 +71,7 @@ func parseProfiles(p interface{}) ([]string, map[string]profile) {
 				list = append(list, v.(string))
 			}
 		}
-		profiles[name] = profile(prof)
+		profiles[name] = Profile(prof)
 	}
-	fmt.Printf("%v", profiles)
 	return list, profiles
 }
-
-//func (ff *FFCfg) listProfiles() []string {
-//  var profiles []string
-//  for pro, _ := range viper.GetStringMap("profiles") {
-//    profiles = append(profiles, pro)
-//  }
-//  return profiles
-//}
-
-//func (ff *FFCfg) Profile(pro string) (profile) {
-	//return profile(ff.proCfg.GetStringSlice(pro))
-//}

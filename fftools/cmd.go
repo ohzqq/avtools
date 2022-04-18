@@ -6,13 +6,12 @@ import (
 	"os/exec"
 )
 
-var argOrder = []string{"Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "Output"}
+var ArgOrder = []string{"Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "FilterComplex", "Output"}
 
 type FFmpegCmd struct {
 	Cmd *exec.Cmd
 	Input string
 	Profile Profile
-	//FilterComplex
 }
 
 func New() *FFmpegCmd {

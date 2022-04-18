@@ -2,14 +2,20 @@ package main
 
 import (
 	//"fmt"
+	"log"
 
-	//"github.com/ohzqq/fftools/cmd"
+	"github.com/ohzqq/fftools/cmd"
 	"github.com/ohzqq/fftools/fftools"
 )
 
 func main() {
 	fftools.InitConfig()
 	fftools.Cfg()
+	cli := cmd.NewCli()
+	err := cli.Cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 	//cfg := fftools.Cfg()
 	//keys := fftools.Profiles()
 	//defaults := fftools.Defaults()
