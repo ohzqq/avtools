@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"os"
 	"fmt"
-	"strings"
+	//"strings"
 
 	"github.com/spf13/viper"
 	"github.com/spf13/cobra"
@@ -33,40 +33,75 @@ func InitConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 }
 
 //type profile map[string]string
-type profile []string
 type defaults map[string]interface{}
 
 type FFCfg struct {
-	Profiles []string
+	Profiles map[string]profile
+	ProfileList []string
 	Padding int
 	Output string
-	proCfg *viper.Viper
+	proCfg []interface{}
 	defCfg *viper.Viper
+}
+
+type Profile struct {
+	Pre string
+	VideoCodec string
+	VideoFilters string
+	VideoParams string
+	AudioCodec string
+	AudioFilters string
+	AudioParams string
+	FilterComplex string
+	Post string
 }
 
 func Cfg() *FFCfg {
 	cfg := FFCfg{}
-	cfg.proCfg = viper.Sub("profiles")
+	list, profiles := parseProfiles(viper.Get("profiles"))
+	//cfg.proCfg = 
 	cfg.defCfg = viper.Sub("defaults")
-	cfg.Profiles = cfg.listProfiles()
+	cfg.Profiles = profiles
+	cfg.ProfileList = list
 	cfg.Padding = cfg.defCfg.GetInt("padding")
 	cfg.Output = cfg.defCfg.GetString("output")
 	return &cfg
 }
 
-func (ff *FFCfg) listProfiles() []string {
-	var profiles []string
-	for pro, _ := range viper.GetStringMap("profiles") {
-		profiles = append(profiles, pro)
+type profile map[string]string
+
+func parseProfiles(p interface{}) ([]string, map[string]profile) {
+	var name string
+	var list []string
+	prof := make(map[string]string)
+	profiles := make(map[string]profile)
+	for _, pro := range p.([]interface{}) {
+		for k, v := range pro.(map[interface{}]interface{}) {
+			prof[k.(string)] = v.(string)
+			if k.(string) == "Name" {
+				name = v.(string)
+				list = append(list, v.(string))
+			}
+		}
+		profiles[name] = profile(prof)
 	}
-	return profiles
+	fmt.Printf("%v", profiles)
+	return list, profiles
 }
 
-func (ff *FFCfg) Profile(pro string) (profile) {
-	return profile(ff.proCfg.GetStringSlice(pro))
-}
+//func (ff *FFCfg) listProfiles() []string {
+//  var profiles []string
+//  for pro, _ := range viper.GetStringMap("profiles") {
+//    profiles = append(profiles, pro)
+//  }
+//  return profiles
+//}
+
+//func (ff *FFCfg) Profile(pro string) (profile) {
+	//return profile(ff.proCfg.GetStringSlice(pro))
+//}

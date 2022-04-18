@@ -2,19 +2,17 @@ package fftools
 
 import (
 	//"os"
-	"strings"
+	//"strings"
 	"os/exec"
 )
+
+var argOrder = []string{"Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "Output"}
 
 type FFmpegCmd struct {
 	Cmd *exec.Cmd
 	Input string
-	VideoFilter string
-	AudioFilter string
-	CodecVideo string
-	CodecAudio string
-	VideoParams string
-	AudioParams string
+	Profile Profile
+	//FilterComplex
 }
 
 func New() *FFmpegCmd {
@@ -23,87 +21,92 @@ func New() *FFmpegCmd {
 	return &ff
 }
 
-func (ff *FFmpegCmd) Args(args ...string) {
+func (ff *FFmpegCmd) PreInput(args ...string) {
 	ff.Cmd.Args = append(ff.Cmd.Args, args...)
 }
 
-func (ff *FFmpegCmd) Files(input ...string) string {
-	return strings.Join(input, " ")
+func (ff *FFmpegCmd) Files(input ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, input...)
 }
 
-func (ff *FFmpegCmd) VF(filters ...string) string {
-	return strings.Join(filters , " ")
+func (ff *FFmpegCmd) PostInput(args ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, args...)
 }
 
-func (ff *FFmpegCmd) AF(filters ...string) string {
-	return strings.Join(filters , " ")
+func (ff *FFmpegCmd) CV(codec string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, codec)
 }
 
-func (ff *FFmpegCmd) FilterComplex(filter string) string {
-	return filter
+func (ff *FFmpegCmd) VParams(params ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, params...)
 }
 
-func (ff *FFmpegCmd) CV(codec string) string {
-	return codec
+func (ff *FFmpegCmd) VF(filters ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, filters...)
 }
 
-func (ff *FFmpegCmd) CA(codec string) string {
-	return codec
+func (ff *FFmpegCmd) FilterComplex(filter string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, filter)
 }
 
-func (ff *FFmpegCmd) VParams(params ...string) string {
-	return strings.Join(params, " ")
+func (ff *FFmpegCmd) CA(codec string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, codec)
 }
 
-func (ff *FFmpegCmd) AParams(params ...string) string {
-	return strings.Join(params, " ")
+func (ff *FFmpegCmd) AParams(params ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, params...)
 }
 
-func (p profile) Start(s string) profile {
-	var in []string
-	for _, arg := range p {
-		if arg == "ss" {
-			in = append(in, arg + " " + s)
-		} else {
-			in = append(in, arg)
-		}
-	}
-	return profile(in)
+func (ff *FFmpegCmd) AF(filters ...string) {
+	ff.Cmd.Args = append(ff.Cmd.Args, filters...)
 }
 
-func (p profile) End(e string) profile {
-	var in []string
-	for _, arg := range p {
-		if arg == "to" || arg == "t" {
-			in = append(in, arg + " " + e)
-		} else {
-			in = append(in, arg)
-		}
-	}
-	return profile(in)
-}
+//func (p profile) Start(s string) profile {
+//  var in []string
+//  for _, arg := range p {
+//    if arg == "ss" {
+//      in = append(in, arg + " " + s)
+//    } else {
+//      in = append(in, arg)
+//    }
+//  }
+//  return profile(in)
+//}
 
-func (p profile) Input(input ...string) profile {
-	var in []string
-	i := 0
-	for _, arg := range p {
-		if arg == "i" {
-			in = append(in, arg + " " + input[i])
-			i++
-		} else {
-			in = append(in, arg)
-		}
-	}
-	return profile(in)
-}
+//func (p profile) End(e string) profile {
+//  var in []string
+//  for _, arg := range p {
+//    if arg == "to" || arg == "t" {
+//      in = append(in, arg + " " + e)
+//    } else {
+//      in = append(in, arg)
+//    }
+//  }
+//  return profile(in)
+//}
+
+//func (p profile) Input(input ...string) profile {
+//  var in []string
+//  i := 0
+//  for _, arg := range p {
+//    if arg == "i" {
+//      in = append(in, arg + " " + input[i])
+//      i++
+//    } else {
+//      in = append(in, arg)
+//    }
+//  }
+//  return profile(in)
+//}
 
 
-func (p profile) String() string {
-	var cmdString strings.Builder
-	for _, arg := range p {
-		cmdString.WriteString("-")
-		cmdString.WriteString(arg)
-		cmdString.WriteString(" ")
-	}
-	return cmdString.String()
-}
+//func (p profile) String() string {
+//  var cmdString strings.Builder
+//  for _, arg := range p {
+//    cmdString.WriteString("-")
+//    cmdString.WriteString(arg)
+//    cmdString.WriteString(" ")
+//  }
+//  return cmdString.String()
+//}
+
