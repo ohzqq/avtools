@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/fftools/fftools"
+	//"github.com/ohzqq/fftools/fftools"
 
 	"github.com/leaanthony/clir"
 )
@@ -13,27 +13,11 @@ type Cli struct{
 	Flags flags
 }
 
-const (
-	Pre = "pre"
-	Input = "i"
-	Post = "post"
-	VideoCodec = "vc"
-	VideoParams = "vp"
-	VideoFilters = "vf"
-	AudioCodec = "ac"
-	AudioParams = "ap"
-	AudioFilters = "af"
-	FilterCompex = "filter"
-	Output = "o"
-)
-
-type flags map[string]Flag
+type flags map[string]*Flag
 
 type Flag struct{
-	Changed bool
-	Flag string
+	Name string
 	Value string
-	Type string
 }
 
 var Flags = map[string]string{
@@ -48,14 +32,12 @@ var Flags = map[string]string{
 	"AudioFilters": "af",
 	"FilterCompex": "filter",
 	"Output": "o",
+	"Cue": "cue",
+	"Cover": "c",
+	"FFmetadata": "m",
+	"Verbosity": "v",
+	"Profile": "p",
 }
-
-var CmdFlags = make(flags)
-
-func (f Flag) HasChanged() bool { return f.Changed }
-func (f Flag) Name() string { return f.Flag }
-func (f Flag) ValueString() string { return f.Value }
-func (f Flag) ValueType() string { return f.Type }
 
 func NewCli() *Cli {
 	cli := Cli{
@@ -63,32 +45,32 @@ func NewCli() *Cli {
 		Flags: initFlags(),
 	}
 	cli.setFlags()
-	fmt.Printf("%v", cli)
+	//fmt.Printf("%v", cli)
 	cli.Cmd.Action(cli.defaultAction())
 	return &cli
 }
 
 func (c *Cli) defaultAction() clir.Action {
 	return func() error {
-		c.Cmd.PrintHelp()
-		//fmt.Println("Hello world")
+		//c.Cmd.j c 
+		//c.Cmd.PrintHelp()
+		fmt.Printf("%v", c.Flags["Cover"])
 		return nil
 	}
 }
 
 func (c *Cli) setFlags() {
 	for arg, flag := range Flags {
-		f := c.Flags[arg].Value
-		c.Cmd.StringFlag(flag, arg, &f)
+		c.Cmd.StringFlag(flag, arg, &c.Flags[arg].Value)
 	}
 }
 
 func initFlags() flags {
-	f := make(flags)
-	for _, arg := range fftools.ArgOrder {
-		flag := Flag{}
-		flag.Flag = Flags[arg]
-		f[arg] = flag
+	flags := make(flags)
+	for arg, _ := range Flags {
+		f := Flag{}
+		f.Name = Flags[arg]
+		flags[arg] = &f
 	}
-	return f
+	return flags
 }

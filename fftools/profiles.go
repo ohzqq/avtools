@@ -39,23 +39,33 @@ func InitConfig() {
 
 type Profile map[string]string
 
-type FFCfg struct {
+type ffCfg struct {
 	Profiles map[string]Profile
 	ProfileList []string
 	Padding int
 	Output string
+	Verbosity string
+	ProCfg map[string]*viper.Viper
+	Defaults *viper.Viper
 }
 
-func Cfg() *FFCfg {
-	cfg := FFCfg{}
+var Cfg = ffCfg{}
+
+func FFcfg() {
+	//cfg := FFCfg{}
 	list, profiles := parseProfiles(viper.Get("Profiles"))
 	//cfg.proCfg = 
-	defCfg := viper.Sub("Defaults")
-	cfg.Profiles = profiles
-	cfg.ProfileList = list
-	cfg.Padding = defCfg.GetInt("Padding")
-	cfg.Output = defCfg.GetString("Output")
-	return &cfg
+	Cfg.Defaults = viper.Sub("Defaults")
+	Cfg.Profiles = profiles
+	Cfg.ProfileList = list
+	Cfg.Padding = Cfg.Defaults.GetInt("Padding")
+	Cfg.Output = Cfg.Defaults.GetString("Output")
+	Cfg.Verbosity = Cfg.Defaults.GetString("Verbosity")
+	//return &cfg
+}
+
+func (c *ffCfg) GetDefaults() *viper.Viper {
+	return c.Defaults
 }
 
 func parseProfiles(p interface{}) ([]string, map[string]Profile) {
@@ -63,6 +73,7 @@ func parseProfiles(p interface{}) ([]string, map[string]Profile) {
 	var list []string
 	prof := make(map[string]string)
 	profiles := make(map[string]Profile)
+	proCfg := make(map[string]*viper.Viper)
 	for _, pro := range p.([]interface{}) {
 		for k, v := range pro.(map[interface{}]interface{}) {
 			prof[k.(string)] = v.(string)
@@ -71,6 +82,7 @@ func parseProfiles(p interface{}) ([]string, map[string]Profile) {
 				list = append(list, v.(string))
 			}
 		}
+		proCfg[name] = viper.Sub(name)
 		profiles[name] = Profile(prof)
 	}
 	return list, profiles

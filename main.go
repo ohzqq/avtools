@@ -10,8 +10,9 @@ import (
 
 func main() {
 	fftools.InitConfig()
-	fftools.Cfg()
+	fftools.FFcfg()
 	cli := cmd.NewCli()
+	//fmt.Printf("%v", fftools.Cfg.Profiles)
 	err := cli.Cmd.Run()
 	if err != nil {
 		log.Fatal(err)

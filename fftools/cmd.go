@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-var ArgOrder = []string{"Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "FilterComplex", "Output"}
+var ArgOrder = []string{"Verbosity", "Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "FilterComplex", "Output"}
 
 type FFmpegCmd struct {
 	Cmd *exec.Cmd
