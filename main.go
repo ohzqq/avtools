@@ -11,6 +11,8 @@ import (
 func main() {
 	fftools.InitConfig()
 	fftools.FFcfg()
+	//c := fftools.NewCmd().Args(fftools.Cfg.Profiles["convert"])
+	//fmt.Printf("%v", c.Cmd())
 	cli := cmd.NewCli()
 	//fmt.Printf("%v", fftools.Cfg.Profiles)
 	err := cli.Cmd.Run()

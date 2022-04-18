@@ -6,58 +6,80 @@ import (
 	"os/exec"
 )
 
+type CmdArgs map[string]string
+
 var ArgOrder = []string{"Verbosity", "Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "AudioCodec", "AudioParams", "AudioFilters", "FilterComplex", "Output"}
 
 type FFmpegCmd struct {
-	Cmd *exec.Cmd
+	cmd *exec.Cmd
 	Input string
-	Profile Profile
+	Arguments CmdArgs
 }
 
-func New() *FFmpegCmd {
+func NewCmd() *FFmpegCmd {
 	ff := FFmpegCmd{}
-	ff.Cmd = exec.Command("ffmpeg", "-hide_banner")
+	ff.cmd = exec.Command("ffmpeg", "-hide_banner")
+	ff.Arguments = make(CmdArgs)
 	return &ff
 }
 
-func (ff *FFmpegCmd) PreInput(args ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, args...)
+func (ff *FFmpegCmd) Args(args CmdArgs) *FFmpegCmd {
+	ff.Arguments = args
+	ff.Arguments.SetVerbosity()
+	return ff
 }
 
-func (ff *FFmpegCmd) Files(input ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, input...)
+func (c CmdArgs) SetVerbosity() {
+	if Cfg.Defaults.IsSet("Verbosity") {
+		c["Verbosity"] = "-loglevel " + Cfg.Defaults.GetString("Verbosity")
+	}
 }
 
-func (ff *FFmpegCmd) PostInput(args ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, args...)
+func (c CmdArgs) SetInput(arg string) {
+	c["Input"] = arg
 }
 
-func (ff *FFmpegCmd) CV(codec string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, codec)
+func (ff *FFmpegCmd) Cmd() *exec.Cmd {
+	for _, arg := range ArgOrder {
+		ff.cmd.Args = append(ff.cmd.Args, ff.Arguments[arg])
+	}
+	return ff.cmd
 }
 
-func (ff *FFmpegCmd) VParams(params ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, params...)
+func (ff *FFmpegCmd) PreInput(arg string) {
+	ff.Arguments["Pre"] = arg
 }
 
-func (ff *FFmpegCmd) VF(filters ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, filters...)
+func (ff *FFmpegCmd) PostInput(arg string) {
+	ff.Arguments["Post"] = arg
 }
 
-func (ff *FFmpegCmd) FilterComplex(filter string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, filter)
+func (ff *FFmpegCmd) VC(arg string) {
+	ff.Arguments["VideoCodec"] = arg
 }
 
-func (ff *FFmpegCmd) CA(codec string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, codec)
+func (ff *FFmpegCmd) VP(arg string) {
+	ff.Arguments["VideoParams"] = arg
 }
 
-func (ff *FFmpegCmd) AParams(params ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, params...)
+func (ff *FFmpegCmd) VF(arg string) {
+	ff.Arguments["VideoFilters"] = arg
 }
 
-func (ff *FFmpegCmd) AF(filters ...string) {
-	ff.Cmd.Args = append(ff.Cmd.Args, filters...)
+func (ff *FFmpegCmd) FilterComplex(arg string) {
+	ff.Arguments["FilterComplex"] = arg
+}
+
+func (ff *FFmpegCmd) AC(arg string) {
+	ff.Arguments["AudioCodec"] = arg
+}
+
+func (ff *FFmpegCmd) AP(arg string) {
+	ff.Arguments["AudioParams"] = arg
+}
+
+func (ff *FFmpegCmd) AF(arg string) {
+	ff.Arguments["AudioFilters"] = arg
 }
 
 //func (p profile) Start(s string) profile {

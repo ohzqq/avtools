@@ -37,10 +37,8 @@ func InitConfig() {
 	}
 }
 
-type Profile map[string]string
-
 type ffCfg struct {
-	Profiles map[string]Profile
+	Profiles map[string]CmdArgs
 	ProfileList []string
 	Padding int
 	Output string
@@ -68,11 +66,11 @@ func (c *ffCfg) GetDefaults() *viper.Viper {
 	return c.Defaults
 }
 
-func parseProfiles(p interface{}) ([]string, map[string]Profile) {
+func parseProfiles(p interface{}) ([]string, map[string]CmdArgs) {
 	var name string
 	var list []string
 	prof := make(map[string]string)
-	profiles := make(map[string]Profile)
+	profiles := make(map[string]CmdArgs)
 	proCfg := make(map[string]*viper.Viper)
 	for _, pro := range p.([]interface{}) {
 		for k, v := range pro.(map[interface{}]interface{}) {
@@ -83,7 +81,7 @@ func parseProfiles(p interface{}) ([]string, map[string]Profile) {
 			}
 		}
 		proCfg[name] = viper.Sub(name)
-		profiles[name] = Profile(prof)
+		profiles[name] = CmdArgs(prof)
 	}
 	return list, profiles
 }
