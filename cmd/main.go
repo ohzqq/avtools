@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	//"fmt"
 
 	"github.com/ohzqq/fftools/fftools"
 
@@ -9,30 +9,21 @@ import (
 )
 
 type Cli struct{
-	Cmd *clir.Cli
+	Parser *flaggy.Parser
 	Flags Flags
 }
 
 func NewCli() *Cli {
 	cli := Cli{
-		//Cmd: clir.NewCli("fftools", "FFmpeg tools", "v0.0.1"),
+		Parser: flaggy.NewParser("fftools"),
 		Flags: initFlags(),
 	}
 	cli.setFlags()
-	//fmt.Printf("%v", cli)
+	//fmt.Printf("%v", cli.Flags["af"])
 	//cli.Cmd.Action(cli.defaultAction())
 	return &cli
 }
 
-func (c *Cli) defaultAction() clir.Action {
-	return func() error {
-		//cmd := fftools.NewCmd().Args(c.Args())
-		//c.Cmd.j c 
-		//c.Cmd.PrintHelp()
-		fmt.Printf("%v", c.Flags["Input"])
-		return nil
-	}
-}
 
 func (c *Cli) Args() fftools.CmdArgs {
 	args := make(fftools.CmdArgs)
@@ -68,10 +59,10 @@ var cmdFlags = map[string]string{
 	"Profile": "p",
 }
 
-func (c *Cli) setFlags() {
+func (c Cli) setFlags() {
 	for arg, flag := range cmdFlags {
 		//f := c.Flags[arg].Value
-		c.Cmd.StringFlag(flag, arg, &c.Flags[arg].Value)
+		flaggy.String(&c.Flags[arg].Value, flag, arg, arg)
 	}
 }
 
