@@ -49,6 +49,7 @@ type defaults struct {
 	Output string
 	Verbosity string
 	Overwrite bool
+	Profile string
 }
 
 func FFcfg() {

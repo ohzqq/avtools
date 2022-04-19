@@ -14,24 +14,54 @@ import (
 func main() {
 	fftools.InitConfig()
 	fftools.FFcfg()
-	//c := fftools.NewCmd().Args(fftools.Cfg.Profiles["convert"])
-	//fmt.Printf("%v", c.Cmd())
-	//cli := cmd.NewCli()
-	//fmt.Printf("%v", fftools.Cfg.Profiles)
-	//cli.Parser.ShowHelp()
+
+	// Flags
 	var input []string
 	flaggy.StringSlice(&input, "i", "input", "input")
-	cli := Cli{}
-	cli.Flags = initFlags()
-	for arg, flag := range cmdFlags {
-		//f := c.Flags[arg].Value
-		flaggy.String(&cli.Flags[arg].Value, flag, arg, arg)
-	}
+
+	var output string
+	flaggy.String(&output, "o", "output", "Set output")
+
+	var cue string
+	flaggy.String(&cue, "c", "cue", "set cue sheet")
+
+	var cover string
+	flaggy.String(&cover, "C", "cover", "set cover")
+
+	var meta string
+	flaggy.String(&meta, "m", "meta", "set ffmetadata")
+
+	var profile = fftools.Cfg.Defaults.Profile
+	flaggy.String(&profile, "p", "profile", "designate profile")
+
 	flaggy.Parse()
 
-	c := fftools.NewCmd().Input(input)
+	cmd := fftools.NewCmd().Profile(profile)
+	for _, in := range input {
+		cmd.In(in)
+	}
 
-	fmt.Printf("%v", c)
+	if output != "" {
+		cmd.Args().Out(output)
+	}
+
+	if cue != "" {
+		cmd.Args().Cue(cue)
+	}
+
+	if cover != "" {
+		cmd.Args().Cover(cover)
+	}
+
+	if meta != "" {
+		cmd.In(meta)
+	}
+
+	cmd.Args() //.VCodec("libx264")
+	//c := fftools.NewCmd().Input(input)
+
+	fmt.Printf("%v", cmd.Args())
+	fmt.Printf("%v", cmd.Cmd())
 }
 
 type Cli struct{
