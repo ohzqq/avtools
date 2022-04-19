@@ -29,9 +29,9 @@ func main() {
 	}
 	flaggy.Parse()
 
-	//c := fftools.NewCmd().Args(cli.Args()).Input(input)
+	c := fftools.NewCmd().Input(input)
 
-	fmt.Printf("%v", fftools.Cfg.Profiles.List())
+	fmt.Printf("%v", c)
 }
 
 type Cli struct{
@@ -39,13 +39,13 @@ type Cli struct{
 }
 
 
-func (c *Cli) Args() fftools.CmdArgs {
-	args := make(fftools.CmdArgs)
-	for arg, flag := range c.Flags {
-		args[arg] = flag.Value
-	}
-	return args
-}
+//func (c *Cli) Args() fftools.CmdArgs {
+//  args := make(fftools.CmdArgs)
+//  for arg, flag := range c.Flags {
+//    args[arg] = flag.Value
+//  }
+//  return args
+//}
 
 type Flags map[string]*Flag
 
