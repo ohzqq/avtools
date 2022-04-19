@@ -31,7 +31,7 @@ func main() {
 
 	//c := fftools.NewCmd().Args(cli.Args()).Input(input)
 
-	fmt.Printf("%v", fftools.Cfg)
+	fmt.Printf("%v", fftools.Cfg.Profiles.List())
 }
 
 type Cli struct{

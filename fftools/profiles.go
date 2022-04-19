@@ -37,11 +37,10 @@ func InitConfig() {
 	}
 }
 
+var Cfg = ffCfg{}
+
 type ffCfg struct {
 	Profiles pros
-	//Profiles map[string]CmdArgs
-	ProfileList []string
-	//ProCfg *viper.Viper
 	Defaults defaults
 }
 
@@ -52,46 +51,21 @@ type defaults struct {
 	Overwrite bool
 }
 
-var Cfg = ffCfg{}
-
 func FFcfg() {
 	viper.Sub("Defaults").Unmarshal(&Cfg.Defaults)
 	proCfg := viper.Sub("Profiles")
 	Cfg.Profiles = parseProfiles(proCfg)
-	Cfg.ProfileList = Cfg.profileList()
 }
 
-func (c *ffCfg) profileList() []string {
+type pros map[string]CmdArgs
+
+func (p pros) List() []string {
 	var list []string
-	for pro, _ := range c.Profiles {
+	for pro, _ := range p {
 		list = append(list, pro)
 	}
 	return list
 }
-
-//func (c *ffCfg) GetDefaults() *viper.Viper {
-//  return c.Defaults
-//}
-
-type Profile struct {
-	Pre string
-	Input string
-	Post string
-	VideoCodec string
-	VideoParams string
-	VideoFilters string
-	AudioCodec string
-	AudioParams string
-	AudioFilters string
-	FilterCompex string
-	Verbosity string
-	Output string
-	Padding bool
-	Ext string
-	Overwrite bool
-}
-
-type pros map[string]Profile
 
 func parseProfiles(v *viper.Viper) pros {
 	profiles := make(pros)
