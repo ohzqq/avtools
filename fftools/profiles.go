@@ -3,7 +3,7 @@ package fftools
 import (
 	"path/filepath"
 	"os"
-	//"fmt"
+	"fmt"
 	//"strings"
 
 	"github.com/spf13/viper"
@@ -38,50 +38,66 @@ func InitConfig() {
 }
 
 type ffCfg struct {
-	Profiles map[string]CmdArgs
+	Profiles pros
+	//Profiles map[string]CmdArgs
 	ProfileList []string
-	Padding int
+	//ProCfg *viper.Viper
+	Defaults defaults
+}
+
+type defaults struct {
+	Padding bool
 	Output string
 	Verbosity string
-	ProCfg map[string]*viper.Viper
-	Defaults *viper.Viper
+	Overwrite bool
 }
 
 var Cfg = ffCfg{}
 
 func FFcfg() {
-	//cfg := FFCfg{}
-	list, profiles := parseProfiles(viper.Get("Profiles"))
-	//cfg.proCfg = 
-	Cfg.Defaults = viper.Sub("Defaults")
-	Cfg.Profiles = profiles
-	Cfg.ProfileList = list
-	Cfg.Padding = Cfg.Defaults.GetInt("Padding")
-	Cfg.Output = Cfg.Defaults.GetString("Output")
-	Cfg.Verbosity = Cfg.Defaults.GetString("Verbosity")
-	//return &cfg
+	viper.Sub("Defaults").Unmarshal(&Cfg.Defaults)
+	proCfg := viper.Sub("Profiles")
+	Cfg.Profiles = parseProfiles(proCfg)
+	Cfg.ProfileList = Cfg.profileList()
 }
 
-func (c *ffCfg) GetDefaults() *viper.Viper {
-	return c.Defaults
-}
-
-func parseProfiles(p interface{}) ([]string, map[string]CmdArgs) {
-	var name string
+func (c *ffCfg) profileList() []string {
 	var list []string
-	prof := make(map[string]string)
-	profiles := make(map[string]CmdArgs)
-	proCfg := make(map[string]*viper.Viper)
-	for _, pro := range p.([]interface{}) {
-		for k, v := range pro.(map[interface{}]interface{}) {
-			prof[k.(string)] = v.(string)
-			if k.(string) == "Name" {
-				name = v.(string)
-				list = append(list, v.(string))
-			}
-		}
-		proCfg[name] = viper.Sub(name)
-		profiles[name] = CmdArgs(prof)
+	for pro, _ := range c.Profiles {
+		list = append(list, pro)
 	}
-	return list, profiles
+	return list
+}
+
+//func (c *ffCfg) GetDefaults() *viper.Viper {
+//  return c.Defaults
+//}
+
+type Profile struct {
+	Pre string
+	Input string
+	Post string
+	VideoCodec string
+	VideoParams string
+	VideoFilters string
+	AudioCodec string
+	AudioParams string
+	AudioFilters string
+	FilterCompex string
+	Verbosity string
+	Output string
+	Padding bool
+	Ext string
+	Overwrite bool
+}
+
+type pros map[string]Profile
+
+func parseProfiles(v *viper.Viper) pros {
+	profiles := make(pros)
+	err := v.Unmarshal(&profiles)
+	if err != nil {
+		fmt.Printf("unable to decode into struct, %v", err)
+	}
+	return profiles
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	//"strings"
 	//"log"
 
 	//"github.com/ohzqq/fftools/cmd"
@@ -27,11 +28,13 @@ func main() {
 		flaggy.String(&cli.Flags[arg].Value, flag, arg, arg)
 	}
 	flaggy.Parse()
-	fmt.Printf("%v", cli.Args())
+
+	//c := fftools.NewCmd().Args(cli.Args()).Input(input)
+
+	fmt.Printf("%v", fftools.Cfg)
 }
 
 type Cli struct{
-	Parser *flaggy.Parser
 	Flags Flags
 }
 
@@ -52,21 +55,21 @@ type Flag struct{
 }
 
 var cmdFlags = map[string]string{
-	"Pre": "pre",
+	//"Pre": "pre",
 	//"Input": "i",
-	"Post": "post",
-	"VideoCodec": "c:v",
-	"VideoParams": "vp",
-	"VideoFilters": "vf",
-	"AudioCodec": "c:a",
-	"AudioParams": "ap",
-	"AudioFilters": "af",
-	"FilterCompex": "filter",
+	//"Post": "post",
+	//"VideoCodec": "c:v",
+	//"VideoParams": "vp",
+	//"VideoFilters": "vf",
+	//"AudioCodec": "c:a",
+	//"AudioParams": "ap",
+	//"AudioFilters": "af",
+	//"FilterCompex": "filter",
 	"Output": "o",
 	"Cue": "cue",
 	"Cover": "c",
 	"FFmetadata": "m",
-	"Verbosity": "v",
+	//"Verbosity": "v",
 	"Profile": "p",
 }
 
