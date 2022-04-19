@@ -3,7 +3,6 @@ package fftools
 import (
 	//"os"
 	"strings"
-	"strconv"
 	"os/exec"
 
 	//"github.com/alessio/shellescape"
@@ -41,63 +40,59 @@ func (ff *FFmpegCmd) Args() *CmdArgs {
 }
 
 func (ff *FFmpegCmd) Cmd() *exec.Cmd {
-	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Meta", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
+	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
-			if ff.Verbosity() != "" {
+			if a := ff.Verbosity(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Verbosity())
 			}
 		case "Overwrite":
-			if ff.Overwrite() != "" {
+			if a := ff.Overwrite(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Overwrite())
 			}
 		case "Pre":
-			if ff.Pre() != "" {
+			if a := ff.Pre(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Pre())
 			}
 		case "Input":
 			if len(ff.Input) > 0 {
 				ff.cmd.Args = append(ff.cmd.Args, ff.joinInput())
 			}
-		case "Meta":
-			if ff.Meta() != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Meta())
-			}
 		case "Post":
-			if ff.Post() != "" {
+			if a := ff.Post(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Post())
 			}
 		case "VideoCodec":
-			if ff.VideoCodec() != "" {
+			if a := ff.VideoCodec(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.VideoCodec())
 			}
 		case "VideoParams":
-			if ff.VideoParams() != "" {
+			if a := ff.VideoParams(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.VideoParams())
 			}
 		case "VideoFilters":
-			if ff.VideoFilters() != "" {
+			if a := ff.VideoFilters(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.VideoFilters())
 			}
 		case "FilterComplex":
-			if ff.FilterComplex() != "" {
+			if a := ff.FilterComplex(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.FilterComplex())
 			}
 		case "AudioCodec":
-			if ff.AudioCodec() != "" {
+			if a := ff.AudioCodec(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.AudioCodec())
 			}
 		case "AudioParams":
-			if ff.AudioParams() != "" {
+			if a := ff.AudioParams(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.AudioParams())
 			}
 		case "AudioFilters":
-			if ff.AudioFilters() != "" {
+			if a := ff.AudioFilters(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.AudioFilters())
 			}
 		case "Output":
-			if ff.Output() != "" {
+			if a := ff.Output(); a != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Output())
 			}
 		}
@@ -130,11 +125,7 @@ func (ff *FFmpegCmd) joinInput() string {
 
 
 func (ff *FFmpegCmd) Meta() string {
-	idx := strconv.Itoa(len(ff.Input))
-	if ff.args.Metadata != "" {
-		return "-i " + ff.args.Metadata + " -map_metadata " + idx
-	}
-	return ""
+	return ff.args.Metadata
 }
 
 func (ff *FFmpegCmd) Pre() string {
