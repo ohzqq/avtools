@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	//"strings"
-	"bytes"
-	"log"
 
 	//"github.com/ohzqq/fftools/cmd"
 	"github.com/ohzqq/fftools/fftools"
@@ -40,40 +38,40 @@ func main() {
 	join := joinCmd()
 	flaggy.AttachSubcommand(join, 1)
 
-	split := splitCmd()
+	split := cmdWithInput("split", posInput)
 	flaggy.AttachSubcommand(split, 1)
 
-	convert := convertCmd()
+	convert := cmdWithInput("convert", posInput)
 	flaggy.AttachSubcommand(convert, 1)
 
-	cue := cueCmd()
+	cue := cmdWithInput("cue", posInput)
 	flaggy.AttachSubcommand(cue, 1)
 
-	rm := rmCmd()
+	rm := newParentCmd("rm")
 	flaggy.AttachSubcommand(rm, 1)
-	rmChaps := rmChapsCmd()
+	rmChaps := newChildCmd("chaps", posInput)
 	rm.AttachSubcommand(rmChaps, 1)
-	rmCover := rmCoverCmd()
+	rmCover := newChildCmd("cover", posInput)
 	rm.AttachSubcommand(rmCover, 1)
-	rmMeta := rmMetaCmd()
+	rmMeta := newChildCmd("meta", posInput)
 	rm.AttachSubcommand(rmMeta, 1)
 
-	embed := embedCmd()
+	embed := newParentCmd("embed")
 	flaggy.AttachSubcommand(embed, 1)
-	embedChaps := embedChapsCmd()
+	embedChaps := newChildCmd("chaps", posInput)
 	embed.AttachSubcommand(embedChaps, 1)
-	embedCover := embedCoverCmd()
+	embedCover := newChildCmd("cover", posInput)
 	embed.AttachSubcommand(embedCover, 1)
-	embedMeta := embedMetaCmd()
+	embedMeta := newChildCmd("meta", posInput)
 	embed.AttachSubcommand(embedMeta, 1)
 
-	extract := extractCmd()
+	extract := newParentCmd("extract")
 	flaggy.AttachSubcommand(extract, 1)
-	extractChaps := extractChapsCmd()
+	extractChaps := newChildCmd("chaps", posInput)
 	extract.AttachSubcommand(extractChaps, 1)
-	extractCover := extractCoverCmd()
+	extractCover := newChildCmd("cover", posInput)
 	extract.AttachSubcommand(extractCover, 1)
-	extractMeta := extractMetaCmd()
+	extractMeta := newChildCmd("meta", posInput)
 	extract.AttachSubcommand(extractMeta, 1)
 
 	flaggy.Parse()
@@ -85,9 +83,9 @@ func main() {
 	if posInput != "" {
 		cmd.In(posInput)
 	}
-	for _, in := range input {
-		cmd.In(in)
-	}
+	//for _, in := range input {
+	//  cmd.In(in)
+	//}
 
 	// Handle flags
 	if output != "" {
@@ -115,12 +113,7 @@ func main() {
 	}
 
 	if join.Used {
-		c := cmd.Join(ext).Cmd()
-		var out bytes.Buffer
-		c.Stderr = &out
-		err := c.Run()
-		fmt.Printf("%q\n", out.String())
-		log.Printf("Command finished with error: %v", err)
+		cmd.Join(ext).Run()
 	}
 
 	if split.Used {
@@ -172,90 +165,18 @@ func joinCmd() *flaggy.Subcommand {
 	return cmd
 }
 
-func splitCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("split")
+func cmdWithInput(name string, input string) *flaggy.Subcommand {
+	cmd := flaggy.NewSubcommand(name)
 	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
 	return cmd
 }
 
-func cueCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("cue")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
+func newParentCmd(name string) *flaggy.Subcommand {
+	return flaggy.NewSubcommand(name)
 }
 
-func convertCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("convert")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
+func newChildCmd(name string, input string) *flaggy.Subcommand {
+	cmd := flaggy.NewSubcommand(name)
+	cmd.AddPositionalValue(&input, "input", 1, true, "input for the command")
 	return cmd
 }
-
-func rmCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("rm")
-	return cmd
-}
-
-func rmCoverCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("cover")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func rmMetaCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("meta")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func rmChapsCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("chaps")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func extractCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("extract")
-	return cmd
-}
-
-func extractMetaCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("meta")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func extractCoverCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("cover")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func extractChapsCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("chaps")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func embedCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("embed")
-	return cmd
-}
-
-func embedMetaCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("meta")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func embedCoverCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("cover")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
-func embedChapsCmd() *flaggy.Subcommand {
-	cmd := flaggy.NewSubcommand("chaps")
-	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
-	return cmd
-}
-
