@@ -1,7 +1,7 @@
 package fftools
 
 import (
-	//"os"
+	"os"
 	"log"
 	"fmt"
 	"bytes"
@@ -19,6 +19,7 @@ type FFmpegCmd struct {
 	Input []string
 	profile bool
 	padding bool
+	tmpFile *os.File
 	args CmdArgs
 }
 
@@ -48,7 +49,10 @@ func (ff *FFmpegCmd) Args() *CmdArgs {
 }
 
 func (ff *FFmpegCmd) Run() {
+	defer os.Remove(ff.tmpFile.Name())
+
 	cmd := ff.Cmd()
+
 	var (
 		stderr bytes.Buffer
 		stdout bytes.Buffer
@@ -59,13 +63,14 @@ func (ff *FFmpegCmd) Run() {
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
-		fmt.Printf("%q\n", stderr.String())
+		fmt.Printf("%v\n", stderr.String())
 	}
-	fmt.Printf("%q\n", stdout.String())
+	fmt.Printf("%v\n", stdout.String())
 }
 
 func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Meta", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
+
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
@@ -75,12 +80,7 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 		case "Pre":
 			ff.Pre()
 		case "Input":
-			if len(ff.Input) > 0 {
-				for _, i := range ff.Input {
-					ff.push("-i")
-					ff.push(i)
-				}
-			}
+			ff.pushInput()
 		case "Meta":
 			ff.Meta()
 		case "Post":
@@ -100,9 +100,7 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 		case "AudioFilters":
 			ff.AudioFilters()
 		case "Output":
-			if ff.Output() != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Output())
-			}
+			ff.Output()
 		}
 	}
 	return ff.cmd
@@ -121,6 +119,17 @@ func (ff *FFmpegCmd) Verbosity() {
 
 func (ff *FFmpegCmd) In(input string) {
 	ff.Input = append(ff.Input, input)
+}
+
+func (ff *FFmpegCmd) pushInput() {
+	if len(ff.Input) > 0 {
+		for _, i := range ff.Input {
+			ff.push("-i")
+			ff.push(i)
+		}
+	} else {
+		log.Fatal("No input specified")
+	}
 }
 
 func (ff *FFmpegCmd) Meta() {
@@ -197,7 +206,7 @@ func (ff *FFmpegCmd) AudioFilters() {
 	}
 }
 
-func (ff *FFmpegCmd) Output() string {
+func (ff *FFmpegCmd) Output() {
 	var o string
 	var pad string
 	var ext string
@@ -216,10 +225,8 @@ func (ff *FFmpegCmd) Output() string {
 	}
 
 	if ff.args.Output == "" {
-		return o + pad + ext
+		ff.push(o + pad + ext)
 	} else {
-		return ff.args.Output + pad + ext
+		ff.push(ff.args.Output + pad + ext)
 	}
-
-	return ""
 }

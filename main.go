@@ -156,7 +156,7 @@ func main() {
 		fmt.Println("rm cover")
 	}
 
-	fmt.Println(cmd.Cmd().String())
+	//fmt.Println(cmd.Cmd().String())
 }
 
 func joinCmd() *flaggy.Subcommand {

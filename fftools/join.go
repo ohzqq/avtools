@@ -13,9 +13,8 @@ import (
 
 func (ff *FFmpegCmd) Join(ext string) *FFmpegCmd {
 	files := find("." + ext)
-	fileList := concatFile(files)
-	//defer os.Remove(fileList.Name())
-	ff.In(fileList.Name())
+	ff.tmpFile = concatFile(files)
+	ff.In(ff.tmpFile.Name())
 	pre := flagArgs{"f": "concat", "safe": "0"}
 	ff.Args().PreInput(pre).Ext(ext)
 	return ff
