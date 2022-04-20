@@ -1,9 +1,14 @@
 package fftools
 
 import (
-	//"os"
+	"os"
+	"log"
+	//"fmt"
 	"strings"
 	"os/exec"
+	"strconv"
+	"io/fs"
+	"path/filepath"
 
 	//"github.com/alessio/shellescape"
 )
@@ -12,11 +17,13 @@ type FFmpegCmd struct {
 	cmd *exec.Cmd
 	Input []string
 	profile bool
+	padding bool
 	args CmdArgs
 }
 
 func NewCmd() *FFmpegCmd {
 	ff := FFmpegCmd{}
+	ff.padding = false
 	ff.cmd = exec.Command("ffmpeg", "-hide_banner")
 	return &ff
 }
@@ -39,60 +46,90 @@ func (ff *FFmpegCmd) Args() *CmdArgs {
 	return &ff.args
 }
 
+func (ff *FFmpegCmd) Join(ext string) *FFmpegCmd {
+	files := find("." + ext)
+	fileList := concatFile(files)
+	//defer os.Remove(fileList.Name())
+	ff.In(fileList.Name())
+	pre := flagArgs{
+		"f": "concat",
+		"safe": "0",
+	}
+	ff.Args().PreInput(pre).Ext(ext)
+	return ff
+}
+
+func concatFile(files []string) *os.File {
+	file, err := os.CreateTemp("", "audiofiles")
+	if err != nil { log.Fatal(err) }
+
+	var cat strings.Builder
+	for _, f := range files {
+		abs, err := filepath.Abs(f)
+		if err != nil { log.Fatal(err) }
+		cat.WriteString("file ")
+		cat.WriteString("'")
+		cat.WriteString(abs)
+		cat.WriteString("'")
+		cat.WriteString("\n")
+	}
+
+	if _, err := file.WriteString(cat.String()); err != nil {
+		log.Fatal(err)
+	}
+
+	return file
+}
+
+func find(ext string) []string {
+	var files []string
+	filepath.WalkDir(".", func(file string, dir fs.DirEntry, e error) error {
+		if e != nil { return e }
+		if filepath.Ext(dir.Name()) == ext {
+			files = append(files, file)
+		}
+		return nil
+	})
+	return files
+}
+
 func (ff *FFmpegCmd) Cmd() *exec.Cmd {
-	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
+	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Meta", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
-			if a := ff.Verbosity(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Verbosity())
-			}
+			ff.Verbosity()
 		case "Overwrite":
-			if a := ff.Overwrite(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Overwrite())
-			}
+			ff.Overwrite()
 		case "Pre":
-			if a := ff.Pre(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Pre())
-			}
+			ff.Pre()
 		case "Input":
 			if len(ff.Input) > 0 {
-				ff.cmd.Args = append(ff.cmd.Args, ff.joinInput())
+				for _, i := range ff.Input {
+					ff.push("-i")
+					ff.push(i)
+				}
 			}
+		case "Meta":
+			ff.Meta()
 		case "Post":
-			if a := ff.Post(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.Post())
-			}
+			ff.Post()
 		case "VideoCodec":
-			if a := ff.VideoCodec(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.VideoCodec())
-			}
+			ff.VideoCodec()
 		case "VideoParams":
-			if a := ff.VideoParams(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.VideoParams())
-			}
+			ff.VideoParams()
 		case "VideoFilters":
-			if a := ff.VideoFilters(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.VideoFilters())
-			}
+			ff.VideoFilters()
 		case "FilterComplex":
-			if a := ff.FilterComplex(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.FilterComplex())
-			}
+			ff.FilterComplex()
 		case "AudioCodec":
-			if a := ff.AudioCodec(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.AudioCodec())
-			}
+			ff.AudioCodec()
 		case "AudioParams":
-			if a := ff.AudioParams(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.AudioParams())
-			}
+			ff.AudioParams()
 		case "AudioFilters":
-			if a := ff.AudioFilters(); a != "" {
-				ff.cmd.Args = append(ff.cmd.Args, ff.AudioFilters())
-			}
+			ff.AudioFilters()
 		case "Output":
-			if a := ff.Output(); a != "" {
+			if ff.Output() != "" {
 				ff.cmd.Args = append(ff.cmd.Args, ff.Output())
 			}
 		}
@@ -100,93 +137,93 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 	return ff.cmd
 }
 
-func (ff *FFmpegCmd) Verbosity() string {
-	var v string
-	if Cfg.Defaults.Verbosity == "" {
-		v = ""
-	} else {
-		v = "-loglevel " + Cfg.Defaults.Verbosity
+func (ff *FFmpegCmd) push(arg string) {
+	ff.cmd.Args = append(ff.cmd.Args, arg)
+}
+
+func (ff *FFmpegCmd) Verbosity() {
+	if Cfg.Defaults.Verbosity != "" {
+		ff.push("-loglevel")
+		ff.push(Cfg.Defaults.Verbosity)
 	}
-	return v
 }
 
 func (ff *FFmpegCmd) In(input string) {
 	ff.Input = append(ff.Input, input)
 }
 
-func (ff *FFmpegCmd) joinInput() string {
-	var in []string
-	for _, i := range ff.Input {
-		in = append(in, "-i")
-		in = append(in, i)
+func (ff *FFmpegCmd) Meta() {
+	if ff.args.Metadata != "" {
+		ff.push("-i")
+		ff.push(ff.args.Metadata)
+		ff.push("-map_metadata")
+		ff.push(strconv.Itoa(len(ff.Input)))
 	}
-	return strings.Join(in, " ")
 }
 
-
-func (ff *FFmpegCmd) Meta() string {
-	return ff.args.Metadata
+func (ff *FFmpegCmd) Pre() {
+	for _, arg := range ff.args.Pre.Split() {
+		ff.push(arg)
+	}
 }
 
-func (ff *FFmpegCmd) Pre() string {
-	return ff.args.Pre
-}
-
-func (ff *FFmpegCmd) Overwrite() string {
-	var o string
+func (ff *FFmpegCmd) Overwrite() {
 	if Cfg.Defaults.Overwrite {
-			o = "-y"
-	} else {
-			o = ""
+		ff.push("-y")
 	}
-	return o
 }
 
-func (ff *FFmpegCmd) Post() string {
-	return ff.args.Post
+func (ff *FFmpegCmd) Post() {
+	for _, arg := range ff.args.Post.Split() {
+		ff.push(arg)
+	}
 }
 
-func (ff *FFmpegCmd) VideoCodec() string {
+func (ff *FFmpegCmd) VideoCodec() {
 	if ff.args.VideoCodec != "" {
-		return "-c:v " + ff.args.VideoCodec
+		ff.push("-c:v")
+		ff.push(ff.args.VideoCodec)
 	}
-	return ""
 }
 
-func (ff *FFmpegCmd) VideoParams() string {
-	return ff.args.VideoParams
+func (ff *FFmpegCmd) VideoParams() {
+	for _, arg := range ff.args.VideoParams.Split() {
+		ff.push(arg)
+	}
 }
 
-func (ff *FFmpegCmd) VideoFilters() string {
+func (ff *FFmpegCmd) VideoFilters() {
 	if ff.args.VideoFilters != "" {
-		return "-vf " + ff.args.VideoFilters
+		ff.push("-vf")
+		ff.push(ff.args.VideoFilters)
 	}
-	return ""
 }
 
-func (ff *FFmpegCmd) FilterComplex() string {
+func (ff *FFmpegCmd) FilterComplex() {
 	if ff.args.FilterComplex != "" {
-		return "-filter " + ff.args.FilterComplex
+		ff.push("-filter")
+		ff.push(ff.args.FilterComplex)
 	}
-	return ""
 }
 
-func (ff *FFmpegCmd) AudioCodec() string {
+func (ff *FFmpegCmd) AudioCodec() {
 	if ff.args.AudioCodec != "" {
-		return "-c:a " + ff.args.AudioCodec
+		ff.push("-c:a")
+		ff.push(ff.args.AudioCodec)
 	}
-	return ""
 }
 
-func (ff *FFmpegCmd) AudioParams() string {
-	return ff.args.AudioParams
+func (ff *FFmpegCmd) AudioParams() {
+	for _, arg := range ff.args.AudioParams.Split() {
+		ff.push(arg)
+	}
 }
 
-func (ff *FFmpegCmd) AudioFilters() string {
+func (ff *FFmpegCmd) AudioFilters() {
 	if ff.args.AudioFilters != "" {
-		return "-af " + ff.args.AudioFilters
+		ff.push("-af")
+		ff.push(ff.args.AudioFilters)
 	}
-	return ""
 }
 
 func (ff *FFmpegCmd) Output() string {
@@ -195,21 +232,23 @@ func (ff *FFmpegCmd) Output() string {
 	var ext string
 	if Cfg.Defaults.Output != "" {
 		o = Cfg.Defaults.Output
-		if Cfg.Defaults.Padding {
+		if ff.padding {
 			pad = "%06d"
 		} else {
 			pad = ""
 		}
 	}
-	if ff.args.Ext != "" {
-		ext = "." + ff.args.Ext
+	if ff.args.Extension != "" {
+		ext = "." + ff.args.Extension
 	} else {
 		ext = ".mkv"
 	}
+
 	if ff.args.Output == "" {
 		return o + pad + ext
 	} else {
 		return ff.args.Output + pad + ext
 	}
+
 	return ""
 }

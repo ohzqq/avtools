@@ -9,23 +9,34 @@ import (
 )
 
 type CmdArgs struct {
-	Pre string
-	Post string
+	Pre flagArgs
+	Post flagArgs
 	VideoCodec string
-	VideoParams string
+	VideoParams flagArgs
 	VideoFilters string
 	AudioCodec string
-	AudioParams string
+	AudioParams flagArgs
 	AudioFilters string
 	FilterComplex string
 	Verbosity string
 	Output string
 	Padding bool
-	Ext string
+	Extension string
 	Overwrite bool
 	CueSheet string
 	AlbumCover string
 	Metadata string
+}
+
+type flagArgs map[string]string
+
+func (f flagArgs) Split() []string {
+	var args []string
+	for flag, arg := range f {
+		flag = "-" + flag
+		args = append(args, flag, arg)
+	}
+	return args
 }
 
 func (a *CmdArgs) Cover(s string) *CmdArgs {
@@ -48,7 +59,7 @@ func (a *CmdArgs) LogLevel(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) PreInput(s string) *CmdArgs {
+func (a *CmdArgs) PreInput(s flagArgs) *CmdArgs {
 	a.Pre = s
 	return a
 }
@@ -58,7 +69,7 @@ func (a *CmdArgs) OverWrite(over bool) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) PostInput(s string) *CmdArgs {
+func (a *CmdArgs) PostInput(s flagArgs) *CmdArgs {
 	a.Post = s
 	return a
 }
@@ -68,8 +79,8 @@ func (a *CmdArgs) VCodec(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) VParams(s string) *CmdArgs {
-	a.VideoParams = s
+func (a *CmdArgs) VParams(f flagArgs) *CmdArgs {
+	a.VideoParams = f
 	return a
 }
 
@@ -88,7 +99,7 @@ func (a *CmdArgs) ACodec(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) AParams(s string) *CmdArgs {
+func (a *CmdArgs) AParams(s flagArgs) *CmdArgs {
 	a.AudioParams = s
 	return a
 }
@@ -98,7 +109,10 @@ func (a *CmdArgs) AFilters(s string) *CmdArgs {
 	return a
 }
 
+func (a *CmdArgs) Ext(s string)  {
+	a.Extension = s
+}
+
 func (a *CmdArgs) Out(s string)  {
 	a.Output = s
-	//return a
 }

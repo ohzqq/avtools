@@ -45,7 +45,6 @@ type ffCfg struct {
 }
 
 type defaults struct {
-	Padding bool
 	Output string
 	Verbosity string
 	Overwrite bool
