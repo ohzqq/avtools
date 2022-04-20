@@ -44,8 +44,8 @@ func main() {
 	convert := cmdWithInput("convert", posInput)
 	flaggy.AttachSubcommand(convert, 1)
 
-	cue := cmdWithInput("cue", posInput)
-	flaggy.AttachSubcommand(cue, 1)
+	cueS := cmdWithInput("cue", posInput)
+	flaggy.AttachSubcommand(cueS, 1)
 
 	rm := newParentCmd("rm")
 	flaggy.AttachSubcommand(rm, 1)
@@ -108,8 +108,9 @@ func main() {
 		fmt.Println("split")
 	}
 
-	if cue.Used {
-		fmt.Println("split")
+	if cueS.Used {
+		//sheet := fftools.ReadFile(posInput)
+		fftools.ReadCueSheet(posInput)
 	}
 
 	if join.Used {

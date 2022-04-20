@@ -3,6 +3,7 @@ module github.com/ohzqq/fftools
 go 1.18
 
 require (
+	github.com/Ambrevar/demlo v3.7.1+incompatible // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -20,6 +21,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.11.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/vchimishuk/chub v0.0.0-20220107162648-9d7fe8a6a485 // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
