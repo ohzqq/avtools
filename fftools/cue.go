@@ -9,29 +9,36 @@ import (
 	"regexp"
 	"time"
 )
+var _ = fmt.Printf
 
-type track struct {
-	title string
-	startTime time.Duration
+type Chapter struct {
+	Title string
+	Start time.Duration
+	End time.Duration
 }
 
-func ReadCueSheet(file string) {
+func ReadCueSheet(file string) []Chapter {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer contents.Close()
 
+	var (
+		titles []string
+		indices []time.Duration
+	)
 	scanner := bufio.NewScanner(contents)
-	var titles []string
-	var indices []time.Duration
 	for scanner.Scan() {
 		s := strings.TrimSpace(scanner.Text())
 		if strings.Contains(s, "TITLE") {
-			titles = append(titles, strings.TrimPrefix(s, "TITLE "))
+			t := strings.TrimPrefix(s, "TITLE ")
+			t = strings.Trim(t, "'")
+			t = strings.Trim(t, `"`)
+			titles = append(titles, t)
 		} else if strings.Contains(s, "INDEX") {
-			rmFrames := regexp.MustCompile(`:\d\d$`)
 			start := strings.TrimPrefix(s, "INDEX 01 ")
+			rmFrames := regexp.MustCompile(`:\d\d$`)
 			start = rmFrames.ReplaceAllString(start, "s")
 			start = strings.ReplaceAll(start, ":", "m")
 			dur, _ := time.ParseDuration(start)
@@ -39,13 +46,13 @@ func ReadCueSheet(file string) {
 		}
 	}
 
-	var tracks []track
+	var tracks []Chapter
 	for i, _ := range titles {
-		t := track{}
-		t.title = titles[i]
-		t.startTime = indices[i]
+		t := Chapter{}
+		t.Title = titles[i]
+		t.Start = indices[i]
 		tracks = append(tracks, t)
 	}
 
-	fmt.Printf("%v", tracks)
+	return tracks
 }
