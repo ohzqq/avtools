@@ -74,10 +74,12 @@ func main() {
 	extractMeta := newChildCmd("meta", posInput)
 	extract.AttachSubcommand(extractMeta, 1)
 
+	fftools.AllJsonMeta().Run()
 	flaggy.Parse()
 
 	// Setup command
 	cmd := fftools.NewCmd().Profile(profile)
+	//fftools.AllJsonMeta()
 
 	// Input
 	if posInput != "" {

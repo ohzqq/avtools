@@ -58,7 +58,7 @@ func (ff *FFmpegCmd) Run() {
 		stdout bytes.Buffer
 	)
 	cmd.Stderr = &stderr
-	cmd.Stderr = &stdout
+	cmd.Stdout = &stdout
 
 	err := cmd.Run()
 	if err != nil {

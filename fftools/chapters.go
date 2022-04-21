@@ -8,14 +8,17 @@ import (
 	"fmt"
 	"regexp"
 	"time"
+	"strconv"
 	//"reflect"
 )
 var _ = fmt.Printf
 
 type Chapter struct {
-	Title string
-	Start time.Duration
-	End time.Duration
+	ID int
+	TimeBase string
+	StartTime string
+	EndTime string
+	Tags Tags
 }
 
 type Chapters []*Chapter
@@ -32,7 +35,7 @@ func ReadCueSheet(file string) Chapters {
 
 	var (
 		titles []string
-		indices []time.Duration
+		indices []string
 	)
 	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
@@ -48,15 +51,16 @@ func ReadCueSheet(file string) Chapters {
 			start = rmFrames.ReplaceAllString(start, "s")
 			start = strings.ReplaceAll(start, ":", "m")
 			dur, _ := time.ParseDuration(start)
-			indices = append(indices, dur)
+			durS := strconv.Itoa(int(dur.Seconds())) + ".000000"
+			indices = append(indices, durS)
 		}
 	}
 
 	var tracks Chapters
 	for i, _ := range titles {
 		t := Chapter{}
-		t.Title = titles[i]
-		t.Start = indices[i]
+		t.Tags.Title = titles[i]
+		t.StartTime = indices[i]
 		tracks = append(tracks, &t)
 	}
 
