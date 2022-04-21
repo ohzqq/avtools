@@ -1,9 +1,9 @@
 package fftools
 
 import (
-	"fmt"
+	//"fmt"
 )
 
-func Split() {
-	fmt.Println("split")
-}
+//func (ff *FFmpegCmd) Split() *FFmpegCmd {
+//  fmt.Println("split")
+//}

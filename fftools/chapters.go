@@ -13,20 +13,36 @@ import (
 )
 var _ = fmt.Printf
 
+type Chapters []Chapter
+
 type Chapter struct {
 	ID int
-	TimeBase string
-	StartTime string
-	EndTime string
-	Tags Tags
+	TimeBase string `json:"time_base"`
+	StartTime string `json:"start_time"`
+	ss string
+	to string
+	EndTime string `json:"end_time"`
+	Tags Tags `json:"tags"`
 }
 
-type Chapters []*Chapter
-
-func (c *Chapter) Timestamps() {
+func (c Chapters) Timestamps() {
+	var end string
+	eCh := 0
+	for i := 1; i < len(c); i++ {
+		c[eCh].ss = c[eCh].StartTime
+		switch e := c[i].EndTime; e {
+		default:
+			end = c[eCh].EndTime
+		case "":
+			end = c[i].StartTime
+		}
+		c[eCh].to = end
+		eCh++
+	}
+		fmt.Printf("%v\n", c)
 }
 
-func ReadCueSheet(file string) Chapters {
+func ReadCueSheet(file string) MediaMeta {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -51,7 +67,7 @@ func ReadCueSheet(file string) Chapters {
 			start = rmFrames.ReplaceAllString(start, "s")
 			start = strings.ReplaceAll(start, ":", "m")
 			dur, _ := time.ParseDuration(start)
-			durS := strconv.Itoa(int(dur.Seconds())) + ".000000"
+			durS := strconv.Itoa(int(dur.Seconds()))
 			indices = append(indices, durS)
 		}
 	}
@@ -61,8 +77,8 @@ func ReadCueSheet(file string) Chapters {
 		t := Chapter{}
 		t.Tags.Title = titles[i]
 		t.StartTime = indices[i]
-		tracks = append(tracks, &t)
+		tracks = append(tracks, t)
 	}
 
-	return tracks
+	return MediaMeta{Chapters: tracks}
 }

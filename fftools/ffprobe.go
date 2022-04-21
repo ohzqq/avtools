@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"os/exec"
 	"bytes"
+	"encoding/json"
 )
 
 type MediaMeta struct {
+	Chapters Chapters
 	Streams Streams
 	Format Format
 }
@@ -16,26 +18,26 @@ type MediaMeta struct {
 type Streams []Stream
 
 type Stream struct {
-	CodecName string
-	CodecType string
+	CodecName string `json:"codec_name"`
+	CodecType string `json:"codec_type"`
 }
 
 type Format struct {
 	Filename string
-	StartTime string
+	StartTime string `json:"start_time"`
 	Duration string
 	Size string
-	BitRate string
+	BitRate string `json:"bit_rate"`
 	Tags Tags
 }
 
 type Tags struct {
-	Title string
-	Artist string
-	Composer string
-	Album string
-	Comment string
-	Genre string
+	Title string `json:"title"`
+	Artist string `json:"artist"`
+	Composer string `json:"composer"`
+	Album string `json:"album"`
+	Comment string `json:"comment"`
+	Genre string `json:"genre"`
 }
 
 type FFProbeCmd struct {
@@ -51,21 +53,22 @@ func NewFFProbeCmd() *FFProbeCmd {
 	return &ff
 }
 
-func AllJsonMeta() *FFProbeCmd {
-	cmd := NewFFProbeCmd()
-	cmd.In("/mnt/roar/audiobook/tmp/scrape/Palm_Island_1_-_Perfect_Ten_-_K.M._Neuhold/Palm_Island_01_-_Perfect_Ten.m4b")
-	cmd.Args().
+func (ff *FFProbeCmd) AllJsonMeta(input string) *MediaMeta {
+	ff.In(input)
+	ff.Args().
 		Entries("format=filename,start_time,duration,size,bit_rate,format_tags:stream=codec_type,codec_name:format_tags").
-		Chapters(true).
+		Chapters().
 		Verbosity("error").
 		Format("json")
-	fmt.Printf("%v\n", cmd.Cmd().String())
-	return cmd
+
+	m := ff.Run()
+	var meta MediaMeta
+	err := json.Unmarshal(m, &meta)
+	if err != nil { fmt.Println("help")}
+	return &meta
 }
 
-func (ff *FFProbeCmd) Run() {
-	//defer os.Remove(ff.tmpFile.Name())
-
+func (ff *FFProbeCmd) Run() []byte {
 	cmd := ff.Cmd()
 
 	var (
@@ -80,26 +83,24 @@ func (ff *FFProbeCmd) Run() {
 		log.Printf("Command finished with error: %v\n", err)
 		fmt.Printf("%v\n", stderr.String())
 	}
-	fmt.Printf("%v\n", stdout.String())
+	return stdout.Bytes()
 }
 
 func (ff *FFProbeCmd) Cmd() *exec.Cmd {
-	argOrder := []string{"Verbosity", "Streams", "Entries", "Chapters", "Params", "Format", "Input"}
+	argOrder := []string{"Verbosity", "Streams", "Entries", "Chapters", "Pretty", "Format", "Input"}
 
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
 			ff.Verbosity()
-		//case "Input":
-		//  ff.pushInput()
+		case "Pretty":
+			ff.Pretty()
 		case "Streams":
 			ff.Streams()
 		case "Entries":
 			ff.Entries()
 		case "Chapters":
 			ff.Chapters()
-		//case "Params":
-		//  ff.Params()
 		case "Format":
 			ff.Format()
 		}
@@ -122,11 +123,6 @@ func (ff *FFProbeCmd) Verbosity() {
 
 func (ff *FFProbeCmd) In(input string) {
 	ff.push(input)
-	//ff.Input = input
-}
-
-func (ff *FFProbeCmd) pushInput() {
-	ff.push(ff.Input)
 }
 
 func (ff *FFProbeCmd) Pretty() {
@@ -140,13 +136,6 @@ func (ff *FFProbeCmd) Chapters() {
 		ff.push("-show_chapters")
 	}
 }
-
-//func (ff *FFProbeCmd) Params() {
-//  if ff.args.params != "" {
-//    ff.push("-c:v")
-//    ff.push(ff.args.params)
-//  }
-//}
 
 func (ff *FFProbeCmd) Entries() {
 	if ff.args.entries != "" {
@@ -187,12 +176,11 @@ type ProbeArgs struct {
 	entries string
 	chapters bool
 	format string
-	//params string
 	verbosity string
 }
 
-func (a *ProbeArgs) Pretty(arg bool) *ProbeArgs {
-	a.pretty = arg
+func (a *ProbeArgs) Pretty() *ProbeArgs {
+	a.pretty = true
 	return a
 }
 
@@ -206,8 +194,8 @@ func (a *ProbeArgs) Entries(arg string) *ProbeArgs {
 	return a
 }
 
-func (a *ProbeArgs) Chapters(arg bool) *ProbeArgs {
-	a.chapters = arg
+func (a *ProbeArgs) Chapters() *ProbeArgs {
+	a.chapters = true
 	return a
 }
 
@@ -215,11 +203,6 @@ func (a *ProbeArgs) Format(arg string) *ProbeArgs {
 	a.format = arg
 	return a
 }
-
-//func (a *ProbeArgs) Params(arg string) *ProbeArgs {
-//  a.params = arg
-//  return a
-//}
 
 func (a *ProbeArgs) Verbosity(arg string) *ProbeArgs {
 	a.verbosity = arg

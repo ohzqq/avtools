@@ -74,7 +74,6 @@ func main() {
 	extractMeta := newChildCmd("meta", posInput)
 	extract.AttachSubcommand(extractMeta, 1)
 
-	fftools.AllJsonMeta().Run()
 	flaggy.Parse()
 
 	// Setup command
@@ -88,6 +87,7 @@ func main() {
 	//for _, in := range input {
 	//  cmd.In(in)
 	//}
+
 
 	// Handle flags
 	if output != "" {
@@ -111,8 +111,10 @@ func main() {
 	}
 
 	if cueS.Used {
-		//sheet := fftools.ReadFile(posInput)
-		fftools.ReadCueSheet(posInput)
+		//c := fftools.NewFFProbeCmd().AllJsonMeta(posInput)
+		c := fftools.ReadCueSheet(posInput)
+		c.Chapters.Timestamps()
+		//c.Timestamps()
 	}
 
 	if join.Used {
