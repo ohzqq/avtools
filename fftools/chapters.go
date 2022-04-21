@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"regexp"
 	"time"
+	//"reflect"
 )
 var _ = fmt.Printf
 
@@ -17,7 +18,12 @@ type Chapter struct {
 	End time.Duration
 }
 
-func ReadCueSheet(file string) []Chapter {
+type Chapters []*Chapter
+
+func (c *Chapter) Timestamps() {
+}
+
+func ReadCueSheet(file string) Chapters {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -46,12 +52,12 @@ func ReadCueSheet(file string) []Chapter {
 		}
 	}
 
-	var tracks []Chapter
+	var tracks Chapters
 	for i, _ := range titles {
 		t := Chapter{}
 		t.Title = titles[i]
 		t.Start = indices[i]
-		tracks = append(tracks, t)
+		tracks = append(tracks, &t)
 	}
 
 	return tracks
