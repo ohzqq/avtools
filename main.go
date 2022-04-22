@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	//"strings"
 
 	//"github.com/ohzqq/fftools/cmd"
@@ -83,8 +84,9 @@ func main() {
 	cmd := fftools.NewCmd().Profile(profile)
 
 	// Input
+	var media *fftools.Media
 	if posInput != "" {
-		cmd.In(fftools.NewMedia(posInput))
+		media = fftools.NewMedia(posInput)
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -97,23 +99,28 @@ func main() {
 	}
 
 	if cueSheet != "" {
-		cmd.Args().Cue(cueSheet)
+		media.Cue = filepath.Base(cueSheet)
+		//cmd.Args().Cue(cueSheet)
 	}
 
 	if cover != "" {
-		cmd.Args().Cover(cover)
+		media.Cover = filepath.Base(cover)
+		//cmd.Args().Cover(cover)
 	}
 
 	if meta != "" {
-		cmd.Args().Meta(meta)
+		media.FFmeta = filepath.Base(meta)
+		//cmd.Args().Meta(meta)
 	}
+
+	cmd.In(media)
 
 	if test.Used {
 		//file := fftools.NewMedia(posInput).WithMeta()
 		//fmt.Printf("%v\n", file.HasChapters())
 		//file.ReadMeta()
-		ch := cmd.GetChapters()
-		fmt.Printf("%T\n", ch)
+		//ch := cmd.GetChapters()
+		fmt.Printf("%V\n", media)
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
 		//fmt.Printf("%v\n", )

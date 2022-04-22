@@ -61,12 +61,13 @@ func (ff *FFmpegCmd) GetChapters() *Chapters {
 	var (
 		meta *MediaMeta
 	)
-	if ff.args.CueSheet != "" {
-		meta = ReadCueSheet(ff.args.CueSheet)
-	} else if ff.args.Metadata != "" {
-		meta = ReadFFmetadata(ff.args.Metadata)
+	input := ff.Input[0]
+	if input.Cue != "" {
+		meta = ReadCueSheet(input.Cue)
+	} else if input.FFmeta != "" {
+		meta = ReadFFmetadata(input.FFmeta)
 	} else {
-		meta = ff.Input[0].ReadMeta()
+		meta = input.ReadMeta()
 	}
 	return meta.Chapters
 }

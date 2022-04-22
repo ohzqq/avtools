@@ -56,20 +56,6 @@ type Chapter struct {
 	Title string
 }
 
-func (c *Chapter) timeBaseFloat() float64 {
-	tb := strings.ReplaceAll(c.Timebase, "1/", "")
-	baseint, _ := strconv.ParseFloat(tb, 64)
-	return baseint
-}
-
-func (c *Chapter) toSeconds() () {
-	tb := c.timeBaseFloat()
-	ss, _ := strconv.ParseFloat(c.Start, 64)
-	to, _ := strconv.ParseFloat(c.End, 64)
-	c.Start = strconv.FormatFloat(ss / tb, 'f', 6, 64)
-	c.End = strconv.FormatFloat(to / tb, 'f', 6, 64)
-}
-
 type jsonMeta struct {
 	Chapters []jsonChapter
 	Streams *Streams
@@ -133,6 +119,20 @@ func WriteFFmetadata(input string) {
 	cmd.Args().PostInput(params).ACodec("none").VCodec("none").Ext("ini")
 	fmt.Printf("%v", cmd.Cmd().String())
 	cmd.Run()
+}
+
+func (c *Chapter) timeBaseFloat() float64 {
+	tb := strings.ReplaceAll(c.Timebase, "1/", "")
+	baseint, _ := strconv.ParseFloat(tb, 64)
+	return baseint
+}
+
+func (c *Chapter) toSeconds() () {
+	tb := c.timeBaseFloat()
+	ss, _ := strconv.ParseFloat(c.Start, 64)
+	to, _ := strconv.ParseFloat(c.End, 64)
+	c.Start = strconv.FormatFloat(ss / tb, 'f', 6, 64)
+	c.End = strconv.FormatFloat(to / tb, 'f', 6, 64)
 }
 
 func ReadFFmetadata(input string) *MediaMeta {

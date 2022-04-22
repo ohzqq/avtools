@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"log"
 	"fmt"
+	//"os"
 )
 var _ = fmt.Printf
 
@@ -12,6 +13,9 @@ type Media struct {
 	Path string
 	Dir string
 	Ext string
+	FFmeta string
+	Cue string
+	Cover string
 	Meta *MediaMeta
 }
 
