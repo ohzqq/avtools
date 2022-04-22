@@ -6,39 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 	"bytes"
-	"encoding/json"
 )
-
-type MediaMeta struct {
-	Chapters Chapters
-	Streams Streams
-	Format Format
-}
-
-type Streams []Stream
-
-type Stream struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
-}
-
-type Format struct {
-	Filename string
-	StartTime string `json:"start_time"`
-	Duration string
-	Size string
-	BitRate string `json:"bit_rate"`
-	Tags Tags
-}
-
-type Tags struct {
-	Title string `json:"title"`
-	Artist string `json:"artist"`
-	Composer string `json:"composer"`
-	Album string `json:"album"`
-	Comment string `json:"comment"`
-	Genre string `json:"genre"`
-}
 
 type FFProbeCmd struct {
 	cmd *exec.Cmd
@@ -51,21 +19,6 @@ func NewFFProbeCmd() *FFProbeCmd {
 	ff := FFProbeCmd{}
 	ff.cmd = exec.Command("ffprobe", "-hide_banner")
 	return &ff
-}
-
-func (ff *FFProbeCmd) AllJsonMeta(input string) *MediaMeta {
-	ff.In(input)
-	ff.Args().
-		Entries("format=filename,start_time,duration,size,bit_rate,format_tags:stream=codec_type,codec_name:format_tags").
-		Chapters().
-		Verbosity("error").
-		Format("json")
-
-	m := ff.Run()
-	var meta MediaMeta
-	err := json.Unmarshal(m, &meta)
-	if err != nil { fmt.Println("help")}
-	return &meta
 }
 
 func (ff *FFProbeCmd) Run() []byte {

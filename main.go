@@ -35,50 +35,52 @@ func main() {
 	flaggy.String(&profile, "p", "profile", "designate profile")
 
 	// Subcommands
+	test := newParentCmd("test")
+	flaggy.AttachSubcommand(test, 1)
+
 	join := joinCmd()
 	flaggy.AttachSubcommand(join, 1)
 
-	split := cmdWithInput("split", posInput)
+	split := cmdWithInput("split")
 	flaggy.AttachSubcommand(split, 1)
 
-	convert := cmdWithInput("convert", posInput)
+	convert := cmdWithInput("convert")
 	flaggy.AttachSubcommand(convert, 1)
 
-	cueS := cmdWithInput("cue", posInput)
+	cueS := cmdWithInput("cue")
 	flaggy.AttachSubcommand(cueS, 1)
 
 	rm := newParentCmd("rm")
 	flaggy.AttachSubcommand(rm, 1)
-	rmChaps := newChildCmd("chaps", posInput)
+	rmChaps := newChildCmd("chaps")
 	rm.AttachSubcommand(rmChaps, 1)
-	rmCover := newChildCmd("cover", posInput)
+	rmCover := newChildCmd("cover")
 	rm.AttachSubcommand(rmCover, 1)
-	rmMeta := newChildCmd("meta", posInput)
+	rmMeta := newChildCmd("meta")
 	rm.AttachSubcommand(rmMeta, 1)
 
 	embed := newParentCmd("embed")
 	flaggy.AttachSubcommand(embed, 1)
-	embedChaps := newChildCmd("chaps", posInput)
+	embedChaps := newChildCmd("chaps")
 	embed.AttachSubcommand(embedChaps, 1)
-	embedCover := newChildCmd("cover", posInput)
+	embedCover := newChildCmd("cover")
 	embed.AttachSubcommand(embedCover, 1)
-	embedMeta := newChildCmd("meta", posInput)
+	embedMeta := newChildCmd("meta")
 	embed.AttachSubcommand(embedMeta, 1)
 
 	extract := newParentCmd("extract")
 	flaggy.AttachSubcommand(extract, 1)
-	extractChaps := newChildCmd("chaps", posInput)
+	extractChaps := newChildCmd("chaps")
 	extract.AttachSubcommand(extractChaps, 1)
-	extractCover := newChildCmd("cover", posInput)
+	extractCover := newChildCmd("cover")
 	extract.AttachSubcommand(extractCover, 1)
-	extractMeta := newChildCmd("meta", posInput)
+	extractMeta := newChildCmd("meta")
 	extract.AttachSubcommand(extractMeta, 1)
 
 	flaggy.Parse()
 
 	// Setup command
 	cmd := fftools.NewCmd().Profile(profile)
-	//fftools.AllJsonMeta()
 
 	// Input
 	if posInput != "" {
@@ -106,14 +108,21 @@ func main() {
 		cmd.Args().Meta(meta)
 	}
 
+	if test.Used {
+		m := fftools.ReadFFmetadata(meta)
+		fmt.Printf("%V", m.Chapters)
+	}
+
 	if convert.Used {
 		fmt.Println("split")
 	}
 
 	if cueS.Used {
-		//c := fftools.NewFFProbeCmd().AllJsonMeta(posInput)
-		c := fftools.ReadCueSheet(posInput)
-		c.Chapters.Timestamps()
+		//c := fftools.AllJsonMeta(posInput)
+		//c := fftools.ReadCueSheet(posInput)
+		c := cmd.Meta()
+		fmt.Printf("%V", c.Chapters)
+		//c.Chapters.Timestamps()
 		//c.Timestamps()
 	}
 
@@ -146,7 +155,7 @@ func main() {
 	}
 
 	if extractMeta.Used{
-		fmt.Println("rm cover")
+		fftools.FFmetadata(posInput)
 	}
 
 	if rmChaps.Used {
@@ -170,7 +179,7 @@ func joinCmd() *flaggy.Subcommand {
 	return cmd
 }
 
-func cmdWithInput(name string, input string) *flaggy.Subcommand {
+func cmdWithInput(name string) *flaggy.Subcommand {
 	cmd := flaggy.NewSubcommand(name)
 	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
 	return cmd
@@ -180,8 +189,8 @@ func newParentCmd(name string) *flaggy.Subcommand {
 	return flaggy.NewSubcommand(name)
 }
 
-func newChildCmd(name string, input string) *flaggy.Subcommand {
+func newChildCmd(name string) *flaggy.Subcommand {
 	cmd := flaggy.NewSubcommand(name)
-	cmd.AddPositionalValue(&input, "input", 1, true, "input for the command")
+	cmd.AddPositionalValue(&posInput, "input", 1, true, "input for the command")
 	return cmd
 }

@@ -6,6 +6,7 @@ require (
 	github.com/Ambrevar/demlo v3.7.1+incompatible // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/go-ini/ini v1.66.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/integrii/flaggy v1.4.4 // indirect

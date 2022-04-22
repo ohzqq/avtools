@@ -30,6 +30,10 @@ type CmdArgs struct {
 
 type flagArgs map[string]string
 
+func newFlagArg(flag, arg string) flagArgs {
+	return flagArgs{flag: arg}
+}
+
 func (f flagArgs) Split() []string {
 	var args []string
 	for flag, arg := range f {
