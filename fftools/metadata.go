@@ -23,7 +23,6 @@ type MediaMeta struct {
 	Tags *Tags
 }
 
-
 type Streams []*Stream
 
 type Stream struct {
@@ -74,7 +73,7 @@ type jsonChapter struct {
 	Tags *Tags `json:"tags"`
 }
 
-func Meta(input string) *MediaMeta {
+func ReadEmbeddedMeta(input string) *MediaMeta {
 	ff := NewFFProbeCmd()
 	ff.In(input)
 	ff.Args().
@@ -84,9 +83,11 @@ func Meta(input string) *MediaMeta {
 		Format("json")
 
 	m := ff.Run()
+
 	var meta jsonMeta
 	err := json.Unmarshal(m, &meta)
 	if err != nil { fmt.Println("help")}
+
 	media := MediaMeta{}
 	media.Streams = meta.Streams
 	media.Format = &Format{
@@ -111,7 +112,7 @@ func Meta(input string) *MediaMeta {
 	return &media
 }
 
-func FFmetadata(input string) {
+func WriteFFmetadata(input string) {
 	cmd := NewCmd()
 	cmd.In(input)
 	params := newFlagArg("f", "ffmetadata")

@@ -113,10 +113,12 @@ func (a *CmdArgs) AFilters(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) Ext(s string)  {
+func (a *CmdArgs) Ext(s string) *CmdArgs {
 	a.Extension = s
+	return a
 }
 
-func (a *CmdArgs) Out(s string)  {
+func (a *CmdArgs) Out(s string) *CmdArgs {
 	a.Output = s
+	return a
 }

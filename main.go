@@ -35,7 +35,7 @@ func main() {
 	flaggy.String(&profile, "p", "profile", "designate profile")
 
 	// Subcommands
-	test := newParentCmd("test")
+	test := cmdWithInput("test")
 	flaggy.AttachSubcommand(test, 1)
 
 	join := joinCmd()
@@ -109,8 +109,9 @@ func main() {
 	}
 
 	if test.Used {
-		m := fftools.ReadFFmetadata(meta)
-		fmt.Printf("%V", m.Chapters)
+		//m := fftools.ReadFFmetadata(meta)
+		ch := cmd.GetChapters()
+		fmt.Printf("%V", ch)
 	}
 
 	if convert.Used {
@@ -155,7 +156,7 @@ func main() {
 	}
 
 	if extractMeta.Used{
-		fftools.FFmetadata(posInput)
+		fftools.WriteFFmetadata(posInput)
 	}
 
 	if rmChaps.Used {

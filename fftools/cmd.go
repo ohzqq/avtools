@@ -44,7 +44,7 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Meta() *MediaMeta {
-	return Meta(ff.Input[0])
+	return ReadEmbeddedMeta(ff.Input[0])
 }
 
 func (ff *FFmpegCmd) Args() *CmdArgs {
