@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"log"
 	"fmt"
+	"strconv"
+	"strings"
 	//"os"
 )
 var _ = fmt.Printf
@@ -85,20 +87,6 @@ func NewMedia(input string) *Media {
 	media.Ext = filepath.Ext(input)
 
 	return media
-}
-
-func (m *Media) Cut(ss, to string, no int) {
-	count := fmt.Sprintf("%06d", no + 1)
-	cmd := NewCmd().In(m)
-	timestamps := make(map[string]string)
-	if ss != "" {
-		timestamps["ss"] = ss
-	}
-	if to != "" {
-		timestamps["to"] = to
-	}
-	cmd.Args().PostInput(timestamps).Out("tmp" + count).Ext(m.Ext)
-	cmd.Run()
 }
 
 func (m *Media) WithMeta() *Media {

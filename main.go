@@ -144,7 +144,7 @@ func main() {
 	}
 
 	if split.Used {
-		cmd.Split()
+		media.Split()
 	}
 
 	if embedChaps.Used {
