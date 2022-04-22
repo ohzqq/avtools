@@ -84,7 +84,7 @@ func main() {
 
 	// Input
 	if posInput != "" {
-		cmd.In(posInput)
+		cmd.In(fftools.NewMedia(posInput))
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -109,9 +109,14 @@ func main() {
 	}
 
 	if test.Used {
-		//m := fftools.ReadFFmetadata(meta)
-		ch := cmd.GetChapters()
-		fmt.Printf("%V", ch)
+		file := fftools.NewMedia(posInput).WithMeta()
+		//fmt.Printf("%v\n", file.HasChapters())
+		//fmt.Printf("%v\n", file.Meta.Chapters)
+		//file.ReadMeta()
+		//ch := cmd.GetChapters()
+		fmt.Printf("%V\n", file.Meta.Tags.Title)
+		//fmt.Printf("%v\n", file.HasChapters())
+		//fmt.Printf("%v\n", )
 	}
 
 	if convert.Used {
@@ -128,11 +133,11 @@ func main() {
 	}
 
 	if join.Used {
-		cmd.Join(ext).Run()
+		fftools.Join(ext).Profile(profile).Run()
 	}
 
 	if split.Used {
-		fmt.Println("split")
+		fftools.Split(posInput, profile)
 	}
 
 	if embedChaps.Used {

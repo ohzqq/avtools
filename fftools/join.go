@@ -11,10 +11,11 @@ import (
 	//"github.com/alessio/shellescape"
 )
 
-func (ff *FFmpegCmd) Join(ext string) *FFmpegCmd {
-	files := find("." + ext)
+func Join(ext string) *FFmpegCmd {
+	ff := NewCmd()
+	files := find(ext)
 	ff.tmpFile = concatFile(files)
-	ff.In(ff.tmpFile.Name())
+	ff.In(NewMedia(ff.tmpFile.Name()))
 	pre := flagArgs{"f": "concat", "safe": "0"}
 	ff.Args().PreInput(pre).Ext(ext)
 	return ff

@@ -16,7 +16,7 @@ import (
 
 type FFmpegCmd struct {
 	cmd *exec.Cmd
-	Input []string
+	Input []*Media
 	profile bool
 	padding bool
 	tmpFile *os.File
@@ -30,8 +30,9 @@ func NewCmd() *FFmpegCmd {
 	return &ff
 }
 
-func (ff *FFmpegCmd) In(input string) {
+func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
 	ff.Input = append(ff.Input, input)
+	return ff
 }
 
 func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
@@ -44,7 +45,7 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Meta() *MediaMeta {
-	return ReadEmbeddedMeta(ff.Input[0])
+	return ff.Input[0].ReadMeta()
 }
 
 func (ff *FFmpegCmd) Args() *CmdArgs {
@@ -56,8 +57,24 @@ func (ff *FFmpegCmd) Args() *CmdArgs {
 	return &ff.args
 }
 
+func (ff *FFmpegCmd) GetChapters() *Chapters {
+	var (
+		meta *MediaMeta
+	)
+	if ff.args.CueSheet != "" {
+		meta = ReadCueSheet(ff.args.CueSheet)
+	} else if ff.args.Metadata != "" {
+		meta = ReadFFmetadata(ff.args.Metadata)
+	} else {
+		meta = ff.Input[0].ReadMeta()
+	}
+	return meta.Chapters
+}
+
 func (ff *FFmpegCmd) Run() {
-	//defer os.Remove(ff.tmpFile.Name())
+	if ff.tmpFile != nil {
+		defer os.Remove(ff.tmpFile.Name())
+	}
 
 	cmd := ff.Cmd()
 
@@ -67,6 +84,8 @@ func (ff *FFmpegCmd) Run() {
 	)
 	cmd.Stderr = &stderr
 	cmd.Stdout = &stdout
+
+	fmt.Printf("%v\n", cmd.String())
 
 	err := cmd.Run()
 	if err != nil {
@@ -129,7 +148,7 @@ func (ff *FFmpegCmd) pushInput() {
 	if len(ff.Input) > 0 {
 		for _, i := range ff.Input {
 			ff.push("-i")
-			ff.push(i)
+			ff.push(i.Path)
 		}
 	} else {
 		log.Fatal("No input specified")
@@ -167,6 +186,7 @@ func (ff *FFmpegCmd) VideoCodec() {
 	switch vc := ff.args.VideoCodec; vc {
 	case "none":
 	case "":
+	default:
 		ff.push("-c:v")
 		ff.push(ff.args.VideoCodec)
 	}
@@ -196,6 +216,7 @@ func (ff *FFmpegCmd) AudioCodec() {
 	switch ac := ff.args.AudioCodec; ac {
 	case "none":
 	case "":
+	default:
 		ff.push("-c:a")
 		ff.push(ff.args.AudioCodec)
 	}
@@ -227,7 +248,7 @@ func (ff *FFmpegCmd) Output() {
 		}
 	}
 	if ff.args.Extension != "" {
-		ext = "." + ff.args.Extension
+		ext = ff.args.Extension
 	} else {
 		ext = ".mkv"
 	}

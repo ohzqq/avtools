@@ -97,7 +97,7 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 		Size: meta.Format.Size,
 		BitRate: meta.Format.BitRate,
 	}
-	meta.Tags = meta.Format.Tags
+	media.Tags = meta.Format.Tags
 
 	var chapters Chapters
 	for _, ch := range meta.Chapters {
@@ -114,7 +114,7 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 
 func WriteFFmetadata(input string) {
 	cmd := NewCmd()
-	cmd.In(input)
+	cmd.In(NewMedia(input))
 	params := newFlagArg("f", "ffmetadata")
 	cmd.Args().PostInput(params).ACodec("none").VCodec("none").Ext("ini")
 	fmt.Printf("%v", cmd.Cmd().String())
