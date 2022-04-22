@@ -30,9 +30,15 @@ func NewMedia(input string) *Media {
 }
 
 func (m *Media) Cut(ss, to string, no int) {
-	count := fmt.Sprintf("%06d", no)
+	count := fmt.Sprintf("%06d", no + 1)
 	cmd := NewCmd().In(m)
-	timestamps := map[string]string{"ss": ss, "to": to}
+	timestamps := make(map[string]string)
+	if ss != "" {
+		timestamps["ss"] = ss
+	}
+	if to != "" {
+		timestamps["to"] = to
+	}
 	cmd.Args().PostInput(timestamps).Out("tmp" + count).Ext(m.Ext)
 	cmd.Run()
 }

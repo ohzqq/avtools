@@ -109,12 +109,12 @@ func main() {
 	}
 
 	if test.Used {
-		file := fftools.NewMedia(posInput).WithMeta()
+		//file := fftools.NewMedia(posInput).WithMeta()
 		//fmt.Printf("%v\n", file.HasChapters())
-		//fmt.Printf("%v\n", file.Meta.Chapters)
 		//file.ReadMeta()
-		//ch := cmd.GetChapters()
-		fmt.Printf("%V\n", file.Meta.Tags.Title)
+		ch := cmd.GetChapters()
+		fmt.Printf("%T\n", ch)
+		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
 		//fmt.Printf("%v\n", )
 	}
@@ -125,8 +125,8 @@ func main() {
 
 	if cueS.Used {
 		//c := fftools.AllJsonMeta(posInput)
-		//c := fftools.ReadCueSheet(posInput)
-		c := cmd.Meta()
+		c := fftools.ReadCueSheet(posInput)
+		//c := cmd.Meta()
 		fmt.Printf("%V", c.Chapters)
 		//c.Chapters.Timestamps()
 		//c.Timestamps()
@@ -137,7 +137,7 @@ func main() {
 	}
 
 	if split.Used {
-		fftools.Split(posInput, profile)
+		cmd.Split()
 	}
 
 	if embedChaps.Used {

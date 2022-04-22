@@ -56,6 +56,20 @@ type Chapter struct {
 	Title string
 }
 
+func (c *Chapter) timeBaseFloat() float64 {
+	tb := strings.ReplaceAll(c.Timebase, "1/", "")
+	baseint, _ := strconv.ParseFloat(tb, 64)
+	return baseint
+}
+
+func (c *Chapter) toSeconds() () {
+	tb := c.timeBaseFloat()
+	ss, _ := strconv.ParseFloat(c.Start, 64)
+	to, _ := strconv.ParseFloat(c.End, 64)
+	c.Start = strconv.FormatFloat(ss / tb, 'f', 6, 64)
+	c.End = strconv.FormatFloat(to / tb, 'f', 6, 64)
+}
+
 type jsonMeta struct {
 	Chapters []jsonChapter
 	Streams *Streams
@@ -145,10 +159,11 @@ func ReadFFmetadata(input string) *MediaMeta {
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")
 		for _, chap := range sec {
-			c := new(Chapter)
-			err := chap.MapTo(c)
+			c := Chapter{}
+			err := chap.MapTo(&c)
+			c.toSeconds()
 			if err != nil { log.Fatal(err) }
-			chapters = append(chapters, c)
+			chapters = append(chapters, &c)
 		}
 	}
 
