@@ -57,6 +57,10 @@ func (m *Media) HasChapters() bool {
 	return false
 }
 
+func (m *Media) SetChapters(ch *Chapters) {
+	m.Meta.Chapters = ch
+}
+
 func (m *Media) HasVideo() bool {
 	for _, stream := range *m.Meta.Streams {
 		if stream.CodecType == "video" {
@@ -94,7 +98,6 @@ func (m *Media) AudioCodec() string {
 }
 
 func (m *Media) Duration() string {
-	dur := secsToHHMMSS(m.Meta.Format.Duration)
-	return dur
+	return secsToHHMMSS(m.Meta.Format.Duration)
 }
 

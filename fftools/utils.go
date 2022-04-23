@@ -1,16 +1,21 @@
 package fftools
 
 import (
-	"time"
+	"strconv"
 	"strings"
 	"log"
+	"fmt"
 )
 
+var _ = fmt.Sprintf("%v", "")
+
 func secsToHHMMSS(sec string) string {
-	d := strings.ReplaceAll(sec, ".", "s") + "us"
-	dur, err := time.ParseDuration(d)
+	seconds, err := strconv.Atoi(strings.Split(sec, ".")[0])
 	if err != nil { log.Fatal(err) }
-	duration := dur.String()
-	h := strings.ReplaceAll(duration, "h", "")
-	return duration
+	//seconds := float64(s)
+	h := seconds / 3600
+	m := seconds % 3600 / 60
+	s := seconds % 3600 % 60
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
+	//return s
 }

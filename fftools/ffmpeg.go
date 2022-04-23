@@ -37,10 +37,42 @@ func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
 
 func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	ff.profile = true
-	ff.args = Cfg.Profiles[p]
-	ff.args.LogLevel(Cfg.Defaults.Verbosity)
-	ff.args.Out(Cfg.Defaults.Output)
-	ff.args.OverWrite(Cfg.Defaults.Overwrite)
+	if ff.args.PreInput == nil {
+		ff.args.Pre(Cfg.Profiles[p].PreInput)
+	}
+	if ff.args.PostInput == nil {
+		ff.args.Post(Cfg.Profiles[p].PostInput)
+	}
+	if ff.args.VideoParams == nil {
+		ff.args.VParams(Cfg.Profiles[p].VideoParams)
+	}
+	if ff.args.VideoCodec == "" {
+		ff.args.VCodec(Cfg.Profiles[p].VideoCodec)
+	}
+	if ff.args.VideoFilters == "" {
+		ff.args.VFilters(Cfg.Profiles[p].VideoFilters)
+	}
+	if ff.args.AudioParams == nil {
+		ff.args.AParams(Cfg.Profiles[p].AudioParams)
+	}
+	if ff.args.AudioCodec == "" {
+		ff.args.ACodec(Cfg.Profiles[p].AudioCodec)
+	}
+	if ff.args.AudioFilters == "" {
+		ff.args.AFilters(Cfg.Profiles[p].AudioFilters)
+	}
+	if ff.args.FilterComplex == "" {
+		ff.args.Filter(Cfg.Profiles[p].FilterComplex)
+	}
+	if ff.args.Verbosity == "" {
+		ff.args.LogLevel(Cfg.Defaults.Verbosity)
+	}
+	if ff.args.Output == "" {
+		ff.args.Out(Cfg.Defaults.Output)
+	}
+	if ff.args.Overwrite == false {
+		ff.args.OverWrite(Cfg.Defaults.Overwrite)
+	}
 	return ff
 }
 
@@ -166,7 +198,7 @@ func (ff *FFmpegCmd) Metadata() {
 }
 
 func (ff *FFmpegCmd) Pre() {
-	for _, arg := range ff.args.Pre.Split() {
+	for _, arg := range ff.args.PreInput.Split() {
 		ff.push(arg)
 	}
 }
@@ -178,7 +210,7 @@ func (ff *FFmpegCmd) Overwrite() {
 }
 
 func (ff *FFmpegCmd) Post() {
-	for _, arg := range ff.args.Post.Split() {
+	for _, arg := range ff.args.PostInput.Split() {
 		ff.push(arg)
 	}
 }

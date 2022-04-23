@@ -140,7 +140,7 @@ func main() {
 	}
 
 	if join.Used {
-		fftools.Join(ext).Profile(profile).Run()
+		fftools.Join(ext).Profile(profile).Cmd()
 	}
 
 	if split.Used {

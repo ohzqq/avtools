@@ -128,7 +128,7 @@ func WriteFFmetadata(input string) {
 	cmd := NewCmd()
 	cmd.In(NewMedia(input))
 	params := newFlagArg("f", "ffmetadata")
-	cmd.Args().PostInput(params).ACodec("none").VCodec("none").Ext("ini")
+	cmd.Args().Post(params).ACodec("none").VCodec("none").Ext("ini")
 	fmt.Printf("%v", cmd.Cmd().String())
 	cmd.Run()
 }

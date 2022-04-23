@@ -9,8 +9,8 @@ import (
 )
 
 type CmdArgs struct {
-	Pre flagArgs
-	Post flagArgs
+	PreInput flagArgs
+	PostInput flagArgs
 	VideoCodec string
 	VideoParams flagArgs
 	VideoFilters string
@@ -63,8 +63,8 @@ func (a *CmdArgs) LogLevel(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) PreInput(s flagArgs) *CmdArgs {
-	a.Pre = s
+func (a *CmdArgs) Pre(s flagArgs) *CmdArgs {
+	a.PreInput = s
 	return a
 }
 
@@ -73,8 +73,8 @@ func (a *CmdArgs) OverWrite(over bool) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) PostInput(s flagArgs) *CmdArgs {
-	a.Post = s
+func (a *CmdArgs) Post(s flagArgs) *CmdArgs {
+	a.PostInput = s
 	return a
 }
 
