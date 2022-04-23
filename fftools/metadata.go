@@ -16,6 +16,58 @@ import (
 )
 var _ = fmt.Printf
 
+type MediaMeta struct {
+	Chapters *Chapters
+	Streams *Streams
+	Format *Format
+	Tags *Tags
+}
+
+type Streams []*Stream
+
+type Stream struct {
+	CodecName string `json:"codec_name"`
+	CodecType string `json:"codec_type"`
+}
+
+type Format struct {
+	Filename string
+	Duration string
+	Size string
+	BitRate string `json:"bit_rate"`
+}
+
+type Tags struct {
+	Title string `json:"title"`
+	Artist string `json:"artist"`
+	Composer string `json:"composer"`
+	Album string `json:"album"`
+	Comment string `json:"comment"`
+	Genre string `json:"genre"`
+}
+
+type Chapters []*Chapter
+
+type Chapter struct {
+	Timebase string `json:"time_base"`
+	Start string `json:"start_time"`
+	End string `json:"end_time"`
+	Title string
+}
+
+func (c *Chapter) timeBaseFloat() float64 {
+	tb := strings.ReplaceAll(c.Timebase, "1/", "")
+	baseint, _ := strconv.ParseFloat(tb, 64)
+	return baseint
+}
+
+func (c *Chapter) toSeconds() () {
+	tb := c.timeBaseFloat()
+	ss, _ := strconv.ParseFloat(c.Start, 64)
+	to, _ := strconv.ParseFloat(c.End, 64)
+	c.Start = strconv.FormatFloat(ss / tb, 'f', 6, 64)
+	c.End = strconv.FormatFloat(to / tb, 'f', 6, 64)
+}
 
 type jsonMeta struct {
 	Chapters []jsonChapter
@@ -38,7 +90,7 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 	ff := NewFFProbeCmd()
 	ff.In(input)
 	ff.Args().
-		Entries("format=filename,start_time,duration,size,bit_rate,format_tags:stream=codec_type,codec_name:format_tags").
+		Entries("format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags").
 		Chapters().
 		Verbosity("error").
 		Format("json")
@@ -53,7 +105,6 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 	media.Streams = meta.Streams
 	media.Format = &Format{
 		Filename: meta.Format.Filename,
-		StartTime: meta.Format.StartTime,
 		Duration: meta.Format.Duration,
 		Size: meta.Format.Size,
 		BitRate: meta.Format.BitRate,

@@ -86,7 +86,7 @@ func main() {
 	// Input
 	var media *fftools.Media
 	if posInput != "" {
-		media = fftools.NewMedia(posInput)
+		media = fftools.NewMedia(posInput).WithMeta()
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -120,7 +120,7 @@ func main() {
 		//fmt.Printf("%v\n", file.HasChapters())
 		//file.ReadMeta()
 		//ch := cmd.GetChapters()
-		fmt.Printf("%V\n", media)
+		fmt.Printf("%V\n", media.Duration())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
 		//fmt.Printf("%v\n", )

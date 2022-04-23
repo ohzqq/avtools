@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"log"
 	"fmt"
-	"strconv"
-	"strings"
+	//"strconv"
+	//"strings"
 	//"os"
 )
 var _ = fmt.Printf
@@ -19,60 +19,6 @@ type Media struct {
 	Cue string
 	Cover string
 	Meta *MediaMeta
-}
-
-type MediaMeta struct {
-	Chapters *Chapters
-	Streams *Streams
-	Format *Format
-	Tags *Tags
-}
-
-type Streams []*Stream
-
-type Stream struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
-}
-
-type Format struct {
-	Filename string
-	StartTime string `json:"start_time"`
-	Duration string
-	Size string
-	BitRate string `json:"bit_rate"`
-}
-
-type Tags struct {
-	Title string `json:"title"`
-	Artist string `json:"artist"`
-	Composer string `json:"composer"`
-	Album string `json:"album"`
-	Comment string `json:"comment"`
-	Genre string `json:"genre"`
-}
-
-type Chapters []*Chapter
-
-type Chapter struct {
-	Timebase string `json:"time_base"`
-	Start string `json:"start_time"`
-	End string `json:"end_time"`
-	Title string
-}
-
-func (c *Chapter) timeBaseFloat() float64 {
-	tb := strings.ReplaceAll(c.Timebase, "1/", "")
-	baseint, _ := strconv.ParseFloat(tb, 64)
-	return baseint
-}
-
-func (c *Chapter) toSeconds() () {
-	tb := c.timeBaseFloat()
-	ss, _ := strconv.ParseFloat(c.Start, 64)
-	to, _ := strconv.ParseFloat(c.End, 64)
-	c.Start = strconv.FormatFloat(ss / tb, 'f', 6, 64)
-	c.End = strconv.FormatFloat(to / tb, 'f', 6, 64)
 }
 
 func NewMedia(input string) *Media {
@@ -110,3 +56,45 @@ func (m *Media) HasChapters() bool {
 	}
 	return false
 }
+
+func (m *Media) HasVideo() bool {
+	for _, stream := range *m.Meta.Streams {
+		if stream.CodecType == "video" {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *Media) HasAudio() bool {
+	for _, stream := range *m.Meta.Streams {
+		if stream.CodecType == "audio" {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *Media) VideoCodec() string {
+	for _, stream := range *m.Meta.Streams {
+		if stream.CodecType == "video" {
+			return stream.CodecName
+		}
+	}
+	return ""
+}
+
+func (m *Media) AudioCodec() string {
+	for _, stream := range *m.Meta.Streams {
+		if stream.CodecType == "audio" {
+			return stream.CodecName
+		}
+	}
+	return ""
+}
+
+func (m *Media) Duration() string {
+	dur := secsToHHMMSS(m.Meta.Format.Duration)
+	return dur
+}
+
