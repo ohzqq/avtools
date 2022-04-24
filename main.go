@@ -119,12 +119,15 @@ func main() {
 	cmd.In(media)
 
 	if test.Used {
-		cmd := fftools.RmAlbumArt(media)
+		cmd := fftools.AddAlbumArt(media, cover)
+		if meta != "" {
+			cmd.FFmeta(meta)
+		}
 		cmd.Run()
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
-		fmt.Printf("%v\n", cmd.String())
+		//fmt.Printf("%v\n", cmd.String())
 	}
 
 	if convert.Used {
@@ -180,7 +183,8 @@ func main() {
 	}
 
 	if rmCover.Used {
-		fmt.Println("rm cover")
+		cmd := fftools.RmAlbumArt(media)
+		cmd.Run()
 	}
 
 	if rmMeta.Used{

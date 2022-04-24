@@ -201,18 +201,21 @@ func (ff *FFmpegCmd) pushInput(input string) {
 func (ff *FFmpegCmd) mapInput() {
 	if ff.cover != "" || ff.ffmeta != "" {
 		for idx, _ := range ff.MediaInput {
-			ff.push("-map " + strconv.Itoa(idx) + ":0")
+			ff.push("-map")
+			ff.push(strconv.Itoa(idx) + ":0")
 		}
 	}
 
 	idx := len(ff.MediaInput)
 	if ff.cover != "" {
-		ff.push("-map " + strconv.Itoa(idx) + ":0")
+		ff.push("-map")
+		ff.push(strconv.Itoa(idx) + ":0")
 		idx++
 	}
 
 	if ff.ffmeta != "" {
-		ff.push("-map_metadata " + strconv.Itoa(idx))
+		ff.push("-map_metadata")
+		ff.push(strconv.Itoa(idx))
 		idx++
 	}
 }
