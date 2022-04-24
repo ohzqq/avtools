@@ -76,7 +76,7 @@ func (m *Media) SetChapters(ch *Chapters) {
 }
 
 func (m *Media) HasVideo() bool {
-	if !m.hasStreams() {
+	if !m.HasStreams() {
 		m.WithMeta()
 	}
 	for _, stream := range *m.Meta.Streams {
@@ -88,7 +88,7 @@ func (m *Media) HasVideo() bool {
 }
 
 func (m *Media) HasAudio() bool {
-	if !m.hasStreams() {
+	if !m.HasStreams() {
 		m.WithMeta()
 	}
 	for _, stream := range *m.Meta.Streams {
@@ -100,7 +100,7 @@ func (m *Media) HasAudio() bool {
 }
 
 func (m *Media) VideoCodec() string {
-	if !m.hasStreams() {
+	if !m.HasStreams() {
 		m.WithMeta()
 	}
 	for _, stream := range *m.Meta.Streams {
@@ -112,7 +112,7 @@ func (m *Media) VideoCodec() string {
 }
 
 func (m *Media) AudioCodec() string {
-	if !m.hasStreams() {
+	if !m.HasStreams() {
 		m.WithMeta()
 	}
 	for _, stream := range *m.Meta.Streams {
@@ -123,9 +123,16 @@ func (m *Media) AudioCodec() string {
 	return ""
 }
 
-func (m *Media) hasStreams() bool {
+func (m *Media) HasMeta() bool {
 	if m.Meta != nil {
-		if len(*m.Meta.Streams) > 0 {
+		return true
+	}
+	return false
+}
+
+func (m *Media) HasStreams() bool {
+	if m.HasMeta() {
+		if m.Meta.Streams != nil {
 			return true
 		}
 	}

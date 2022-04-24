@@ -105,9 +105,7 @@ func main() {
 		//cmd.Args().Cue(cueSheet)
 	}
 
-	var coverAbs string
 	if cover != "" {
-		coverAbs, _ = filepath.Abs(cover)
 		//media.Cover = filepath.Base(cover)
 		//cmd.Args().Cover(cover)
 	}
@@ -121,8 +119,8 @@ func main() {
 	cmd.In(media)
 
 	if test.Used {
-		fftools.AddAlbumArt(media, coverAbs)
-		//fmt.Printf("%V\n", media.Duration())
+		fftools.AddAlbumArt(media, cover)
+		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
 		//fmt.Printf("%v\n", )
