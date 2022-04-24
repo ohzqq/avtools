@@ -111,7 +111,7 @@ func main() {
 	}
 
 	if meta != "" {
-		media.FFmeta = filepath.Base(meta)
+		//media.FFmeta = filepath.Base(meta)
 		media.SetMeta(fftools.ReadFFmetadata(meta))
 		//cmd.Args().Meta(meta)
 	}
@@ -119,7 +119,7 @@ func main() {
 	cmd.In(media)
 
 	if test.Used {
-		fftools.AddAlbumArt(media, cover)
+		fftools.AddAlbumArt(media, cover, meta)
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())

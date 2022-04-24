@@ -11,6 +11,7 @@ import (
 	//"io/fs"
 	//"path/filepath"
 
+	//"cs.opensource.google/go/x/exp/slices"
 	//"github.com/alessio/shellescape"
 )
 
@@ -137,6 +138,7 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 			ff.Pre()
 		case "Input":
 			ff.pushMediaInput()
+			ff.mapInput()
 		//case "Meta":
 		//  ff.Metadata()
 		case "Post":
@@ -176,11 +178,9 @@ func (ff *FFmpegCmd) Verbosity() {
 }
 
 func (ff *FFmpegCmd) pushMediaInput() {
-	var in = 0
 	if len(ff.MediaInput) > 0 {
 		for _, i := range ff.MediaInput {
 			ff.pushInput(i.Path)
-			in++
 		}
 	} else {
 		log.Fatal("No input specified")
@@ -191,7 +191,24 @@ func (ff *FFmpegCmd) pushMediaInput() {
 	}
 
 	if ff.ffmeta != "" {
-		ff.metadata(ff.ffmeta)
+		ff.pushInput(ff.ffmeta)
+	}
+}
+
+func (ff *FFmpegCmd) mapInput() {
+	for idx, _ := range ff.MediaInput {
+		ff.push("-map " + strconv.Itoa(idx) + ":0")
+	}
+
+	idx := len(ff.MediaInput)
+	if ff.cover != "" {
+		ff.push("-map " + strconv.Itoa(idx) + ":0")
+		idx++
+	}
+
+	if ff.ffmeta != "" {
+		ff.push("-map_metadata " + strconv.Itoa(idx))
+		idx++
 	}
 }
 
@@ -200,12 +217,9 @@ func (ff *FFmpegCmd) pushInput(input string) {
 	ff.push(input)
 }
 
-func (ff *FFmpegCmd) metadata(meta string) *FFmpegCmd {
+func (ff *FFmpegCmd) metadata(meta string) {
 	ff.push("-i")
 	ff.push(meta)
-	ff.push("-map_metadata")
-	ff.push(strconv.Itoa(len(ff.MediaInput)))
-	return ff
 }
 func (ff *FFmpegCmd) Pre() {
 	for _, arg := range ff.args.PreInput.Split() {

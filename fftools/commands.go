@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func AddAlbumArt(m *Media, cover string) {
+func AddAlbumArt(m *Media, cover, meta string) {
 	path, err := filepath.Abs(cover)
 	if err != nil {
 		log.Fatal(err)
@@ -17,7 +17,7 @@ func AddAlbumArt(m *Media, cover string) {
 	switch codec := m.AudioCodec(); codec {
 	case "aac":
 	case "mp3":
-		cmd := NewCmd().In(m).Cover(path)
+		cmd := NewCmd().In(m).Cover(path).FFmeta(meta)
 		cmd.Args().Out("tmp-cover").Params(Mp3CoverArgs())
 		fmt.Printf("%v", cmd.String())
 	}
