@@ -25,7 +25,7 @@ type CmdArgs struct {
 	Extension string
 	Overwrite bool
 	CueSheet string
-	AlbumCover string
+	AlbumArt string
 	Metadata string
 }
 
@@ -45,7 +45,7 @@ func (f flagArgs) Split() []string {
 }
 
 func (a *CmdArgs) Cover(s string) *CmdArgs {
-	a.AlbumCover = s
+	a.AlbumArt = s
 	return a
 }
 

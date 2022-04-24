@@ -31,6 +31,11 @@ func NewCmd() *FFmpegCmd {
 	ff := FFmpegCmd{}
 	ff.padding = false
 	ff.cmd = exec.Command("ffmpeg", "-hide_banner")
+	if !ff.profile {
+		ff.args = CmdArgs{}
+		ff.args.VCodec("copy")
+		ff.args.ACodec("copy")
+	}
 	return &ff
 }
 
@@ -91,11 +96,6 @@ func (ff *FFmpegCmd) FFmeta(meta string) *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Args() *CmdArgs {
-	if !ff.profile {
-		ff.args = CmdArgs{}
-		ff.args.VCodec("copy")
-		ff.args.ACodec("copy")
-	}
 	return &ff.args
 }
 
@@ -184,12 +184,12 @@ func (ff *FFmpegCmd) processInput() {
 		log.Fatal("No input specified")
 	}
 
-	if ff.cover != "" {
-		ff.pushInput(ff.cover)
+	if ff.args.AlbumArt != "" {
+		ff.pushInput(ff.args.AlbumArt)
 	}
 
-	if ff.ffmeta != "" {
-		ff.pushInput(ff.ffmeta)
+	if ff.args.Metadata != "" {
+		ff.pushInput(ff.args.Metadata)
 	}
 }
 
@@ -199,7 +199,7 @@ func (ff *FFmpegCmd) pushInput(input string) {
 }
 
 func (ff *FFmpegCmd) mapInput() {
-	if ff.cover != "" || ff.ffmeta != "" {
+	if ff.args.AlbumArt != "" || ff.args.Metadata != "" {
 		for idx, _ := range ff.MediaInput {
 			ff.push("-map")
 			ff.push(strconv.Itoa(idx) + ":0")
@@ -207,13 +207,13 @@ func (ff *FFmpegCmd) mapInput() {
 	}
 
 	idx := len(ff.MediaInput)
-	if ff.cover != "" {
+	if ff.args.AlbumArt != "" {
 		ff.push("-map")
 		ff.push(strconv.Itoa(idx) + ":0")
 		idx++
 	}
 
-	if ff.ffmeta != "" {
+	if ff.args.Metadata != "" {
 		ff.push("-map_metadata")
 		ff.push(strconv.Itoa(idx))
 		idx++

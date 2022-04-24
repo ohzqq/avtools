@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
+	//"path/filepath"
 	//"log"
 	//"strings"
 
@@ -100,29 +100,25 @@ func main() {
 	}
 
 	if cueSheet != "" {
-		media.Cue = filepath.Base(cueSheet)
+		//media.Cue = filepath.Base(cueSheet)
 		media.SetChapters(fftools.ReadCueSheet(cueSheet))
 		//cmd.Args().Cue(cueSheet)
 	}
 
 	if cover != "" {
 		//media.Cover = filepath.Base(cover)
-		//cmd.Args().Cover(cover)
+		cmd.Args().Cover(cover)
 	}
 
 	if meta != "" {
-		//media.FFmeta = filepath.Base(meta)
 		media.SetMeta(fftools.ReadFFmetadata(meta))
-		//cmd.Args().Meta(meta)
+		cmd.Args().Meta(meta)
 	}
 
 	cmd.In(media)
 
 	if test.Used {
-		cmd := fftools.AddAlbumArt(media, cover)
-		if meta != "" {
-			cmd.FFmeta(meta)
-		}
+		cmd := fftools.RmChapters(media)
 		cmd.Run()
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
@@ -158,12 +154,17 @@ func main() {
 	if embedCover.Used {
 		cmd := fftools.AddAlbumArt(media, cover)
 		if meta != "" {
-			cmd.FFmeta(meta)
+			cmd.Args().Meta(meta)
 		}
+		cmd.Run()
 	}
 
 	if embedMeta.Used{
-		fmt.Println("rm cover")
+		cmd.FFmeta(meta)
+		if cover != "" {
+			cmd.Cover(cover)
+		}
+		cmd.Run()
 	}
 
 	if extractChaps.Used {

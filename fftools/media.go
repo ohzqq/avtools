@@ -15,9 +15,6 @@ type Media struct {
 	Path string
 	Dir string
 	Ext string
-	FFmeta string
-	Cue string
-	Cover string
 	Meta *MediaMeta
 }
 
@@ -62,10 +59,10 @@ func (m *Media) HasChapters() bool {
 	return false
 }
 
-func (m *Media) SetCover(cover string) *Media {
-	m.Cover = cover
-	return m
-}
+//func (m *Media) SetCover(cover string) *Media {
+//  m.Cover = cover
+//  return m
+//}
 
 func (m *Media) SetChapters(ch *Chapters) {
 	if m.Meta != nil {

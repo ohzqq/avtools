@@ -25,8 +25,8 @@ func AddAlbumArt(m *Media, cover string) *FFmpegCmd {
 		addAacCover(m.Path, path)
 		return nil
 	case "mp3":
-		cmd := NewCmd().In(m).Cover(path)
-		cmd.Args().Out("tmp-cover").Params(Mp3CoverArgs())
+		cmd := NewCmd().In(m)
+		cmd.Args().Out("tmp-cover").Params(Mp3CoverArgs()).Cover(path)
 		return cmd
 	}
 	return nil
@@ -53,16 +53,31 @@ func RmAlbumArt(m *Media) *FFmpegCmd {
 	return cmd
 }
 
-func AddFFmeta(m *Media) {
+func AddFFmeta(m *Media, meta string) *FFmpegCmd {
+	path, err := filepath.Abs(meta)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cmd := NewCmd().In(m)
+	cmd.Args().Meta(path)
+	return cmd
 }
 
-func RmFFmeta(m *Media) {
+func RmFFmeta(m *Media) *FFmpegCmd {
+	arg := newFlagArg("map_metadata", "-1")
+	cmd := NewCmd().In(m)
+	cmd.Args().Post(arg).Out("no-meta")
+	return cmd
 }
 
 func AddChapters(m *Media) {
 }
 
-func RmChapters(m *Media) {
+func RmChapters(m *Media) *FFmpegCmd {
+	arg := newFlagArg("map_chapters", "-1")
+	cmd := NewCmd().In(m)
+	cmd.Args().Post(arg).Out("no-chaps")
+	return cmd
 }
 
 func ConvertFFmetaChapToCue(m *Media) {
