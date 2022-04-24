@@ -70,9 +70,6 @@ func RmFFmeta(m *Media) *FFmpegCmd {
 	return cmd
 }
 
-func AddChapters(m *Media) {
-}
-
 func RmChapters(m *Media) *FFmpegCmd {
 	arg := newFlagArg("map_chapters", "-1")
 	cmd := NewCmd().In(m)

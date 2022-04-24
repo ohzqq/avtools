@@ -118,11 +118,11 @@ func main() {
 	cmd.In(media)
 
 	if test.Used {
-		cmd := fftools.RmChapters(media)
-		cmd.Run()
+		//cmd := fftools.RmChapters(media)
+		//cmd.Run()
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
-		//fmt.Printf("%v\n", file.HasChapters())
+		fmt.Printf("%V\n", media.Meta.Chapters)
 		//fmt.Printf("%v\n", cmd.String())
 	}
 

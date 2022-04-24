@@ -59,11 +59,6 @@ func (m *Media) HasChapters() bool {
 	return false
 }
 
-//func (m *Media) SetCover(cover string) *Media {
-//  m.Cover = cover
-//  return m
-//}
-
 func (m *Media) SetChapters(ch *Chapters) {
 	if m.Meta != nil {
 		if len(*m.Meta.Chapters) > 0 {
