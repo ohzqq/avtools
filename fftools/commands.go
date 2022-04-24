@@ -4,26 +4,53 @@ import (
 	"fmt"
 	//"io/fs"
 	"os"
+	"os/exec"
 	"log"
+	"bytes"
 	"strings"
 	"path/filepath"
 )
 
-func AddAlbumArt(m *Media, cover, meta string) {
+func AddAlbumArt(m *Media, cover string) *FFmpegCmd {
 	path, err := filepath.Abs(cover)
 	if err != nil {
 		log.Fatal(err)
 	}
 	switch codec := m.AudioCodec(); codec {
 	case "aac":
+		_, err := exec.LookPath("AtomicParsley")
+		if err != nil {
+			log.Fatal("embedding album art with aac requires AtomicParsley to be installed")
+		}
+		addAacCover(m.Path, path)
+		return nil
 	case "mp3":
-		cmd := NewCmd().In(m).Cover(path).FFmeta(meta)
+		cmd := NewCmd().In(m).Cover(path)
 		cmd.Args().Out("tmp-cover").Params(Mp3CoverArgs())
-		fmt.Printf("%v", cmd.String())
+		return cmd
+	}
+	return nil
+}
+
+func addAacCover(media, cover string) {
+	cmd := exec.Command("AtomicParsley", media, "--artwork", cover, "--overWrite")
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+		fmt.Printf("%v\n", stderr.String())
 	}
 }
 
-func RmAlbumArt(m *Media) {
+func RmAlbumArt(m *Media) *FFmpegCmd {
+	cmd := NewCmd().In(m)
+	cmd.Args().Out("tmp-nocover").VCodec("vn")
+	return cmd
 }
 
 func AddFFmeta(m *Media) {

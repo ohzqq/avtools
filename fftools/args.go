@@ -131,8 +131,6 @@ func (a *CmdArgs) Out(s string) *CmdArgs {
 
 func Mp3CoverArgs() []string {
 	return []string{
-		//"-map 0:0",
-		//"-map 1:0",
 		"-id3v2_version",
 		"3",
 		"-metadata:s:v",

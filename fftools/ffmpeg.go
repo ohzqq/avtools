@@ -137,10 +137,8 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 		case "Pre":
 			ff.Pre()
 		case "Input":
-			ff.pushMediaInput()
+			ff.processInput()
 			ff.mapInput()
-		//case "Meta":
-		//  ff.Metadata()
 		case "Post":
 			ff.Post()
 		case "VideoCodec":
@@ -177,7 +175,7 @@ func (ff *FFmpegCmd) Verbosity() {
 	}
 }
 
-func (ff *FFmpegCmd) pushMediaInput() {
+func (ff *FFmpegCmd) processInput() {
 	if len(ff.MediaInput) > 0 {
 		for _, i := range ff.MediaInput {
 			ff.pushInput(i.Path)
@@ -195,9 +193,16 @@ func (ff *FFmpegCmd) pushMediaInput() {
 	}
 }
 
+func (ff *FFmpegCmd) pushInput(input string) {
+	ff.push("-i")
+	ff.push(input)
+}
+
 func (ff *FFmpegCmd) mapInput() {
-	for idx, _ := range ff.MediaInput {
-		ff.push("-map " + strconv.Itoa(idx) + ":0")
+	if ff.cover != "" || ff.ffmeta != "" {
+		for idx, _ := range ff.MediaInput {
+			ff.push("-map " + strconv.Itoa(idx) + ":0")
+		}
 	}
 
 	idx := len(ff.MediaInput)
@@ -210,11 +215,6 @@ func (ff *FFmpegCmd) mapInput() {
 		ff.push("-map_metadata " + strconv.Itoa(idx))
 		idx++
 	}
-}
-
-func (ff *FFmpegCmd) pushInput(input string) {
-	ff.push("-i")
-	ff.push(input)
 }
 
 func (ff *FFmpegCmd) metadata(meta string) {
