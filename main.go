@@ -87,7 +87,7 @@ func main() {
 	// Input
 	var media *fftools.Media
 	if posInput != "" {
-		media = fftools.NewMedia(posInput) //.WithMeta()
+		media = fftools.NewMedia(posInput).WithMeta()
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -101,8 +101,8 @@ func main() {
 
 	if cueSheet != "" {
 		//media.Cue = filepath.Base(cueSheet)
+		cmd.Args().Cue(cueSheet)
 		media.SetChapters(fftools.ReadCueSheet(cueSheet))
-		//cmd.Args().Cue(cueSheet)
 	}
 
 	if cover != "" {
@@ -122,8 +122,9 @@ func main() {
 		//cmd.Run()
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
-		fmt.Printf("%V\n", media.Meta.Chapters)
+		//fmt.Printf("%V\n", media.Meta.Chapters)
 		//fmt.Printf("%v\n", cmd.String())
+		fftools.ConvertFFmetaChapsToCue(media)
 	}
 
 	if convert.Used {

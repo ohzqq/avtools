@@ -52,7 +52,7 @@ func (m *Media) SetMeta(meta *MediaMeta) *Media {
 
 func (m *Media) HasChapters() bool {
 	if m.Meta != nil {
-		if len(*m.Meta.Chapters) != 0 {
+		if *m.Meta.Chapters != nil {
 			return true
 		}
 	}
@@ -60,11 +60,10 @@ func (m *Media) HasChapters() bool {
 }
 
 func (m *Media) SetChapters(ch *Chapters) {
-	if m.Meta != nil {
-		if len(*m.Meta.Chapters) > 0 {
-			m.Meta.Chapters = ch
-		}
+	if !m.HasChapters() {
+		m.WithMeta()
 	}
+	m.Meta.Chapters = ch
 }
 
 func (m *Media) HasVideo() bool {

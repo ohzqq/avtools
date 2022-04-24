@@ -8,6 +8,7 @@ import (
 	"log"
 	"bytes"
 	"strings"
+	"strconv"
 	"path/filepath"
 )
 
@@ -77,10 +78,65 @@ func RmChapters(m *Media) *FFmpegCmd {
 	return cmd
 }
 
-func ConvertFFmetaChapToCue(m *Media) {
+func ConvertFFmetaChapsToCue(m *Media) {
+	var chaps strings.Builder
+
+	chaps.WriteString("FILE ")
+	chaps.WriteString("'")
+	chaps.WriteString(m.File)
+	chaps.WriteString("' ")
+	chaps.WriteString(strings.ToUpper(strings.TrimPrefix(m.Ext, ".")))
+	chaps.WriteString("\n")
+
+	tr := 1
+	for _, ch := range *m.Meta.Chapters {
+		chaps.WriteString("TRACK ")
+		chaps.WriteString(strconv.Itoa(tr))
+		chaps.WriteString(" AUDIO")
+		chaps.WriteString("\n")
+		chaps.WriteString("  TITLE ")
+		chaps.WriteString("'")
+		if ch.Title == "" {
+			chaps.WriteString("Chapter ")
+			chaps.WriteString(strconv.Itoa(tr))
+		} else {
+			chaps.WriteString(ch.Title)
+		}
+		chaps.WriteString("'")
+		chaps.WriteString("\n")
+		chaps.WriteString("  INDEX 01 ")
+		chaps.WriteString(secsToCueStamp(ch.Start))
+		chaps.WriteString("\n")
+		tr++
+	}
 }
 
-func ConvertCueToFFmetaChap(m *Media) {
+func ConvertCueToFFmetaChaps(m *Media) {
+	var chaps strings.Builder
+	for _, ch := range *m.Meta.Chapters {
+		chaps.WriteString("[CHAPTER]")
+		chaps.WriteString("\n")
+		chaps.WriteString("title=")
+		chaps.WriteString(ch.Title)
+		chaps.WriteString("\n")
+		chaps.WriteString("TIMEBASE=1/1000")
+		chaps.WriteString("\n")
+		start, _ := strconv.Atoi(ch.Start)
+		chaps.WriteString("START=")
+		ss := strconv.Itoa(start * 1000)
+		chaps.WriteString(ss)
+		chaps.WriteString("\n")
+		end, _ := strconv.Atoi(ch.End)
+		chaps.WriteString("END=")
+		var to string
+		if end == 0 {
+			to = strconv.Itoa(secsAtoi(m.Meta.Format.Duration) * 1000)
+		} else {
+			to = strconv.Itoa(end * 1000)
+		}
+		chaps.WriteString(to)
+		chaps.WriteString("\n")
+	}
 }
 
 func Split(m *Media) {

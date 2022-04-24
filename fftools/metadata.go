@@ -6,9 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"strings"
-	"regexp"
-	"strconv"
-	"time"
+	//"regexp"
 	"encoding/json"
 	//"reflect"
 
@@ -179,13 +177,8 @@ func ReadCueSheet(file string) *Chapters {
 			t = strings.Trim(t, `"`)
 			titles = append(titles, t)
 		} else if strings.Contains(s, "INDEX") {
-			start := strings.TrimPrefix(s, "INDEX 01 ")
-			rmFrames := regexp.MustCompile(`:\d\d$`)
-			start = rmFrames.ReplaceAllString(start, "s")
-			start = strings.ReplaceAll(start, ":", "m")
-			dur, _ := time.ParseDuration(start)
-			durS := strconv.Itoa(int(dur.Seconds()))
-			indices = append(indices, durS)
+			start := cueStampToSecs(strings.TrimPrefix(s, "INDEX 01 "))
+			indices = append(indices, start)
 		}
 	}
 

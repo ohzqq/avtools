@@ -5,7 +5,9 @@ import (
 	"strings"
 	"log"
 	"fmt"
+	"time"
 	"os"
+	"math"
 	"path/filepath"
 )
 
@@ -20,7 +22,7 @@ func secsToHHMMSS(sec string) string {
 	//return s
 }
 
-func secsToMMSS(sec string) string {
+func secsToCueStamp(sec string) string {
 	seconds := secsAtoi(sec)
 	m := seconds / 60
 	s := seconds % 60
@@ -28,12 +30,21 @@ func secsToMMSS(sec string) string {
 	//return s
 }
 
-func secsAtoi(sec string) int {
-	seconds, err := strconv.Atoi(strings.Split(sec, ".")[0])
+func cueStampToSecs(stamp string) string {
+	split := strings.Split(stamp, ":")
+	dur, err := time.ParseDuration(split[0] + "m" + split[1] + "s")
 	if err != nil {
 		log.Fatal(err)
 	}
-	return seconds
+	return strconv.Itoa(int(dur.Seconds()))
+}
+
+func secsAtoi(sec string) int {
+	seconds, err := strconv.ParseFloat(sec, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return int(math.Round(seconds))
 }
 
 func timeBaseFloat(timebase string) float64 {
