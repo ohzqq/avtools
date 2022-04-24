@@ -18,6 +18,7 @@ type CmdArgs struct {
 	AudioParams flagArgs
 	AudioFilters string
 	FilterComplex string
+	MiscParams []string
 	Verbosity string
 	Output string
 	Padding bool
@@ -98,6 +99,11 @@ func (a *CmdArgs) Filter(s string) *CmdArgs {
 	return a
 }
 
+func (a *CmdArgs) Params(p []string) *CmdArgs {
+	a.MiscParams = p
+	return a
+}
+
 func (a *CmdArgs) ACodec(s string) *CmdArgs {
 	a.AudioCodec = s
 	return a
@@ -121,4 +127,17 @@ func (a *CmdArgs) Ext(s string) *CmdArgs {
 func (a *CmdArgs) Out(s string) *CmdArgs {
 	a.Output = s
 	return a
+}
+
+func Mp3CoverArgs() []string {
+	return []string{
+		"-map 0:0",
+		"-map 1:0",
+		"-id3v2_version",
+		"3",
+		"-metadata:s:v",
+		"title='Album cover'",
+		"-metadata:s:v",
+		"comment='Cover (front)'",
+	}
 }

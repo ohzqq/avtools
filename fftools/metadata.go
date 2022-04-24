@@ -171,7 +171,7 @@ func ReadFFmetadata(input string) *MediaMeta {
 	}
 }
 
-func ReadCueSheet(file string) *MediaMeta {
+func ReadCueSheet(file string) *Chapters {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -215,5 +215,5 @@ func ReadCueSheet(file string) *MediaMeta {
 		//fmt.Printf("%v", t)
 	}
 
-	return &MediaMeta{Chapters: &tracks}
+	return &tracks
 }

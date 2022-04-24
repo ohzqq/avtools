@@ -16,7 +16,10 @@ import (
 
 type FFmpegCmd struct {
 	cmd *exec.Cmd
-	Input []*Media
+	input []string
+	MediaInput []*Media
+	cover string
+	ffmeta string
 	profile bool
 	padding bool
 	tmpFile *os.File
@@ -31,7 +34,7 @@ func NewCmd() *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
-	ff.Input = append(ff.Input, input)
+	ff.MediaInput = append(ff.MediaInput, input)
 	return ff
 }
 
@@ -76,8 +79,14 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	return ff
 }
 
-func (ff *FFmpegCmd) Meta() *MediaMeta {
-	return ff.Input[0].ReadMeta()
+func (ff *FFmpegCmd) Cover(cover string) *FFmpegCmd {
+	ff.cover = cover
+	return ff
+}
+
+func (ff *FFmpegCmd) FFmeta(meta string) *FFmpegCmd {
+	ff.ffmeta = meta
+	return ff
 }
 
 func (ff *FFmpegCmd) Args() *CmdArgs {
@@ -87,21 +96,6 @@ func (ff *FFmpegCmd) Args() *CmdArgs {
 		ff.args.ACodec("copy")
 	}
 	return &ff.args
-}
-
-func (ff *FFmpegCmd) GetChapters() *Chapters {
-	var (
-		meta *MediaMeta
-	)
-	input := ff.Input[0]
-	if input.Cue != "" {
-		meta = ReadCueSheet(input.Cue)
-	} else if input.FFmeta != "" {
-		meta = ReadFFmetadata(input.FFmeta)
-	} else {
-		meta = input.ReadMeta()
-	}
-	return meta.Chapters
 }
 
 func (ff *FFmpegCmd) Run() {
@@ -128,9 +122,11 @@ func (ff *FFmpegCmd) Run() {
 	fmt.Printf("%v\n", stdout.String())
 }
 
-func (ff *FFmpegCmd) Cmd() *exec.Cmd {
-	argOrder := []string{"Verbosity", "Overwrite", "Pre", "Input", "Meta", "Post", "VideoCodec", "VideoParams", "VideoFilters", "FilterComplex", "AudioCodec", "AudioParams", "AudioFilters", "Output", "Ext"}
+func (ff *FFmpegCmd) String() string {
+	return ff.Cmd().String()
+}
 
+func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
@@ -140,9 +136,9 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 		case "Pre":
 			ff.Pre()
 		case "Input":
-			ff.pushInput()
-		case "Meta":
-			ff.Metadata()
+			ff.pushMediaInput()
+		//case "Meta":
+		//  ff.Metadata()
 		case "Post":
 			ff.Post()
 		case "VideoCodec":
@@ -153,6 +149,8 @@ func (ff *FFmpegCmd) Cmd() *exec.Cmd {
 			ff.VideoFilters()
 		case "FilterComplex":
 			ff.FilterComplex()
+		case "MiscParams":
+			ff.MiscParams()
 		case "AudioCodec":
 			ff.AudioCodec()
 		case "AudioParams":
@@ -177,26 +175,38 @@ func (ff *FFmpegCmd) Verbosity() {
 	}
 }
 
-func (ff *FFmpegCmd) pushInput() {
-	if len(ff.Input) > 0 {
-		for _, i := range ff.Input {
-			ff.push("-i")
-			ff.push(i.Path)
+func (ff *FFmpegCmd) pushMediaInput() {
+	var in = 0
+	if len(ff.MediaInput) > 0 {
+		for _, i := range ff.MediaInput {
+			ff.pushInput(i.Path)
+			in++
 		}
 	} else {
 		log.Fatal("No input specified")
 	}
-}
 
-func (ff *FFmpegCmd) Metadata() {
-	if ff.args.Metadata != "" {
-		ff.push("-i")
-		ff.push(ff.args.Metadata)
-		ff.push("-map_metadata")
-		ff.push(strconv.Itoa(len(ff.Input)))
+	if ff.cover != "" {
+		ff.pushInput(ff.cover)
+	}
+
+	if ff.ffmeta != "" {
+		ff.metadata(ff.ffmeta)
 	}
 }
 
+func (ff *FFmpegCmd) pushInput(input string) {
+	ff.push("-i")
+	ff.push(input)
+}
+
+func (ff *FFmpegCmd) metadata(meta string) *FFmpegCmd {
+	ff.push("-i")
+	ff.push(meta)
+	ff.push("-map_metadata")
+	ff.push(strconv.Itoa(len(ff.MediaInput)))
+	return ff
+}
 func (ff *FFmpegCmd) Pre() {
 	for _, arg := range ff.args.PreInput.Split() {
 		ff.push(arg)
@@ -219,6 +229,8 @@ func (ff *FFmpegCmd) VideoCodec() {
 	switch vc := ff.args.VideoCodec; vc {
 	case "none":
 	case "":
+	case "vn":
+		ff.push("-vn")
 	default:
 		ff.push("-c:v")
 		ff.push(ff.args.VideoCodec)
@@ -245,10 +257,20 @@ func (ff *FFmpegCmd) FilterComplex() {
 	}
 }
 
+func (ff *FFmpegCmd) MiscParams() {
+	if params := ff.args.MiscParams; len(params) > 0 {
+		for _, p := range params {
+			ff.push(p)
+		}
+	}
+}
+
 func (ff *FFmpegCmd) AudioCodec() {
 	switch ac := ff.args.AudioCodec; ac {
 	case "none":
 	case "":
+	case "an":
+		ff.push("-an")
 	default:
 		ff.push("-c:a")
 		ff.push(ff.args.AudioCodec)
@@ -271,7 +293,6 @@ func (ff *FFmpegCmd) AudioFilters() {
 func (ff *FFmpegCmd) Output() {
 	var o string
 	var pad string
-	var ext string
 	if Cfg.Defaults.Output != "" {
 		o = Cfg.Defaults.Output
 		if ff.padding {
@@ -280,10 +301,12 @@ func (ff *FFmpegCmd) Output() {
 			pad = ""
 		}
 	}
+
+	var ext string
 	if ff.args.Extension != "" {
 		ext = ff.args.Extension
 	} else {
-		ext = ".mkv"
+		ext = ff.MediaInput[0].Ext
 	}
 
 	if ff.args.Output == "" {
@@ -291,4 +314,23 @@ func (ff *FFmpegCmd) Output() {
 	} else {
 		ff.push(ff.args.Output + pad + ext)
 	}
+}
+
+var argOrder = []string{
+	"Verbosity",
+	"Overwrite",
+	"Pre",
+	"Input",
+	"Meta",
+	"Post",
+	"VideoCodec",
+	"VideoParams",
+	"VideoFilters",
+	"FilterComplex",
+	"MiscParams",
+	"AudioCodec",
+	"AudioParams",
+	"AudioFilters",
+	"Output",
+	"Ext",
 }

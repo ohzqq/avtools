@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	//"log"
 	//"strings"
 
 	//"github.com/ohzqq/fftools/cmd"
@@ -86,7 +87,7 @@ func main() {
 	// Input
 	var media *fftools.Media
 	if posInput != "" {
-		media = fftools.NewMedia(posInput).WithMeta()
+		media = fftools.NewMedia(posInput) //.WithMeta()
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -100,27 +101,28 @@ func main() {
 
 	if cueSheet != "" {
 		media.Cue = filepath.Base(cueSheet)
+		media.SetChapters(fftools.ReadCueSheet(cueSheet))
 		//cmd.Args().Cue(cueSheet)
 	}
 
+	var coverAbs string
 	if cover != "" {
-		media.Cover = filepath.Base(cover)
+		coverAbs, _ = filepath.Abs(cover)
+		//media.Cover = filepath.Base(cover)
 		//cmd.Args().Cover(cover)
 	}
 
 	if meta != "" {
 		media.FFmeta = filepath.Base(meta)
+		media.SetMeta(fftools.ReadFFmetadata(meta))
 		//cmd.Args().Meta(meta)
 	}
 
 	cmd.In(media)
 
 	if test.Used {
-		//file := fftools.NewMedia(posInput).WithMeta()
-		//fmt.Printf("%v\n", file.HasChapters())
-		//file.ReadMeta()
-		//ch := cmd.GetChapters()
-		fmt.Printf("%V\n", media.Duration())
+		fftools.AddAlbumArt(media, coverAbs)
+		//fmt.Printf("%V\n", media.Duration())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%v\n", file.HasChapters())
 		//fmt.Printf("%v\n", )
@@ -134,17 +136,17 @@ func main() {
 		//c := fftools.AllJsonMeta(posInput)
 		c := fftools.ReadCueSheet(posInput)
 		//c := cmd.Meta()
-		fmt.Printf("%V", c.Chapters)
+		fmt.Printf("%V", c)
 		//c.Chapters.Timestamps()
 		//c.Timestamps()
 	}
 
 	if join.Used {
-		fftools.Join(ext).Profile(profile).Cmd()
+		fftools.Join(ext).Profile(profile).Run()
 	}
 
 	if split.Used {
-		media.Split()
+		fftools.Split(media)
 	}
 
 	if embedChaps.Used {

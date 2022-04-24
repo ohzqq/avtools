@@ -6,18 +6,49 @@ import (
 	"os"
 	"log"
 	"strings"
-	"path/filepath"
 )
 
-func (m *Media) Split() {
+func AddAlbumArt(m *Media, cover string) {
+	switch codec := m.AudioCodec(); codec {
+	case "aac":
+	case "mp3":
+		cmd := NewCmd().In(m).Cover(cover)
+		cmd.Args().Out("tmp-cover").Params(Mp3CoverArgs())
+		fmt.Printf("%v", cmd.String())
+	}
+}
+
+func RmAlbumArt(m *Media) {
+}
+
+func AddFFmeta(m *Media) {
+}
+
+func RmFFmeta(m *Media) {
+}
+
+func AddChapters(m *Media) {
+}
+
+func RmChapters(m *Media) {
+}
+
+func ConvertFFmetaChapToCue(m *Media) {
+}
+
+func ConvertCueToFFmetaChap(m *Media) {
+}
+
+func Split(m *Media) {
 	if m.HasChapters() {
 		for i, chap := range *m.Meta.Chapters {
-			m.Cut(chap.Start, chap.End, i)
+			cmd := Cut(m, chap.Start, chap.End, i)
+			cmd.Run()
 		}
 	}
 }
 
-func (m *Media) Cut(ss, to string, no int) {
+func Cut(m *Media, ss, to string, no int) *FFmpegCmd {
 	count := fmt.Sprintf("%06d", no + 1)
 	cmd := NewCmd().In(m)
 	timestamps := make(map[string]string)
@@ -28,22 +59,19 @@ func (m *Media) Cut(ss, to string, no int) {
 		timestamps["to"] = to
 	}
 	cmd.Args().Post(timestamps).Out("tmp" + count).Ext(m.Ext)
-	cmd.Run()
+	return cmd
 }
 
 func Join(ext string) *FFmpegCmd {
 	ff := NewCmd()
 	pre := flagArgs{"f": "concat", "safe": "0"}
 	ff.Args().Pre(pre).Ext(ext)
-	files := find(ext)
-	ff.tmpFile = concatFile(files)
-	ff.In(NewMedia(ff.tmpFile.Name()))
-	return ff
-}
 
-func concatFile(files []string) *os.File {
+	files := find(ext)
 	file, err := os.CreateTemp("", "audiofiles")
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var cat strings.Builder
 	for _, f := range files {
@@ -54,31 +82,14 @@ func concatFile(files []string) *os.File {
 		cat.WriteString("\n")
 	}
 
-		fmt.Println(cat.String())
 	if _, err := file.WriteString(cat.String()); err != nil {
 		log.Fatal(err)
 	}
 
-	return file
+	ff.tmpFile = file
+
+	ff.In(NewMedia(ff.tmpFile.Name()))
+	return ff
 }
 
-func find(ext string) []string {
-	var files []string
-
-	entries, err := os.ReadDir(".")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, f := range entries {
-		if filepath.Ext(f.Name()) == ext {
-			file, err := filepath.Abs(f.Name())
-			if err != nil {
-				log.Fatal(err)
-			}
-			files = append(files, file)
-		}
-	}
-	return files
-}
 
