@@ -6,7 +6,6 @@ import (
 	//"log"
 	//"strings"
 
-	//"github.com/ohzqq/fftools/cmd"
 	"github.com/ohzqq/fftools/fftools"
 
 	"github.com/integrii/flaggy"
@@ -61,14 +60,8 @@ func main() {
 	rmMeta := newChildCmd("meta")
 	rm.AttachSubcommand(rmMeta, 1)
 
-	embed := newParentCmd("embed")
-	flaggy.AttachSubcommand(embed, 1)
-	embedChaps := newChildCmd("chaps")
-	embed.AttachSubcommand(embedChaps, 1)
-	embedCover := newChildCmd("cover")
-	embed.AttachSubcommand(embedCover, 1)
-	embedMeta := newChildCmd("meta")
-	embed.AttachSubcommand(embedMeta, 1)
+	update := newParentCmd("update")
+	flaggy.AttachSubcommand(update, 1)
 
 	extract := newParentCmd("extract")
 	flaggy.AttachSubcommand(extract, 1)
@@ -148,22 +141,14 @@ func main() {
 		fftools.Split(media)
 	}
 
-	if embedChaps.Used {
-		fmt.Println("rm cover")
-	}
-
-	if embedCover.Used {
+	if update.Used {
 		cmd := fftools.AddAlbumArt(media, cover)
 		if meta != "" {
 			cmd.Args().Meta(meta)
 		}
-		cmd.Run()
-	}
-
-	if embedMeta.Used{
 		cmd.FFmeta(meta)
 		if cover != "" {
-			cmd.Cover(cover)
+			cmd.Args().Cover(cover)
 		}
 		cmd.Run()
 	}
@@ -181,7 +166,8 @@ func main() {
 	}
 
 	if rmChaps.Used {
-		fmt.Println("rm cover")
+		cmd := fftools.RmChapters(media)
+		cmd.Run()
 	}
 
 	if rmCover.Used {
@@ -190,7 +176,8 @@ func main() {
 	}
 
 	if rmMeta.Used{
-		fmt.Println("rm cover")
+		cmd := fftools.RmFFmeta(media)
+		cmd.Run()
 	}
 
 	//fmt.Println(cmd.Cmd().String())
