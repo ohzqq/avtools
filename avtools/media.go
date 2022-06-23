@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"log"
 	"fmt"
+	"os"
+	"bytes"
 	//"strconv"
 	//"strings"
 	//"os"
@@ -11,6 +13,7 @@ import (
 var _ = fmt.Printf
 
 type Media struct {
+	Overwrite bool
 	File string
 	Path string
 	Dir string

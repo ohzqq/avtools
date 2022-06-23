@@ -4,10 +4,9 @@ import (
 	"fmt"
 	//"io/fs"
 	"os"
+	"bytes"
 	"os/exec"
 	"log"
-	"text/template"
-	"bytes"
 	"strings"
 	//"strconv"
 	"path/filepath"
@@ -59,6 +58,19 @@ func(m *Media) AddFFmeta(meta string) *FFmpegCmd {
 	return cmd
 }
 
+func(m *Media) Update(cover, meta string) *FFmpegCmd {
+	var cmd *FFmpegCmd
+	switch {
+	case cover != "":
+		cmd = m.AddAlbumArt(cover)
+	case meta != "":
+		cmd = m.AddFFmeta(meta)
+	}
+	cmd.Run()
+	//fmt.Printf("%+V %s\n", cover, meta)
+	return cmd
+}
+
 func(m *Media) Remove(chaps, cover, meta bool) *FFmpegCmd {
 	cmd := NewCmd().In(m)
 	if chaps {
@@ -99,6 +111,9 @@ func(m *Media) Split(cue string) {
 
 	for i, ch := range *chaps {
 		cmd := m.Cut(ch.Start, ch.End, i)
+		if m.Overwrite {
+			cmd.Args().OverWrite()
+		}
 		cmd.Run()
 	}
 }

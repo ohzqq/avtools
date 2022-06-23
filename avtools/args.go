@@ -78,8 +78,8 @@ func (a *CmdArgs) Pre(s flagArgs) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) OverWrite(over bool) *CmdArgs {
-	a.Overwrite = over
+func (a *CmdArgs) OverWrite() *CmdArgs {
+	a.Overwrite = true
 	return a
 }
 

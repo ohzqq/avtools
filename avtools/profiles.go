@@ -68,24 +68,24 @@ func InitConfig() {
 		}
 
 		// Search config in home directory with name ".avtools" (without extension).
-		//viper.AddConfigPath(home)
-		viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
+		viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
+		//viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".avtools.yml")
+		viper.SetConfigName("config.yml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+		viper.Sub("Defaults").Unmarshal(&cfg.Defaults)
+		err := viper.Sub("Profiles").Unmarshal(&cfg.profiles)
+		if err != nil {
+			fmt.Printf("unable to decode into struct, %v", err)
+		}
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	viper.Sub("Defaults").Unmarshal(&cfg.Defaults)
-	err := viper.Sub("Profiles").Unmarshal(&cfg.profiles)
-	if err != nil {
-		fmt.Printf("unable to decode into struct, %v", err)
-	}
 	Cfg().profiles["base"] = CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
 }
 

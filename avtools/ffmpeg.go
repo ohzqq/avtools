@@ -80,8 +80,8 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	if ff.args.Output == "" {
 		ff.args.Out(Cfg().Defaults.Output)
 	}
-	if ff.args.Overwrite == false {
-		ff.args.OverWrite(Cfg().Defaults.Overwrite)
+	if ff.args.Overwrite == true {
+		ff.args.OverWrite()
 	}
 	return ff
 }
@@ -225,6 +225,7 @@ func (ff *FFmpegCmd) metadata(meta string) {
 	ff.push("-i")
 	ff.push(meta)
 }
+
 func (ff *FFmpegCmd) Pre() {
 	for _, arg := range ff.args.PreInput.Split() {
 		ff.push(arg)
@@ -233,6 +234,10 @@ func (ff *FFmpegCmd) Pre() {
 
 func (ff *FFmpegCmd) Overwrite() {
 	if Cfg().Defaults.Overwrite {
+		ff.push("-y")
+	}
+
+	if ff.args.Overwrite {
 		ff.push("-y")
 	}
 }

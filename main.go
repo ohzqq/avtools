@@ -22,6 +22,7 @@ func main() {
 		output string
 		cueSheet string
 		cover string
+		overwrite bool
 		meta string
 		profile = avtools.Cfg().DefaultProfile()
 	)
@@ -29,6 +30,7 @@ func main() {
 	// Flags
 	flaggy.StringSlice(&input, "i", "input", "input")
 	flaggy.String(&output, "o", "output", "Set output")
+	flaggy.Bool(&overwrite, "y", "yes", "overwrite")
 	//flaggy.String(&cueSheet, "c", "cue", "set cue sheet")
 	//flaggy.String(&cover, "C", "cover", "set cover")
 	//flaggy.String(&meta, "m", "meta", "set ffmetadata")
@@ -62,19 +64,22 @@ func main() {
 	rm.Bool(&xCover, "a", "art", "Remove album art")
 	flaggy.AttachSubcommand(rm, 1)
 
-	update := newParentCmd("update")
-	flaggy.AttachSubcommand(update, 1)
-
 	extract := newChildCmd("extract")
 	extract.Bool(&xMeta, "m", "meta", "extract meta")
 	extract.Bool(&xChaps, "c", "chaps", "extract chapters")
 	extract.Bool(&xCover, "a", "art", "extract album art")
 	flaggy.AttachSubcommand(extract, 1)
 
+	update := newChildCmd("update")
+	update.String(&meta, "m", "meta", "update meta")
+	//embed.Bool(&xChaps, "c", "chaps", "update chapters")
+	update.String(&cover, "a", "art", "update album art")
+	flaggy.AttachSubcommand(update, 1)
+
 	flaggy.Parse()
 
 	// Setup command
-	cmd := avtools.NewCmd().Profile(profile)
+	//cmd := avtools.NewCmd().Profile(profile)
 
 	// Input
 	var media *avtools.Media
@@ -87,27 +92,32 @@ func main() {
 
 
 	// Handle flags
+	if overwrite {
+		//cmd.Args().OverWrite()
+		media.Overwrite = true
+	}
+
 	if output != "" {
-		cmd.Args().Out(output)
+		//cmd.Args().Out(output)
 	}
 
 	if cueSheet != "" {
 		//media.Cue = filepath.Base(cueSheet)
-		cmd.Args().Cue(cueSheet)
+		//cmd.Args().Cue(cueSheet)
 		media.SetChapters(avtools.ReadCueSheet(cueSheet))
 	}
 
-	if cover != "" {
+	//if cover != "" {
 		//media.Cover = filepath.Base(cover)
-		cmd.Args().Cover(cover)
-	}
+		//cmd.Args().Cover(cover)
+	//}
 
-	if meta != "" {
-		media.SetMeta(avtools.ReadFFmetadata(meta))
-		cmd.Args().Meta(meta)
-	}
+	//if meta != "" {
+		//media.SetMeta(avtools.ReadFFmetadata(meta))
+		//cmd.Args().Meta(meta)
+	//}
 
-	cmd.In(media)
+	//cmd.In(media)
 
 	if test.Used {
 		fmt.Printf("%+V\n", avtools.Cfg())
@@ -116,7 +126,7 @@ func main() {
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%V\n", media.Meta.Chapters)
-		fmt.Printf("%v\n", cmd.String())
+		//fmt.Printf("%v\n", cmd.String())
 	}
 
 	if convert.Used {
@@ -141,15 +151,9 @@ func main() {
 	}
 
 	if update.Used {
-		cmd := media.AddAlbumArt(cover)
-		if meta != "" {
-			cmd.Args().Meta(meta)
-		}
-		cmd.FFmeta(meta)
-		if cover != "" {
-			cmd.Args().Cover(cover)
-		}
-		cmd.Run()
+		media.Update(cover, meta)
+		//fmt.Printf("%+V\n", cmd.String())
+		//cmd.Run()
 	}
 
 	if extract.Used {
