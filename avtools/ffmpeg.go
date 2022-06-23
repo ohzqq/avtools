@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	"os"
@@ -21,20 +21,20 @@ type FFmpegCmd struct {
 	MediaInput []*Media
 	cover string
 	ffmeta string
-	profile bool
 	padding bool
+	profile bool
 	tmpFile *os.File
 	args CmdArgs
 }
 
 func NewCmd() *FFmpegCmd {
-	ff := FFmpegCmd{}
-	ff.padding = false
-	ff.cmd = exec.Command("ffmpeg", "-hide_banner")
+	ff := FFmpegCmd{
+		args: NewArgs(),
+		padding: false,
+		cmd: exec.Command("ffmpeg", "-hide_banner"),
+	}
 	if !ff.profile {
-		ff.args = CmdArgs{}
-		ff.args.VCodec("copy")
-		ff.args.ACodec("copy")
+		ff.Profile(Cfg().DefaultProfile())
 	}
 	return &ff
 }
@@ -45,42 +45,43 @@ func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
-	ff.profile = true
 	if ff.args.PreInput == nil {
-		ff.args.Pre(Cfg.Profiles[p].PreInput)
+		ff.args.Pre(Cfg().GetProfile(p).PreInput)
 	}
 	if ff.args.PostInput == nil {
-		ff.args.Post(Cfg.Profiles[p].PostInput)
+		for k, v := range Cfg().GetProfile(p).PostInput {
+			ff.args.Post(k, v)
+		}
 	}
 	if ff.args.VideoParams == nil {
-		ff.args.VParams(Cfg.Profiles[p].VideoParams)
+		ff.args.VParams(Cfg().GetProfile(p).VideoParams)
 	}
 	if ff.args.VideoCodec == "" {
-		ff.args.VCodec(Cfg.Profiles[p].VideoCodec)
+		ff.args.VCodec(Cfg().GetProfile(p).VideoCodec)
 	}
 	if ff.args.VideoFilters == "" {
-		ff.args.VFilters(Cfg.Profiles[p].VideoFilters)
+		ff.args.VFilters(Cfg().GetProfile(p).VideoFilters)
 	}
 	if ff.args.AudioParams == nil {
-		ff.args.AParams(Cfg.Profiles[p].AudioParams)
+		ff.args.AParams(Cfg().GetProfile(p).AudioParams)
 	}
 	if ff.args.AudioCodec == "" {
-		ff.args.ACodec(Cfg.Profiles[p].AudioCodec)
+		ff.args.ACodec(Cfg().GetProfile(p).AudioCodec)
 	}
 	if ff.args.AudioFilters == "" {
-		ff.args.AFilters(Cfg.Profiles[p].AudioFilters)
+		ff.args.AFilters(Cfg().GetProfile(p).AudioFilters)
 	}
 	if ff.args.FilterComplex == "" {
-		ff.args.Filter(Cfg.Profiles[p].FilterComplex)
+		ff.args.Filter(Cfg().GetProfile(p).FilterComplex)
 	}
 	if ff.args.Verbosity == "" {
-		ff.args.LogLevel(Cfg.Defaults.Verbosity)
+		ff.args.LogLevel(Cfg().Defaults.Verbosity)
 	}
 	if ff.args.Output == "" {
-		ff.args.Out(Cfg.Defaults.Output)
+		ff.args.Out(Cfg().Defaults.Output)
 	}
 	if ff.args.Overwrite == false {
-		ff.args.OverWrite(Cfg.Defaults.Overwrite)
+		ff.args.OverWrite(Cfg().Defaults.Overwrite)
 	}
 	return ff
 }
@@ -169,9 +170,9 @@ func (ff *FFmpegCmd) push(arg string) {
 }
 
 func (ff *FFmpegCmd) Verbosity() {
-	if Cfg.Defaults.Verbosity != "" {
+	if Cfg().Defaults.Verbosity != "" {
 		ff.push("-loglevel")
-		ff.push(Cfg.Defaults.Verbosity)
+		ff.push(Cfg().Defaults.Verbosity)
 	}
 }
 
@@ -231,7 +232,7 @@ func (ff *FFmpegCmd) Pre() {
 }
 
 func (ff *FFmpegCmd) Overwrite() {
-	if Cfg.Defaults.Overwrite {
+	if Cfg().Defaults.Overwrite {
 		ff.push("-y")
 	}
 }
@@ -310,8 +311,8 @@ func (ff *FFmpegCmd) AudioFilters() {
 func (ff *FFmpegCmd) Output() {
 	var o string
 	var pad string
-	if Cfg.Defaults.Output != "" {
-		o = Cfg.Defaults.Output
+	if Cfg().Defaults.Output != "" {
+		o = Cfg().Defaults.Output
 		if ff.padding {
 			pad = "%06d"
 		} else {

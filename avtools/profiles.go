@@ -1,32 +1,77 @@
-package fftools
+package avtools
 
 import (
 	"path/filepath"
 	"os"
 	"fmt"
+	"log"
 	//"strings"
 
+	"golang.org/x/exp/slices"
 	"github.com/spf13/viper"
-	"github.com/spf13/cobra"
 )
 
-var CfgFile string
+var (
+	cfgFile string
+	cfg = ffCfg{profiles: make(pros)}
+)
+
+type ffCfg struct {
+	profiles pros
+	Defaults defaults
+}
+
+func Cfg() ffCfg {
+	return cfg
+}
+
+func(cfg ffCfg) Profiles() []string {
+	var list []string
+	for pro, _ := range cfg.profiles {
+		list = append(list, pro)
+	}
+	return list
+}
+
+func(cfg ffCfg) DefaultProfile() string {
+	def := "base"
+	if d := cfg.Defaults.Profile; slices.Contains(cfg.Profiles(), d) {
+		def = d
+	}
+	return def
+}
+
+func(cfg ffCfg) GetProfile(p string) CmdArgs {
+	return cfg.profiles[p]
+}
+
+type defaults struct {
+	Output string
+	Verbosity string
+	Overwrite bool
+	Profile string
+	Padding bool
+}
+
+type pros map[string]CmdArgs
 
 // initConfig reads in config file and ENV variables if set.
 func InitConfig() {
-	if CfgFile != "" {
+	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(CfgFile)
+		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		// Search config in home directory with name ".fftools" (without extension).
+		// Search config in home directory with name ".avtools" (without extension).
 		//viper.AddConfigPath(home)
-		viper.AddConfigPath(filepath.Join(home, "Sync/code/fftools/tmp/"))
+		viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".fftools.yml")
+		viper.SetConfigName(".avtools.yml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -35,29 +80,14 @@ func InitConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+
+	viper.Sub("Defaults").Unmarshal(&cfg.Defaults)
+	err := viper.Sub("Profiles").Unmarshal(&cfg.profiles)
+	if err != nil {
+		fmt.Printf("unable to decode into struct, %v", err)
+	}
+	Cfg().profiles["base"] = CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
 }
-
-var Cfg = ffCfg{}
-
-type ffCfg struct {
-	Profiles pros
-	Defaults defaults
-}
-
-type defaults struct {
-	Output string
-	Verbosity string
-	Overwrite bool
-	Profile string
-}
-
-func FFcfg() {
-	viper.Sub("Defaults").Unmarshal(&Cfg.Defaults)
-	proCfg := viper.Sub("Profiles")
-	Cfg.Profiles = parseProfiles(proCfg)
-}
-
-type pros map[string]CmdArgs
 
 func (p pros) List() []string {
 	var list []string
@@ -67,11 +97,3 @@ func (p pros) List() []string {
 	return list
 }
 
-func parseProfiles(v *viper.Viper) pros {
-	profiles := make(pros)
-	err := v.Unmarshal(&profiles)
-	if err != nil {
-		fmt.Printf("unable to decode into struct, %v", err)
-	}
-	return profiles
-}

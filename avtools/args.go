@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	//"os"
@@ -27,6 +27,15 @@ type CmdArgs struct {
 	CueSheet string
 	AlbumArt string
 	Metadata string
+}
+
+func NewArgs() CmdArgs {
+	return CmdArgs{
+		PreInput: make(flagArgs),
+		PostInput: make(flagArgs),
+		VideoParams: make(flagArgs),
+		AudioParams: make(flagArgs),
+	}
 }
 
 type flagArgs map[string]string
@@ -74,8 +83,8 @@ func (a *CmdArgs) OverWrite(over bool) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) Post(s flagArgs) *CmdArgs {
-	a.PostInput = s
+func (a *CmdArgs) Post(k, v string) *CmdArgs {
+	a.PostInput[k] = v
 	return a
 }
 

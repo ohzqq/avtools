@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	"strconv"

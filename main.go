@@ -6,7 +6,7 @@ import (
 	//"log"
 	//"strings"
 
-	"github.com/ohzqq/fftools/fftools"
+	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/integrii/flaggy"
 )
@@ -15,8 +15,7 @@ var posInput string
 var ext string
 
 func main() {
-	fftools.InitConfig()
-	fftools.FFcfg()
+	avtools.InitConfig()
 
 	var (
 		input []string
@@ -24,15 +23,15 @@ func main() {
 		cueSheet string
 		cover string
 		meta string
-		profile = fftools.Cfg.Defaults.Profile
+		profile = avtools.Cfg().DefaultProfile()
 	)
 
 	// Flags
 	flaggy.StringSlice(&input, "i", "input", "input")
 	flaggy.String(&output, "o", "output", "Set output")
-	flaggy.String(&cueSheet, "c", "cue", "set cue sheet")
-	flaggy.String(&cover, "C", "cover", "set cover")
-	flaggy.String(&meta, "m", "meta", "set ffmetadata")
+	//flaggy.String(&cueSheet, "c", "cue", "set cue sheet")
+	//flaggy.String(&cover, "C", "cover", "set cover")
+	//flaggy.String(&meta, "m", "meta", "set ffmetadata")
 	flaggy.String(&profile, "p", "profile", "designate profile")
 
 	// Subcommands
@@ -43,6 +42,7 @@ func main() {
 	flaggy.AttachSubcommand(join, 1)
 
 	split := cmdWithInput("split")
+	split.String(&cueSheet, "c", "cue", "use cue sheet as markers")
 	flaggy.AttachSubcommand(split, 1)
 
 	convert := cmdWithInput("convert")
@@ -51,36 +51,35 @@ func main() {
 	cueS := cmdWithInput("cue")
 	flaggy.AttachSubcommand(cueS, 1)
 
-	rm := newParentCmd("rm")
+	var (
+		xMeta bool
+		xChaps bool
+		xCover bool
+	)
+	rm := newChildCmd("rm")
+	rm.Bool(&xMeta, "m", "meta", "Remove meta")
+	rm.Bool(&xChaps, "c", "chaps", "Remove chapters")
+	rm.Bool(&xCover, "a", "art", "Remove album art")
 	flaggy.AttachSubcommand(rm, 1)
-	rmChaps := newChildCmd("chaps")
-	rm.AttachSubcommand(rmChaps, 1)
-	rmCover := newChildCmd("cover")
-	rm.AttachSubcommand(rmCover, 1)
-	rmMeta := newChildCmd("meta")
-	rm.AttachSubcommand(rmMeta, 1)
 
 	update := newParentCmd("update")
 	flaggy.AttachSubcommand(update, 1)
 
-	extract := newParentCmd("extract")
+	extract := newChildCmd("extract")
+	extract.Bool(&xMeta, "m", "meta", "extract meta")
+	extract.Bool(&xChaps, "c", "chaps", "extract chapters")
+	extract.Bool(&xCover, "a", "art", "extract album art")
 	flaggy.AttachSubcommand(extract, 1)
-	extractChaps := newChildCmd("chaps")
-	extract.AttachSubcommand(extractChaps, 1)
-	extractCover := newChildCmd("cover")
-	extract.AttachSubcommand(extractCover, 1)
-	extractMeta := newChildCmd("meta")
-	extract.AttachSubcommand(extractMeta, 1)
 
 	flaggy.Parse()
 
 	// Setup command
-	cmd := fftools.NewCmd().Profile(profile)
+	cmd := avtools.NewCmd().Profile(profile)
 
 	// Input
-	var media *fftools.Media
+	var media *avtools.Media
 	if posInput != "" {
-		media = fftools.NewMedia(posInput).WithMeta()
+		media = avtools.NewMedia(posInput).WithMeta()
 	}
 	//for _, in := range input {
 	//  cmd.In(in)
@@ -95,7 +94,7 @@ func main() {
 	if cueSheet != "" {
 		//media.Cue = filepath.Base(cueSheet)
 		cmd.Args().Cue(cueSheet)
-		media.SetChapters(fftools.ReadCueSheet(cueSheet))
+		media.SetChapters(avtools.ReadCueSheet(cueSheet))
 	}
 
 	if cover != "" {
@@ -104,20 +103,20 @@ func main() {
 	}
 
 	if meta != "" {
-		media.SetMeta(fftools.ReadFFmetadata(meta))
+		media.SetMeta(avtools.ReadFFmetadata(meta))
 		cmd.Args().Meta(meta)
 	}
 
 	cmd.In(media)
 
 	if test.Used {
-		//cmd := fftools.RmChapters(media)
+		fmt.Printf("%+V\n", avtools.Cfg())
+		//cmd := avtools.RmChapters(media)
 		//cmd.Run()
 		//fmt.Printf("%V\n", media.HasStreams())
 		//fmt.Printf("%V\n", file.Meta.Tags.Title)
 		//fmt.Printf("%V\n", media.Meta.Chapters)
-		//fmt.Printf("%v\n", cmd.String())
-		fftools.ConvertFFmetaChapsToCue(media)
+		fmt.Printf("%v\n", cmd.String())
 	}
 
 	if convert.Used {
@@ -125,8 +124,8 @@ func main() {
 	}
 
 	if cueS.Used {
-		//c := fftools.AllJsonMeta(posInput)
-		c := fftools.ReadCueSheet(posInput)
+		//c := avtools.AllJsonMeta(posInput)
+		c := avtools.ReadCueSheet(posInput)
 		//c := cmd.Meta()
 		fmt.Printf("%V", c)
 		//c.Chapters.Timestamps()
@@ -134,15 +133,15 @@ func main() {
 	}
 
 	if join.Used {
-		fftools.Join(ext).Profile(profile).Run()
+		avtools.Join(ext).Profile(profile).Run()
 	}
 
 	if split.Used {
-		fftools.Split(media)
+		media.Split(cueSheet)
 	}
 
 	if update.Used {
-		cmd := fftools.AddAlbumArt(media, cover)
+		cmd := media.AddAlbumArt(cover)
 		if meta != "" {
 			cmd.Args().Meta(meta)
 		}
@@ -153,31 +152,12 @@ func main() {
 		cmd.Run()
 	}
 
-	if extractChaps.Used {
-		fmt.Println("rm cover")
+	if extract.Used {
+		media.Extract(xChaps, xCover, xMeta)
 	}
 
-	if extractCover.Used {
-		fmt.Println("rm cover")
-	}
-
-	if extractMeta.Used{
-		fftools.WriteFFmetadata(posInput)
-	}
-
-	if rmChaps.Used {
-		cmd := fftools.RmChapters(media)
-		cmd.Run()
-	}
-
-	if rmCover.Used {
-		cmd := fftools.RmAlbumArt(media)
-		cmd.Run()
-	}
-
-	if rmMeta.Used{
-		cmd := fftools.RmFFmeta(media)
-		cmd.Run()
+	if rm.Used {
+		media.Remove(xChaps, xCover, xMeta).Run()
 	}
 
 	//fmt.Println(cmd.Cmd().String())

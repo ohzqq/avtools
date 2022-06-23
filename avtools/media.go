@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	"path/filepath"
@@ -22,7 +22,9 @@ func NewMedia(input string) *Media {
 	media := new(Media)
 
 	abs, err := filepath.Abs(input)
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	media.Path = abs
 	media.File = filepath.Base(input)
@@ -57,6 +59,28 @@ func (m *Media) HasChapters() bool {
 		}
 	}
 	return false
+}
+
+func(m *Media) RenderFFChaps() {
+	var f bytes.Buffer
+
+	err := metaTmpl.ffchaps.ExecuteTemplate(&f, "ffchaps", m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	fmt.Println(f.String())
+}
+
+func(m *Media) FFmetaChapsToCue() {
+	f, err := os.Create("chapters.cue")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = metaTmpl.cue.ExecuteTemplate(f, "cue", m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
 }
 
 func (m *Media) SetChapters(ch *Chapters) {

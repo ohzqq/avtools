@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	"fmt"
@@ -6,13 +6,14 @@ import (
 	"os"
 	"os/exec"
 	"log"
+	"text/template"
 	"bytes"
 	"strings"
-	"strconv"
+	//"strconv"
 	"path/filepath"
 )
 
-func AddAlbumArt(m *Media, cover string) *FFmpegCmd {
+func(m *Media) AddAlbumArt(cover string) *FFmpegCmd {
 	path, err := filepath.Abs(cover)
 	if err != nil {
 		log.Fatal(err)
@@ -48,13 +49,7 @@ func addAacCover(media, cover string) {
 	}
 }
 
-func RmAlbumArt(m *Media) *FFmpegCmd {
-	cmd := NewCmd().In(m)
-	cmd.Args().Out("tmp-nocover").VCodec("vn")
-	return cmd
-}
-
-func AddFFmeta(m *Media, meta string) *FFmpegCmd {
+func(m *Media) AddFFmeta(meta string) *FFmpegCmd {
 	path, err := filepath.Abs(meta)
 	if err != nil {
 		log.Fatal(err)
@@ -64,108 +59,67 @@ func AddFFmeta(m *Media, meta string) *FFmpegCmd {
 	return cmd
 }
 
-func RmFFmeta(m *Media) *FFmpegCmd {
-	arg := newFlagArg("map_metadata", "-1")
+func(m *Media) Remove(chaps, cover, meta bool) *FFmpegCmd {
 	cmd := NewCmd().In(m)
-	cmd.Args().Post(arg).Out("no-meta")
+	if chaps {
+		cmd.Args().Post("map_chapters", "-1")
+	}
+	if cover {
+		cmd.Args().VCodec("vn")
+	}
+	if meta {
+		cmd.Args().Post("map_metadata", "-1")
+	}
 	return cmd
 }
 
-func RmChapters(m *Media) *FFmpegCmd {
-	arg := newFlagArg("map_chapters", "-1")
+func(m *Media) Extract(chaps, cover, meta bool) {
 	cmd := NewCmd().In(m)
-	cmd.Args().Post(arg).Out("no-chaps")
-	return cmd
-}
-
-func ConvertFFmetaChapsToCue(m *Media) {
-	var chaps strings.Builder
-
-	chaps.WriteString("FILE ")
-	chaps.WriteString("'")
-	chaps.WriteString(m.File)
-	chaps.WriteString("' ")
-	chaps.WriteString(strings.ToUpper(strings.TrimPrefix(m.Ext, ".")))
-	chaps.WriteString("\n")
-
-	tr := 1
-	for _, ch := range *m.Meta.Chapters {
-		chaps.WriteString("TRACK ")
-		chaps.WriteString(strconv.Itoa(tr))
-		chaps.WriteString(" AUDIO")
-		chaps.WriteString("\n")
-		chaps.WriteString("  TITLE ")
-		chaps.WriteString("'")
-		if ch.Title == "" {
-			chaps.WriteString("Chapter ")
-			chaps.WriteString(strconv.Itoa(tr))
-		} else {
-			chaps.WriteString(ch.Title)
-		}
-		chaps.WriteString("'")
-		chaps.WriteString("\n")
-		chaps.WriteString("  INDEX 01 ")
-		chaps.WriteString(secsToCueStamp(ch.Start))
-		chaps.WriteString("\n")
-		tr++
+	if chaps {
+		m.FFmetaChapsToCue()
+	}
+	if cover {
+		cmd.Args().ACodec("an").Out("cover").Ext(".jpg")
+		cmd.Run()
+	}
+	if meta {
+		cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext(".ini").Out("ffmeta")
+		cmd.Run()
 	}
 }
 
-func ConvertCueToFFmetaChaps(m *Media) {
-	var chaps strings.Builder
-	for _, ch := range *m.Meta.Chapters {
-		chaps.WriteString("[CHAPTER]")
-		chaps.WriteString("\n")
-		chaps.WriteString("title=")
-		chaps.WriteString(ch.Title)
-		chaps.WriteString("\n")
-		chaps.WriteString("TIMEBASE=1/1000")
-		chaps.WriteString("\n")
-		start, _ := strconv.Atoi(ch.Start)
-		chaps.WriteString("START=")
-		ss := strconv.Itoa(start * 1000)
-		chaps.WriteString(ss)
-		chaps.WriteString("\n")
-		end, _ := strconv.Atoi(ch.End)
-		chaps.WriteString("END=")
-		var to string
-		if end == 0 {
-			to = strconv.Itoa(secsAtoi(m.Meta.Format.Duration) * 1000)
-		} else {
-			to = strconv.Itoa(end * 1000)
-		}
-		chaps.WriteString(to)
-		chaps.WriteString("\n")
+func(m *Media) Split(cue string) {
+	var chaps *Chapters
+	switch {
+	case cue != "":
+		chaps = ReadCueSheet(cue)
+	case m.HasChapters():
+		chaps = m.Meta.Chapters
+	}
+
+	for i, ch := range *chaps {
+		cmd := m.Cut(ch.Start, ch.End, i)
+		cmd.Run()
 	}
 }
 
-func Split(m *Media) {
-	if m.HasChapters() {
-		for i, chap := range *m.Meta.Chapters {
-			cmd := Cut(m, chap.Start, chap.End, i)
-			cmd.Run()
-		}
-	}
-}
-
-func Cut(m *Media, ss, to string, no int) *FFmpegCmd {
+func(m *Media) Cut(ss, to string, no int) *FFmpegCmd {
 	count := fmt.Sprintf("%06d", no + 1)
 	cmd := NewCmd().In(m)
-	timestamps := make(map[string]string)
 	if ss != "" {
-		timestamps["ss"] = ss
+		cmd.Args().Post("ss", ss)
 	}
 	if to != "" {
-		timestamps["to"] = to
+		cmd.Args().Post("to", to)
 	}
-	cmd.Args().Post(timestamps).Out("tmp" + count).Ext(m.Ext)
+	cmd.Args().Out("tmp" + count).Ext(m.Ext)
 	return cmd
 }
 
 func Join(ext string) *FFmpegCmd {
 	ff := NewCmd()
 	pre := flagArgs{"f": "concat", "safe": "0"}
-	ff.Args().Pre(pre).Ext(ext)
+	ff.Args().Pre(pre).VCodec("vn").Ext(ext)
 
 	files := find(ext)
 	file, err := os.CreateTemp("", "audiofiles")

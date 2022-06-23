@@ -1,4 +1,4 @@
-package fftools
+package avtools
 
 import (
 	"log"
@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"strings"
+	"strconv"
 	//"regexp"
 	"encoding/json"
 	//"reflect"
@@ -53,6 +54,27 @@ type Chapter struct {
 	Title string
 }
 
+func(c Chapter) StartTimebaseProduct() string {
+	ss, _ := strconv.ParseFloat(c.Start, 64)
+	result := ss * c.TimebaseFloat()
+	return strconv.FormatFloat(result, 'f', 0, 64)
+}
+
+func(c Chapter) EndTimebaseProduct() string {
+	to, _ := strconv.ParseFloat(c.End, 64)
+	result := to * c.TimebaseFloat()
+	return strconv.FormatFloat(result, 'f', 0, 64)
+}
+
+func(c Chapter) TimebaseFloat() float64 {
+	base := "1000"
+	if tb := c.Timebase; tb != "" {
+		base = strings.ReplaceAll(tb, "1/", "")
+	}
+	baseFloat, _ := strconv.ParseFloat(base, 64)
+	return baseFloat
+}
+
 type jsonMeta struct {
 	Chapters []jsonChapter
 	Streams *Streams
@@ -69,6 +91,35 @@ type jsonChapter struct {
 	Chapter
 	Tags *Tags `json:"tags"`
 }
+
+type metaTemplates struct {
+	cue *template.Template
+	ffchaps *template.Template
+}
+
+var funcs = template.FuncMap{
+	"cueStamp": secsToCueStamp,
+}
+
+var metaTmpl = metaTemplates{
+	cue: template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+	ffchaps: template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
+}
+
+const cueTmpl = `FILE '{{.File}}' {{.Ext}}
+{{- range $index, $ch := .Meta.Chapters}}
+TRACK {{$index}} AUDIO
+  TITLE "Chapter {{$index}}"
+  INDEX 01 {{cueStamp $ch.Start}}{{end}}`
+
+const ffChapTmpl = `
+{{- range $index, $ch := .Meta.Chapters -}}
+[CHAPTER]
+TITLE={{if ne $ch.Title ""}}{{.}}{{else}}Chapter {{$index}}{{end}}
+START={{$ch.StartTimebaseProduct}}
+END={{$ch.EndTimebaseProduct}}
+TIMEBASE=1/1000
+{{end -}}`
 
 func ReadEmbeddedMeta(input string) *MediaMeta {
 	ff := NewFFProbeCmd()
@@ -111,8 +162,7 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 func WriteFFmetadata(input string) {
 	cmd := NewCmd()
 	cmd.In(NewMedia(input))
-	params := newFlagArg("f", "ffmetadata")
-	cmd.Args().Post(params).ACodec("none").VCodec("none").Ext("ini")
+	cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext("ini")
 	//fmt.Printf("%v", cmd.Cmd().String())
 	cmd.Run()
 }

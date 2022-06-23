@@ -1,4 +1,4 @@
-module github.com/ohzqq/fftools
+module github.com/ohzqq/avtools
 
 go 1.18
 
@@ -23,6 +23,7 @@ require (
 	github.com/spf13/viper v1.11.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/vchimishuk/chub v0.0.0-20220107162648-9d7fe8a6a485 // indirect
+	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
