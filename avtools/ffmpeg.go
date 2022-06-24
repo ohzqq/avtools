@@ -123,6 +123,8 @@ func (ff *FFmpegCmd) Run() {
 	if err != nil {
 		log.Printf("%v finished with error:\n%v", cmd.String(), err)
 		fmt.Printf("%v\n", stderr.String())
+	} else {
+		fmt.Println("Success!")
 	}
 
 	if stdout.String() != "" {
