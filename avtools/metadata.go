@@ -17,13 +17,10 @@ import (
 var _ = fmt.Printf
 
 type MediaMeta struct {
-	Chapters *Chapters
-	Streams *Streams
+	Chapters []*Chapter
+	Streams []*Stream
 	Format *Format
-	Tags *Tags
 }
-
-type Streams []*Stream
 
 type Stream struct {
 	CodecName string `json:"codec_name"`
@@ -35,6 +32,7 @@ type Format struct {
 	Duration string
 	Size string
 	BitRate string `json:"bit_rate"`
+	Tags *Tags `json:"tags"`
 }
 
 type Tags struct {
@@ -46,12 +44,11 @@ type Tags struct {
 	Genre string `json:"genre"`
 }
 
-type Chapters []*Chapter
-
 type Chapter struct {
 	Timebase string `json:"time_base"`
 	Start string `json:"start_time"`
 	End string `json:"end_time"`
+	Tags *Tags `json:"tags"`
 	Title string
 }
 
@@ -76,21 +73,108 @@ func(c Chapter) TimebaseFloat() float64 {
 	return baseFloat
 }
 
-type jsonMeta struct {
-	Chapters []jsonChapter
-	Streams *Streams
-	Format jsonFormat
-	Tags *Tags
+const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
+
+func ReadEmbeddedMeta(input string) *MediaMeta {
+	ff := NewFFprobeCmd()
+	ff.In(input)
+	ff.Args().Entries(ffProbeMeta).Chapters().Verbosity("error").Format("json")
+
+	m := ff.Run()
+
+	media := MediaMeta{}
+
+	err := json.Unmarshal(m, &media)
+	if err != nil {
+		fmt.Println("help")
+	}
+
+	return &media
 }
 
-type jsonFormat struct {
-	Format
-	Tags *Tags
+func WriteFFmetadata(input string) {
+	cmd := NewFFmpegCmd()
+	cmd.In(NewMedia().Input(input))
+	cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext("ini")
+	cmd.Run()
 }
 
-type jsonChapter struct {
-	Chapter
-	Tags *Tags `json:"tags"`
+func ReadFFmetadata(input string) *MediaMeta {
+	opts := ini.LoadOptions{}
+	opts.Insensitive = true
+	opts.InsensitiveSections = true
+	opts.IgnoreInlineComment = true
+	opts.AllowNonUniqueSections = true
+
+	f, err := ini.LoadSources(opts, input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	media := &MediaMeta{}
+
+	meta, err := f.GetSection("")
+	if err != nil {
+		log.Fatal(err)
+	}
+	meta.MapTo(media.Format.Tags)
+
+	if f.HasSection("chapter") {
+		sec, _ := f.SectionsByName("chapter")
+		for _, chap := range sec {
+			c := Chapter{}
+			err := chap.MapTo(&c)
+			ss, to := ffChapstoSeconds(c.Timebase, c.Start, c.End)
+			c.Start = ss
+			c.End = to
+			if err != nil { log.Fatal(err) }
+			media.Chapters = append(media.Chapters, &c)
+		}
+	}
+
+	return media
+}
+
+func ReadCueSheet(file string) []*Chapter {
+	contents, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer contents.Close()
+
+	var (
+		titles []string
+		indices []string
+	)
+	scanner := bufio.NewScanner(contents)
+	for scanner.Scan() {
+		s := strings.TrimSpace(scanner.Text())
+		if strings.Contains(s, "TITLE") {
+			t := strings.TrimPrefix(s, "TITLE ")
+			t = strings.Trim(t, "'")
+			t = strings.Trim(t, `"`)
+			titles = append(titles, t)
+		} else if strings.Contains(s, "INDEX") {
+			start := cueStampToSecs(strings.TrimPrefix(s, "INDEX 01 "))
+			indices = append(indices, start)
+		}
+	}
+
+	var tracks []*Chapter
+	e := 1
+	for i := 0; i < len(titles); i++ {
+		t := new(Chapter)
+		t.Title = titles[i]
+		t.Start = indices[i]
+		if e < len(titles) {
+			t.End = indices[e]
+		}
+		e++
+		tracks = append(tracks, t)
+		//fmt.Printf("%v", t)
+	}
+
+	return tracks
 }
 
 type metaTemplates struct {
@@ -122,130 +206,3 @@ END={{$ch.EndTimebaseProduct}}
 TIMEBASE=1/1000
 {{end -}}`
 
-func ReadEmbeddedMeta(input string) *MediaMeta {
-	ff := NewFFProbeCmd()
-	ff.In(input)
-	ff.Args().
-		Entries("format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags").
-		Chapters().
-		Verbosity("error").
-		Format("json")
-
-	m := ff.Run()
-
-	var meta jsonMeta
-	err := json.Unmarshal(m, &meta)
-	if err != nil { fmt.Println("help")}
-
-	media := MediaMeta{}
-	media.Streams = meta.Streams
-	media.Format = &Format{
-		Filename: meta.Format.Filename,
-		Duration: meta.Format.Duration,
-		Size: meta.Format.Size,
-		BitRate: meta.Format.BitRate,
-	}
-	media.Tags = meta.Format.Tags
-
-	var chapters Chapters
-	for _, ch := range meta.Chapters {
-		c := new(Chapter)
-		c.Title = ch.Tags.Title
-		c.Timebase = ch.Timebase
-		c.Start = ch.Start
-		c.End = ch.End
-		chapters = append(chapters, c)
-	}
-	media.Chapters = &chapters
-	return &media
-}
-
-func WriteFFmetadata(input string) {
-	cmd := NewCmd()
-	cmd.In(NewMedia(input))
-	cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext("ini")
-	//fmt.Printf("%v", cmd.Cmd().String())
-	cmd.Run()
-}
-
-func ReadFFmetadata(input string) *MediaMeta {
-	opts := ini.LoadOptions{}
-	opts.Insensitive = true
-	opts.InsensitiveSections = true
-	opts.IgnoreInlineComment = true
-	opts.AllowNonUniqueSections = true
-
-	f, err := ini.LoadSources(opts, input)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	meta, err := f.GetSection("")
-	if err != nil {
-		log.Fatal(err)
-	}
-	m := new(Tags)
-	meta.MapTo(m)
-	tags := *m
-
-	var chapters Chapters
-	if f.HasSection("chapter") {
-		sec, _ := f.SectionsByName("chapter")
-		for _, chap := range sec {
-			c := Chapter{}
-			err := chap.MapTo(&c)
-			ss, to := ffChapstoSeconds(c.Timebase, c.Start, c.End)
-			c.Start = ss
-			c.End = to
-			if err != nil { log.Fatal(err) }
-			chapters = append(chapters, &c)
-		}
-	}
-
-	return &MediaMeta{
-		Chapters: &chapters,
-		Tags: &tags,
-	}
-}
-
-func ReadCueSheet(file string) *Chapters {
-	contents, err := os.Open(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer contents.Close()
-
-	var (
-		titles []string
-		indices []string
-	)
-	scanner := bufio.NewScanner(contents)
-	for scanner.Scan() {
-		s := strings.TrimSpace(scanner.Text())
-		if strings.Contains(s, "TITLE") {
-			t := strings.TrimPrefix(s, "TITLE ")
-			t = strings.Trim(t, "'")
-			t = strings.Trim(t, `"`)
-			titles = append(titles, t)
-		} else if strings.Contains(s, "INDEX") {
-			start := cueStampToSecs(strings.TrimPrefix(s, "INDEX 01 "))
-			indices = append(indices, start)
-		}
-	}
-
-	var tracks Chapters
-	e := 1
-	for i := 0; i < len(titles); i++ {
-		t := new(Chapter)
-		t.Title = titles[i]
-		t.Start = indices[i]
-		if e < len(titles) {
-			t.End = indices[e]
-		}
-		e++
-		tracks = append(tracks, t)
-		//fmt.Printf("%v", t)
-	}
-
-	return &tracks
-}

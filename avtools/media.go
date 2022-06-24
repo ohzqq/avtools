@@ -8,7 +8,6 @@ import (
 	"bytes"
 	//"strconv"
 	//"strings"
-	//"os"
 )
 var _ = fmt.Printf
 
@@ -21,20 +20,22 @@ type Media struct {
 	Meta *MediaMeta
 }
 
-func NewMedia(input string) *Media {
-	media := new(Media)
+func NewMedia() *Media {
+	return &Media{}
+}
 
+func(m *Media) Input(input string) *Media {
 	abs, err := filepath.Abs(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	media.Path = abs
-	media.File = filepath.Base(input)
-	media.Dir = filepath.Dir(input)
-	media.Ext = filepath.Ext(input)
+	m.Path = abs
+	m.File = filepath.Base(input)
+	m.Dir = filepath.Dir(input)
+	m.Ext = filepath.Ext(input)
 
-	return media
+	return m
 }
 
 func (m *Media) WithMeta() *Media {
@@ -57,7 +58,7 @@ func (m *Media) SetMeta(meta *MediaMeta) *Media {
 
 func (m *Media) HasChapters() bool {
 	if m.Meta != nil {
-		if *m.Meta.Chapters != nil {
+		if m.Meta.Chapters != nil {
 			return true
 		}
 	}
@@ -86,7 +87,7 @@ func(m *Media) FFmetaChapsToCue() {
 	}
 }
 
-func (m *Media) SetChapters(ch *Chapters) {
+func (m *Media) SetChapters(ch []*Chapter) {
 	if !m.HasChapters() {
 		m.WithMeta()
 	}
@@ -97,7 +98,7 @@ func (m *Media) HasVideo() bool {
 	if !m.HasStreams() {
 		m.WithMeta()
 	}
-	for _, stream := range *m.Meta.Streams {
+	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "video" {
 			return true
 		}
@@ -109,7 +110,7 @@ func (m *Media) HasAudio() bool {
 	if !m.HasStreams() {
 		m.WithMeta()
 	}
-	for _, stream := range *m.Meta.Streams {
+	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "audio" {
 			return true
 		}
@@ -121,7 +122,7 @@ func (m *Media) VideoCodec() string {
 	if !m.HasStreams() {
 		m.WithMeta()
 	}
-	for _, stream := range *m.Meta.Streams {
+	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "video" {
 			return stream.CodecName
 		}
@@ -133,7 +134,7 @@ func (m *Media) AudioCodec() string {
 	if !m.HasStreams() {
 		m.WithMeta()
 	}
-	for _, stream := range *m.Meta.Streams {
+	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "audio" {
 			return stream.CodecName
 		}

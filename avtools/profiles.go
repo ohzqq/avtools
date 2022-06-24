@@ -13,12 +13,17 @@ import (
 
 var (
 	cfgFile string
-	cfg = ffCfg{profiles: make(pros)}
+	cfg = ffCfg{
+		profiles: make(pros),
+		Defaults: &defaults{
+			Output: "tmp",
+		},
+	}
 )
 
 type ffCfg struct {
 	profiles pros
-	Defaults defaults
+	Defaults *defaults
 }
 
 func Cfg() ffCfg {
@@ -69,7 +74,7 @@ func InitConfig() {
 
 		// Search config in home directory with name ".avtools" (without extension).
 		viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
-		//viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
+		viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config.yml")
 	}
@@ -83,17 +88,7 @@ func InitConfig() {
 		if err != nil {
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
-		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
 	Cfg().profiles["base"] = CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
 }
-
-func (p pros) List() []string {
-	var list []string
-	for pro, _ := range p {
-		list = append(list, pro)
-	}
-	return list
-}
-

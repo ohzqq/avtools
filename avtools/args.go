@@ -1,6 +1,8 @@
 package avtools
 
 import (
+	"path/filepath"
+	"log"
 	//"os"
 	//"strings"
 	//"os/exec"
@@ -27,10 +29,15 @@ type CmdArgs struct {
 	CueSheet string
 	AlbumArt string
 	Metadata string
+	pretty bool
+	streams string
+	entries string
+	chapters bool
+	format string
 }
 
-func NewArgs() CmdArgs {
-	return CmdArgs{
+func NewArgs() *CmdArgs {
+	return &CmdArgs{
 		PreInput: make(flagArgs),
 		PostInput: make(flagArgs),
 		VideoParams: make(flagArgs),
@@ -54,7 +61,11 @@ func (f flagArgs) Split() []string {
 }
 
 func (a *CmdArgs) Cover(s string) *CmdArgs {
-	a.AlbumArt = s
+	path, err := filepath.Abs(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	a.AlbumArt = path
 	return a
 }
 
@@ -64,7 +75,11 @@ func (a *CmdArgs) Cue(s string) *CmdArgs {
 }
 
 func (a *CmdArgs) Meta(s string) *CmdArgs {
-	a.Metadata = s
+	path, err := filepath.Abs(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	a.Metadata = path
 	return a
 }
 
@@ -135,6 +150,31 @@ func (a *CmdArgs) Ext(s string) *CmdArgs {
 
 func (a *CmdArgs) Out(s string) *CmdArgs {
 	a.Output = s
+	return a
+}
+
+func (a *CmdArgs) Pretty() *CmdArgs {
+	a.pretty = true
+	return a
+}
+
+func (a *CmdArgs) Streams(arg string) *CmdArgs {
+	a.streams = arg
+	return a
+}
+
+func (a *CmdArgs) Entries(arg string) *CmdArgs {
+	a.entries = arg
+	return a
+}
+
+func (a *CmdArgs) Chapters() *CmdArgs {
+	a.chapters = true
+	return a
+}
+
+func (a *CmdArgs) Format(arg string) *CmdArgs {
+	a.format = arg
 	return a
 }
 

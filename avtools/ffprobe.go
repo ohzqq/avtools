@@ -8,21 +8,29 @@ import (
 	"bytes"
 )
 
-type FFProbeCmd struct {
+type FFprobeCmd struct {
 	cmd *exec.Cmd
 	Input string
 	tmpFile *os.File
+	verbose bool
 	args ProbeArgs
 }
 
-func NewFFProbeCmd() *FFProbeCmd {
-	ff := FFProbeCmd{}
-	ff.cmd = exec.Command("ffprobe", "-hide_banner")
-	return &ff
+func NewFFprobeCmd() *FFprobeCmd {
+	return &FFprobeCmd{cmd: exec.Command("ffprobe", "-hide_banner")}
 }
 
-func (ff *FFProbeCmd) Run() []byte {
-	cmd := ff.Cmd()
+func (ff *FFprobeCmd) In(input string) {
+	ff.Input = input
+}
+
+func (ff *FFprobeCmd) Args() *ProbeArgs {
+	ff.args = ProbeArgs{}
+	return &ff.args
+}
+
+func (ff *FFprobeCmd) Run() []byte {
+	cmd := ff.buildCmd()
 
 	var (
 		stderr bytes.Buffer
@@ -33,94 +41,67 @@ func (ff *FFProbeCmd) Run() []byte {
 
 	err := cmd.Run()
 	if err != nil {
-		log.Printf("Command finished with error: %v\n", err)
+		log.Printf("Command finished with error: %v\n", cmd.String())
 		fmt.Printf("%v\n", stderr.String())
 	}
+
+	if ff.verbose {
+		fmt.Println(cmd.String())
+		fmt.Println(stdout.String())
+	}
+
 	return stdout.Bytes()
 }
 
-func (ff *FFProbeCmd) Cmd() *exec.Cmd {
+func(ff *FFprobeCmd) String() string {
+	return ff.buildCmd().String()
+}
+
+func (ff *FFprobeCmd) buildCmd() *exec.Cmd {
 	argOrder := []string{"Verbosity", "Streams", "Entries", "Chapters", "Pretty", "Format", "Input"}
 
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
-			ff.Verbosity()
+			ff.cmd.Args = append(ff.cmd.Args, "-v")
+			if ff.args.verbosity != "" {
+				ff.cmd.Args = append(ff.cmd.Args, ff.args.verbosity)
+			} else {
+				ff.cmd.Args = append(ff.cmd.Args, "fatal")
+			}
 		case "Pretty":
-			ff.Pretty()
+			if ff.args.pretty {
+				ff.cmd.Args = append(ff.cmd.Args, "-pretty")
+			}
 		case "Streams":
-			ff.Streams()
+			if ff.args.streams != "" {
+				ff.cmd.Args = append(ff.cmd.Args, "-select_streams", ff.args.streams)
+			}
 		case "Entries":
-			ff.Entries()
+			if ff.args.entries != "" {
+				ff.cmd.Args = append(ff.cmd.Args, "-show_entries", ff.args.entries)
+			}
 		case "Chapters":
-			ff.Chapters()
+			if ff.args.chapters {
+				ff.cmd.Args = append(ff.cmd.Args, "-show_chapters")
+			}
 		case "Format":
-			ff.Format()
+			ff.cmd.Args = append(ff.cmd.Args, "-of")
+			switch f := ff.args.format; f {
+			default:
+				fallthrough
+			case "":
+				fallthrough
+			case "plain":
+				ff.cmd.Args = append(ff.cmd.Args, "default=noprint_wrappers=1:nokey=1")
+			case "json":
+				ff.cmd.Args = append(ff.cmd.Args, "json=c=1")
+			}
+		case "Input":
+			ff.cmd.Args = append(ff.cmd.Args, ff.Input)
 		}
 	}
 	return ff.cmd
-}
-
-func (ff *FFProbeCmd) push(arg string) {
-	ff.cmd.Args = append(ff.cmd.Args, arg)
-}
-
-func (ff *FFProbeCmd) Verbosity() {
-	ff.push("-v")
-	if ff.args.verbosity != "" {
-		ff.push(ff.args.verbosity)
-	} else {
-		ff.push("fatal")
-	}
-}
-
-func (ff *FFProbeCmd) In(input string) {
-	ff.push(input)
-}
-
-func (ff *FFProbeCmd) Pretty() {
-	if ff.args.pretty {
-		ff.push("-pretty")
-	}
-}
-
-func (ff *FFProbeCmd) Chapters() {
-	if ff.args.chapters {
-		ff.push("-show_chapters")
-	}
-}
-
-func (ff *FFProbeCmd) Entries() {
-	if ff.args.entries != "" {
-		ff.push("-show_entries")
-		ff.push(ff.args.entries)
-	}
-}
-
-func (ff *FFProbeCmd) Streams() {
-	if ff.args.streams != "" {
-		ff.push("-select_streams")
-		ff.push(ff.args.streams)
-	}
-}
-
-func (ff *FFProbeCmd) Format() {
-	ff.push("-of")
-	switch f := ff.args.format; f {
-	default:
-		fallthrough
-	case "":
-		fallthrough
-	case "plain":
-		ff.push("default=noprint_wrappers=1:nokey=1")
-	case "json":
-		ff.push("json=c=1")
-	}
-}
-
-func (ff *FFProbeCmd) Args() *ProbeArgs {
-	ff.args = ProbeArgs{}
-	return &ff.args
 }
 
 type ProbeArgs struct {
