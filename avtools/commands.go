@@ -155,8 +155,6 @@ func(m *Media) Split(cue string) {
 		}
 		cmd.Run()
 	}
-
-	fmt.Println("Success!")
 }
 
 func(c *Cmd) Split() {
@@ -175,8 +173,6 @@ func(c *Cmd) Split() {
 		}
 		cmd.Run()
 	}
-
-	fmt.Println("Success!")
 }
 
 func(m *Media) Cut(ss, to string, no int) *FFmpegCmd {

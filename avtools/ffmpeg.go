@@ -125,8 +125,9 @@ func (ff *FFmpegCmd) Run() {
 		fmt.Printf("%v\n", stderr.String())
 	}
 
-	fmt.Println(cmd.String())
-	fmt.Printf("%v\n", stdout.String())
+	if stdout.String() != "" {
+		fmt.Printf("%v\n", stdout.String())
+	}
 }
 
 func (ff *FFmpegCmd) String() string {
