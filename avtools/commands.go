@@ -49,81 +49,67 @@ func NewCmd() *Cmd {
 		cwd: cwd,
 		args: NewArgs(),
 	}
-	cmd.FFmpegCmd = NewFFmpegCmd().Profile(cmd.Profile)
-	cmd.FFprobeCmd = NewFFprobeCmd()
+	cmd.FFmpegCmd = NewFFmpegCmd()
 
 	return cmd
-}
-
-func(c *Cmd) Action(a string) *Cmd {
-	c.action = a
-	switch a {
-	case "show":
-		c.isFFprobe = true
-	case "update":
-		c.isFFmpeg = true
-		switch {
-		case c.CoverFile != "":
-			switch codec := c.Media.AudioCodec(); codec {
-			case "aac":
-				c.isFFmpeg = false
-				addAacCover(c.Media.Path, c.CoverFile)
-				break
-			case "mp3":
-				c.Args().Out("tmp-cover").Params(Mp3CoverArgs()).Cover(c.CoverFile)
-			}
-		case c.MetaFile != "":
-			c.Args().Meta(c.MetaFile)
-			//m.AddFFmeta(c.MetaFile)
-		}
-	case "extract":
-		c.isFFmpeg = true
-		switch {
-		case c.ChapFlag:
-			c.Media.FFmetaChapsToCue()
-			break
-		case c.CoverFlag:
-			c.Args().ACodec("an").Out("cover").Ext(".jpg")
-		case c.MetaFlag:
-			c.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext(".ini").Out("ffmeta")
-		}
-	case "remove":
-		c.isFFmpeg = true
-		if c.ChapFlag {
-			c.Args().Post("map_chapters", "-1")
-		}
-
-		if c.CoverFlag {
-			c.Args().VCodec("vn")
-		}
-
-		if c.MetaFlag {
-			c.Args().Post("map_metadata", "-1")
-		}
-	}
-	return c
 }
 
 func (c *Cmd) Args() *CmdArgs {
 	return c.args
 }
 
-func(c *Cmd) Run() {
-	fmt.Printf("%+V\n", c.args)
+func(c *Cmd) Extract() {
 	switch {
-	case c.isFFmpeg:
-		cmd := NewFFmpegCmd().In(c.Media).SetArgs(c.args).Profile(c.Profile)
-		cmd.Run()
-	case c.isFFprobe:
+	case c.ChapFlag:
+		c.Media.FFmetaChapsToCue()
+		break
+	case c.CoverFlag:
+		c.Args().ACodec("an").Out("cover").Ext(".jpg")
+	case c.MetaFlag:
+		c.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Out("ffmeta").Ext(".ini")
 	}
+
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
 }
 
-func addAacCover(path, cover string) {
-	cpath, err := filepath.Abs(cover)
+func(c *Cmd) Remove() {
+	if c.ChapFlag {
+		c.Args().Post("map_chapters", "-1")
+	}
+
+	if c.CoverFlag {
+		c.Args().VCodec("vn")
+	}
+
+	if c.MetaFlag {
+		c.Args().Post("map_metadata", "-1")
+	}
+
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
+}
+
+func(c *Cmd) Update() {
+	if c.CoverFile != "" {
+		switch codec := c.Media.AudioCodec(); codec {
+		case "aac":
+			c.addAacCover()
+			break
+		case "mp3":
+			c.Args().Out("tmp-cover").Params(Mp3CoverArgs()).Cover(c.CoverFile)
+		}
+	}
+	if c.MetaFile != "" {
+		c.Args().Meta(c.MetaFile)
+	}
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
+}
+
+func(c *Cmd) addAacCover() {
+	cpath, err := filepath.Abs(c.CoverFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmd := exec.Command("AtomicParsley", path, "--artwork", cpath, "--overWrite")
+	cmd := exec.Command("AtomicParsley", c.Media.Path, "--artwork", cpath, "--overWrite")
 	var (
 		stderr bytes.Buffer
 		stdout bytes.Buffer
@@ -135,16 +121,6 @@ func addAacCover(path, cover string) {
 		log.Printf("%v finished with error: %v", cmd.String(), err)
 		fmt.Printf("%v\n", stderr.String())
 	}
-}
-
-func(m *Media) AddFFmeta(meta string) *FFmpegCmd {
-	path, err := filepath.Abs(meta)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmd := NewFFmpegCmd().In(m)
-	cmd.Args().Meta(path)
-	return cmd
 }
 
 func(c *Cmd) Show() {
@@ -163,40 +139,6 @@ func(c *Cmd) Show() {
 	c.FFprobeCmd.Run()
 }
 
-func(m *Media) Remove(chaps, cover, meta bool) {
-	cmd := NewFFmpegCmd().In(m)
-
-	if chaps {
-		cmd.Args().Post("map_chapters", "-1")
-	}
-
-	if cover {
-		cmd.Args().VCodec("vn")
-	}
-
-	if meta {
-		cmd.Args().Post("map_metadata", "-1")
-	}
-
-	cmd.Run()
-	//fmt.Println("Success!")
-}
-
-func(m *Media) Extract(chaps, cover, meta bool) {
-	cmd := NewFFmpegCmd().In(m)
-
-	switch {
-	case chaps:
-		m.FFmetaChapsToCue()
-	case cover:
-		cmd.Args().ACodec("an").Out("cover").Ext(".jpg")
-		cmd.Run()
-	case meta:
-		cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext(".ini").Out("ffmeta")
-		cmd.Run()
-	}
-}
-
 func(m *Media) Split(cue string) {
 	var chaps []*Chapter
 	switch {
@@ -209,6 +151,26 @@ func(m *Media) Split(cue string) {
 	for i, ch := range chaps {
 		cmd := m.Cut(ch.Start, ch.End, i)
 		if m.Overwrite {
+			cmd.Args().OverWrite()
+		}
+		cmd.Run()
+	}
+
+	fmt.Println("Success!")
+}
+
+func(c *Cmd) Split() {
+	var chaps []*Chapter
+	switch {
+	case c.CueFile != "":
+		chaps = ReadCueSheet(c.CueFile)
+	case c.Media.HasChapters():
+		chaps = c.Media.Meta.Chapters
+	}
+
+	for i, ch := range chaps {
+		cmd := c.Media.Cut(ch.Start, ch.End, i)
+		if c.Overwrite {
 			cmd.Args().OverWrite()
 		}
 		cmd.Run()
@@ -236,14 +198,14 @@ func(m *Media) Cut(ss, to string, no int) *FFmpegCmd {
 	return cmd
 }
 
-func Join(ext string) *FFmpegCmd {
+func(c *Cmd) Join() {
 	var (
 		ff = NewFFmpegCmd()
-		files = find(ext)
+		files = find(c.Ext)
 		cat strings.Builder
 	)
 
-	ff.Args().Pre(flagArgs{"f": "concat", "safe": "0"}).VCodec("vn").Ext(ext)
+	ff.Args().Pre(flagArgs{"f": "concat", "safe": "0"}).VCodec("vn").Ext(c.Ext)
 
 	file, err := os.CreateTemp("", "audiofiles")
 	if err != nil {
@@ -265,8 +227,5 @@ func Join(ext string) *FFmpegCmd {
 	ff.tmpFile = file
 
 	ff.In(NewMedia().Input(ff.tmpFile.Name()))
-
-	return ff
+	ff.Run()
 }
-
-

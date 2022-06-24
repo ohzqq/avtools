@@ -98,20 +98,17 @@ func main() {
 
 	switch {
 	case join.Used:
-		avtools.Join(cmd.Ext).Profile(cmd.Profile).Run()
+		cmd.Join()
 	case show.Used:
-		cmd.Show()
+		//cmd.Show()
 	case split.Used:
-		cmd.Media.Split(cmd.CueFile)
+		cmd.Split()
 	case rm.Used:
-		//cmd.Media.Remove(cmd.ChapFlag, cmd.CoverFlag, cmd.MetaFlag)
-		cmd.Action("remove").Run()
+		cmd.Remove()
 	case extract.Used:
-		cmd.Action("extract").Run()
-		//cmd.Media.Extract(cmd.ChapFlag, cmd.CoverFlag, cmd.MetaFlag)
+		cmd.Extract()
 	case update.Used:
-		cmd.Action("update").Run()
-		//cmd.Media.Update(cmd.CoverFile, cmd.MetaFile)
+		cmd.Update()
 	case convert.Used:
 		fmt.Println("split")
 	case cueS.Used:

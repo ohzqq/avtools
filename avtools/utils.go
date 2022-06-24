@@ -13,6 +13,25 @@ import (
 
 var _ = fmt.Sprintf("%v", "")
 
+//func addAacCover(path, cover string) {
+//  cpath, err := filepath.Abs(cover)
+//  if err != nil {
+//    log.Fatal(err)
+//  }
+//  cmd := exec.Command("AtomicParsley", path, "--artwork", cpath, "--overWrite")
+//  var (
+//    stderr bytes.Buffer
+//    stdout bytes.Buffer
+//  )
+//  cmd.Stderr = &stderr
+//  cmd.Stdout = &stdout
+//  err = cmd.Run()
+//  if err != nil {
+//    log.Printf("%v finished with error: %v", cmd.String(), err)
+//    fmt.Printf("%v\n", stderr.String())
+//  }
+//}
+
 func secsToHHMMSS(sec string) string {
 	seconds := secsAtoi(sec)
 	h := seconds / 3600
