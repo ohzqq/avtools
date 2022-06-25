@@ -46,7 +46,7 @@ func(cfg ffCfg) DefaultProfile() string {
 	return def
 }
 
-func(cfg ffCfg) GetProfile(p string) CmdArgs {
+func(cfg ffCfg) GetProfile(p string) *CmdArgs {
 	return cfg.profiles[p]
 }
 
@@ -58,7 +58,7 @@ type defaults struct {
 	Padding bool
 }
 
-type pros map[string]CmdArgs
+type pros map[string]*CmdArgs
 
 // initConfig reads in config file and ENV variables if set.
 func InitConfig() {
@@ -88,7 +88,17 @@ func InitConfig() {
 		if err != nil {
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
+		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	Cfg().profiles["base"] = CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
+	Cfg().profiles["base"] = &CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
 }
+
+func (p pros) List() []string {
+	var list []string
+	for pro, _ := range p {
+		list = append(list, pro)
+	}
+	return list
+}
+

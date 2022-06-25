@@ -151,6 +151,7 @@ func ReadCueSheet(file string) []*Chapter {
 		titles []string
 		startTimes []int
 	)
+
 	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
 		s := strings.TrimSpace(scanner.Text())

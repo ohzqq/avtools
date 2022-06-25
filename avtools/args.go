@@ -99,6 +99,9 @@ func (a *CmdArgs) OverWrite() *CmdArgs {
 }
 
 func (a *CmdArgs) Post(k, v string) *CmdArgs {
+	if a.PostInput == nil {
+		a.PostInput = make(flagArgs)
+	}
 	a.PostInput[k] = v
 	return a
 }

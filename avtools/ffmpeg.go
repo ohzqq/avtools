@@ -33,9 +33,6 @@ func NewFFmpegCmd() *FFmpegCmd {
 		padding: false,
 		cmd: exec.Command("ffmpeg", "-hide_banner"),
 	}
-	if !ff.profile {
-		ff.Profile(Cfg().DefaultProfile())
-	}
 	return &ff
 }
 
@@ -45,44 +42,8 @@ func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
 }
 
 func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
-	if ff.args.PreInput == nil {
-		ff.args.Pre(Cfg().GetProfile(p).PreInput)
-	}
-	if ff.args.PostInput == nil {
-		for k, v := range Cfg().GetProfile(p).PostInput {
-			ff.args.Post(k, v)
-		}
-	}
-	if ff.args.VideoParams == nil {
-		ff.args.VParams(Cfg().GetProfile(p).VideoParams)
-	}
-	if ff.args.VideoCodec == "" {
-		ff.args.VCodec(Cfg().GetProfile(p).VideoCodec)
-	}
-	if ff.args.VideoFilters == "" {
-		ff.args.VFilters(Cfg().GetProfile(p).VideoFilters)
-	}
-	if ff.args.AudioParams == nil {
-		ff.args.AParams(Cfg().GetProfile(p).AudioParams)
-	}
-	if ff.args.AudioCodec == "" {
-		ff.args.ACodec(Cfg().GetProfile(p).AudioCodec)
-	}
-	if ff.args.AudioFilters == "" {
-		ff.args.AFilters(Cfg().GetProfile(p).AudioFilters)
-	}
-	if ff.args.FilterComplex == "" {
-		ff.args.Filter(Cfg().GetProfile(p).FilterComplex)
-	}
-	if ff.args.Verbosity == "" {
-		ff.args.LogLevel(Cfg().Defaults.Verbosity)
-	}
-	if ff.args.Output == "" {
-		ff.args.Out(Cfg().Defaults.Output)
-	}
-	if ff.args.Overwrite == true {
-		ff.args.OverWrite()
-	}
+	ff.profile = true
+	ff.args = Cfg().GetProfile(p)
 	return ff
 }
 
@@ -110,6 +71,10 @@ func (ff *FFmpegCmd) Run() {
 		defer os.Remove(ff.tmpFile.Name())
 	}
 
+	if !ff.profile {
+		ff.Profile(Cfg().DefaultProfile())
+	}
+
 	cmd := ff.buildCmd()
 
 	var (
@@ -130,7 +95,7 @@ func (ff *FFmpegCmd) Run() {
 	if stdout.String() != "" {
 		fmt.Printf("%v\n", stdout.String())
 	}
-	fmt.Println(cmd.String())
+	//fmt.Println(cmd.String())
 }
 
 func (ff *FFmpegCmd) String() string {
@@ -204,7 +169,7 @@ func (ff *FFmpegCmd) buildCmd() *exec.Cmd {
 			}
 		case "FilterComplex":
 			if ff.args.FilterComplex != "" {
-				ff.push("-filter")
+				ff.push("-vf")
 				ff.push(ff.args.FilterComplex)
 			}
 		case "MiscParams":

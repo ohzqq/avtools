@@ -2,13 +2,11 @@ package avtools
 
 import (
 	"fmt"
-	//"io/fs"
 	"os"
 	"bytes"
 	"os/exec"
 	"log"
 	"strings"
-	//"strconv"
 	"path/filepath"
 )
 
@@ -47,7 +45,6 @@ func NewCmd() *Cmd {
 	}
 
 	cmd := &Cmd{
-		Profile: Cfg().DefaultProfile(),
 		Media: NewMedia(),
 		cwd: cwd,
 		args: NewArgs(),
@@ -72,7 +69,11 @@ func(c *Cmd) Extract() {
 		c.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Out("ffmeta").Ext(".ini")
 	}
 
-	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
+	if c.Profile != "" {
+		c.FFmpegCmd.Profile(c.Profile)
+	}
+
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Run()
 }
 
 func(c *Cmd) Remove() {
@@ -88,7 +89,11 @@ func(c *Cmd) Remove() {
 		c.Args().Post("map_metadata", "-1")
 	}
 
-	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
+	if c.Profile != "" {
+		c.FFmpegCmd.Profile(c.Profile)
+	}
+
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Run()
 }
 
 func(c *Cmd) Update() {
@@ -104,7 +109,12 @@ func(c *Cmd) Update() {
 	if c.MetaFile != "" {
 		c.Args().Meta(c.MetaFile)
 	}
-	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Profile(c.Profile).Run()
+
+	if c.Profile != "" {
+		c.FFmpegCmd.Profile(c.Profile)
+	}
+
+	c.FFmpegCmd.In(c.Media).SetArgs(c.args).Run()
 }
 
 func(c *Cmd) addAacCover() {
@@ -210,7 +220,14 @@ func(c *Cmd) Cut(ss, to string, no int) *FFmpegCmd {
 		end = ch.EndToSeconds()
 	}
 
-	cmd.Args().Post("ss", start).Post("to", end).Out("tmp" + fmt.Sprintf("%06d", count)).Ext(c.Media.Ext)
+	if c.Profile != "" {
+		cmd.Profile(c.Profile)
+	}
+
+	cmd.Args().
+		Post("ss", start).
+		Post("to", end).
+		Out("tmp" + fmt.Sprintf("%06d", count))
 
 	return cmd
 }
@@ -221,6 +238,10 @@ func(c *Cmd) Join() {
 		files = find(c.Ext)
 		cat strings.Builder
 	)
+
+	if c.Profile != "" {
+		ff.Profile(c.Profile)
+	}
 
 	ff.Args().Pre(flagArgs{"f": "concat", "safe": "0"}).VCodec("vn").Ext(c.Ext)
 
