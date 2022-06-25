@@ -124,19 +124,22 @@ func(c *Cmd) addAacCover() {
 }
 
 func(c *Cmd) Show() {
-	c.FFprobeCmd.In(c.Input)
-	c.FFprobeCmd.verbose = true
+	switch {
+	case c.ChapFlag, c.MetaFlag, c.CoverFlag:
+		c.FFprobeCmd.In(c.Input)
+		c.FFprobeCmd.verbose = true
 
-	args := c.FFprobeCmd.Args()
-	args.Verbosity("error").Format("json")
-	if c.ChapFlag {
-		args.Chapters()
-	}
-	if c.MetaFlag {
-		args.Entries("format_tags")
-	}
+		args := c.FFprobeCmd.Args()
+		args.Verbosity("error").Format("json")
+		if c.ChapFlag {
+			args.Chapters()
+		}
+		if c.MetaFlag {
+			args.Entries("format_tags")
+		}
 
-	c.FFprobeCmd.Run()
+		c.FFprobeCmd.Run()
+	}
 }
 
 func(m *Media) Split(cue string) {

@@ -78,7 +78,7 @@ func main() {
 
 	// Input
 	if cmd.Input != "" {
-		cmd.Media.Input(cmd.Input).WithMeta()
+		cmd.Media.Input(cmd.Input)
 	}
 
 	// Handle flags
@@ -100,7 +100,7 @@ func main() {
 	case join.Used:
 		cmd.Join()
 	case show.Used:
-		//cmd.Show()
+		cmd.Show()
 	case split.Used:
 		cmd.Split()
 	case rm.Used:

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"bytes"
+	"encoding/json"
 	//"strconv"
 	//"strings"
 )
@@ -34,29 +35,40 @@ func(m *Media) Input(input string) *Media {
 	m.File = filepath.Base(input)
 	m.Dir = filepath.Dir(input)
 	m.Ext = filepath.Ext(input)
+	m.ParseJsonMeta()
 
 	return m
 }
 
-func (m *Media) WithMeta() *Media {
-	m.Meta = m.ReadMeta()
-	return m
+func(m *Media) PrintJsonMeta() {
+	fmt.Println(string(m.GetJsonMeta()))
 }
 
-func (m *Media) ReadMeta() *MediaMeta {
-	return ReadEmbeddedMeta(m.Path)
+func(m *Media) ParseJsonMeta() {
+	err := json.Unmarshal(m.GetJsonMeta(), &m.Meta)
+	if err != nil {
+		fmt.Println("help")
+	}
 }
 
-func (m *Media) WriteMeta() {
+func(m *Media) GetJsonMeta() []byte {
+	ff := NewFFprobeCmd()
+	ff.In(m.Path)
+	ff.Args().Entries(ffProbeMeta).Chapters().Verbosity("error").Format("json")
+
+	return ff.Run()
+}
+
+func(m *Media) WriteMeta() {
 	WriteFFmetadata(m.Path)
 }
 
-func (m *Media) SetMeta(meta *MediaMeta) *Media {
+func(m *Media) SetMeta(meta *MediaMeta) *Media {
 	m.Meta = meta
 	return m
 }
 
-func (m *Media) HasChapters() bool {
+func(m *Media) HasChapters() bool {
 	if m.Meta != nil {
 		if m.Meta.Chapters != nil {
 			return true
@@ -88,16 +100,10 @@ func(m *Media) FFmetaChapsToCue() {
 }
 
 func (m *Media) SetChapters(ch []*Chapter) {
-	if !m.HasChapters() {
-		m.WithMeta()
-	}
 	m.Meta.Chapters = ch
 }
 
 func (m *Media) HasVideo() bool {
-	if !m.HasStreams() {
-		m.WithMeta()
-	}
 	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "video" {
 			return true
@@ -107,9 +113,6 @@ func (m *Media) HasVideo() bool {
 }
 
 func (m *Media) HasAudio() bool {
-	if !m.HasStreams() {
-		m.WithMeta()
-	}
 	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "audio" {
 			return true
@@ -119,9 +122,6 @@ func (m *Media) HasAudio() bool {
 }
 
 func (m *Media) VideoCodec() string {
-	if !m.HasStreams() {
-		m.WithMeta()
-	}
 	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "video" {
 			return stream.CodecName
@@ -131,9 +131,6 @@ func (m *Media) VideoCodec() string {
 }
 
 func (m *Media) AudioCodec() string {
-	if !m.HasStreams() {
-		m.WithMeta()
-	}
 	for _, stream := range m.Meta.Streams {
 		if stream.CodecType == "audio" {
 			return stream.CodecName
@@ -168,9 +165,6 @@ func (m *Media) hasFormat() bool {
 }
 
 func (m *Media) Duration() string {
-	if !m.hasFormat() {
-		m.WithMeta()
-	}
 	return secsToHHMMSS(m.Meta.Format.Duration)
 }
 
