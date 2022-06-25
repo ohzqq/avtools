@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	//"path/filepath"
-	//"log"
+	"log"
 	//"strings"
 
 	"github.com/ohzqq/avtools/avtools"
@@ -36,6 +36,7 @@ func main() {
 	split := flaggy.NewSubcommand("split")
 	split.AddPositionalValue(&cmd.Input, "input", 1, true, "input for the command")
 	split.String(&cmd.CueFile, "c", "cue", "use cue sheet as markers")
+	split.String(&cmd.MetaFile, "m", "meta", "use ffmetadata file as markers")
 	flaggy.AttachSubcommand(split, 1)
 
 	convert := flaggy.NewSubcommand("convert")
@@ -102,7 +103,10 @@ func main() {
 	case show.Used:
 		cmd.Show()
 	case split.Used:
-		cmd.Split()
+		err := cmd.Split()
+		if err != nil {
+			log.Fatal(err)
+		}
 	case rm.Used:
 		cmd.Remove()
 	case extract.Used:

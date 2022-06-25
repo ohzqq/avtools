@@ -20,8 +20,9 @@ func NewFFprobeCmd() *FFprobeCmd {
 	return &FFprobeCmd{cmd: exec.Command("ffprobe", "-hide_banner")}
 }
 
-func (ff *FFprobeCmd) In(input string) {
+func (ff *FFprobeCmd) In(input string) *FFprobeCmd {
 	ff.Input = input
+	return ff
 }
 
 func (ff *FFprobeCmd) Args() *ProbeArgs {

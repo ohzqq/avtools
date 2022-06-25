@@ -124,12 +124,26 @@ func(c *Cmd) addAacCover() {
 }
 
 func(c *Cmd) Show() {
+	input, err := filepath.Abs(c.Input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	switch ext := filepath.Ext(input); ext {
+	case ".m4a", ".m4b", ".mp3":
+	case ".ini":
+		c.ChapFlag = false
+		c.MetaFlag = false
+		c.CoverFlag = false
+		c.MetaFile = input
+	}
+
 	switch {
 	case c.ChapFlag, c.MetaFlag, c.CoverFlag:
-		c.FFprobeCmd.In(c.Input)
-		c.FFprobeCmd.verbose = true
+		ff := NewFFprobeCmd().In(input)
+		ff.verbose = true
 
-		args := c.FFprobeCmd.Args()
+		args := ff.Args()
 		args.Verbosity("error").Format("json")
 		if c.ChapFlag {
 			args.Chapters()
@@ -138,35 +152,24 @@ func(c *Cmd) Show() {
 			args.Entries("format_tags")
 		}
 
-		c.FFprobeCmd.Run()
+		ff.Run()
+	case c.MetaFile != "":
+		meta := ReadFFmetadata(input)
+		fmt.Printf("%+V\n", meta)
 	}
 }
 
-func(m *Media) Split(cue string) {
-	var chaps []*Chapter
-	switch {
-	case cue != "":
-		chaps = ReadCueSheet(cue)
-	case m.HasChapters():
-		chaps = m.Meta.Chapters
-	}
-
-	for i, ch := range chaps {
-		cmd := m.Cut(ch.Start, ch.End, i)
-		if m.Overwrite {
-			cmd.Args().OverWrite()
-		}
-		cmd.Run()
-	}
-}
-
-func(c *Cmd) Split() {
+func(c *Cmd) Split() error {
 	var chaps []*Chapter
 	switch {
 	case c.CueFile != "":
 		chaps = ReadCueSheet(c.CueFile)
+	case c.MetaFile != "":
+		chaps = ReadFFmetadata(c.MetaFile).Chapters
 	case c.Media.HasChapters():
 		chaps = c.Media.Meta.Chapters
+	default:
+		return fmt.Errorf("There are no chapters!")
 	}
 
 	for i, ch := range chaps {
@@ -176,6 +179,7 @@ func(c *Cmd) Split() {
 		}
 		cmd.Run()
 	}
+	return nil
 }
 
 func(m *Media) Cut(ss, to string, no int) *FFmpegCmd {

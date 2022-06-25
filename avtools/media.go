@@ -70,7 +70,7 @@ func(m *Media) SetMeta(meta *MediaMeta) *Media {
 
 func(m *Media) HasChapters() bool {
 	if m.Meta != nil {
-		if m.Meta.Chapters != nil {
+		if len(m.Meta.Chapters) != 0 {
 			return true
 		}
 	}

@@ -111,13 +111,19 @@ func ReadFFmetadata(input string) *MediaMeta {
 		log.Fatal(err)
 	}
 
-	media := &MediaMeta{}
 
 	meta, err := f.GetSection("")
 	if err != nil {
 		log.Fatal(err)
 	}
-	meta.MapTo(media.Format.Tags)
+	tags := Tags{}
+	meta.MapTo(&tags)
+
+	media := MediaMeta{
+		Format: &Format{
+			Tags: &tags,
+		},
+	}
 
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")
@@ -127,12 +133,14 @@ func ReadFFmetadata(input string) *MediaMeta {
 			ss, to := ffChapstoSeconds(c.Timebase, c.Start, c.End)
 			c.Start = ss
 			c.End = to
-			if err != nil { log.Fatal(err) }
+			if err != nil {
+				log.Fatal(err)
+			}
 			media.Chapters = append(media.Chapters, &c)
 		}
 	}
 
-	return media
+	return &media
 }
 
 func ReadCueSheet(file string) []*Chapter {
