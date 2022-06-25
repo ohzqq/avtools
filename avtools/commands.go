@@ -25,6 +25,9 @@ type Cmd struct {
 	CoverFile string
 	MetaFile string
 	CueFile string
+	Start string
+	End string
+	ChapNo int
 	Verbose bool
 	Overwrite bool
 	CoverFlag bool
@@ -155,25 +158,18 @@ func(c *Cmd) Show() {
 		ff.Run()
 	case c.MetaFile != "":
 		meta := ReadFFmetadata(input)
-		fmt.Printf("%+V\n", meta)
+		fmt.Printf("%+V\n", len(meta.Chapters))
 	}
 }
 
 func(c *Cmd) Split() error {
-	var chaps []*Chapter
-	switch {
-	case c.CueFile != "":
-		chaps = ReadCueSheet(c.CueFile)
-	case c.MetaFile != "":
-		chaps = ReadFFmetadata(c.MetaFile).Chapters
-	case c.Media.HasChapters():
-		chaps = c.Media.Meta.Chapters
-	default:
-		return fmt.Errorf("There are no chapters!")
+	chaps, err := c.getChapters()
+	if err != nil {
+		return err
 	}
 
 	for i, ch := range chaps {
-		cmd := c.Media.Cut(ch.Start, ch.End, i)
+		cmd := c.Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
 		if c.Overwrite {
 			cmd.Args().OverWrite()
 		}
@@ -182,21 +178,39 @@ func(c *Cmd) Split() error {
 	return nil
 }
 
-func(m *Media) Cut(ss, to string, no int) *FFmpegCmd {
+func(c *Cmd) getChapters() ([]*Chapter, error) {
+	switch {
+	case c.CueFile != "":
+		return ReadCueSheet(c.CueFile), nil
+	case c.MetaFile != "":
+		return ReadFFmetadata(c.MetaFile).Chapters, nil
+	case c.Media.HasChapters():
+		return c.Media.Meta.Chapters, nil
+	default:
+		return nil, fmt.Errorf("There are no chapters!")
+	}
+}
+
+func(c *Cmd) Cut(ss, to string, no int) *FFmpegCmd {
 	var (
-		count = fmt.Sprintf("%06d", no + 1)
-		cmd = NewFFmpegCmd().In(m)
+		count = no + 1
+		cmd = NewFFmpegCmd().In(c.Media)
+		start = ss
+		end = to
 	)
 
-	if ss != "" {
-		cmd.Args().Post("ss", ss)
+	if c.ChapNo != 0 {
+		chaps, err := c.getChapters()
+		if err != nil {
+			log.Fatal(err)
+		}
+		ch := chaps[c.ChapNo - 1]
+		count = c.ChapNo
+		start = ch.StartToSeconds()
+		end = ch.EndToSeconds()
 	}
 
-	if to != "" {
-		cmd.Args().Post("to", to)
-	}
-
-	cmd.Args().Out("tmp" + count).Ext(m.Ext)
+	cmd.Args().Post("ss", start).Post("to", end).Out("tmp" + fmt.Sprintf("%06d", count)).Ext(c.Media.Ext)
 
 	return cmd
 }

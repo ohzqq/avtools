@@ -46,22 +46,30 @@ type Tags struct {
 
 type Chapter struct {
 	Timebase string `json:"time_base"`
-	Start string `json:"start_time"`
-	End string `json:"end_time"`
+	Start int `json:"start"`
+	End int `json:"end"`
 	Tags *Tags `json:"tags"`
-	Title string
+	Title string `ini:"title"`
 }
 
-func(c Chapter) StartTimebaseProduct() string {
-	ss, _ := strconv.ParseFloat(c.Start, 64)
-	result := ss * c.TimebaseFloat()
+func(c *Chapter) StartToIntString() string {
+	result := float64(c.Start) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
 }
 
-func(c Chapter) EndTimebaseProduct() string {
-	to, _ := strconv.ParseFloat(c.End, 64)
-	result := to * c.TimebaseFloat()
+func(c *Chapter) StartToSeconds() string {
+	result := float64(c.Start) / c.TimebaseFloat()
+	return strconv.FormatFloat(result, 'f', 3, 64)
+}
+
+func(c *Chapter) EndToIntString() string {
+	result := float64(c.End) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
+}
+
+func(c *Chapter) EndToSeconds() string {
+	result := float64(c.End) / c.TimebaseFloat()
+	return strconv.FormatFloat(result, 'f', 3, 64)
 }
 
 func(c Chapter) TimebaseFloat() float64 {
@@ -92,13 +100,6 @@ func ReadEmbeddedMeta(input string) *MediaMeta {
 	return &media
 }
 
-func WriteFFmetadata(input string) {
-	cmd := NewFFmpegCmd()
-	cmd.In(NewMedia().Input(input))
-	cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext("ini")
-	cmd.Run()
-}
-
 func ReadFFmetadata(input string) *MediaMeta {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
@@ -111,28 +112,24 @@ func ReadFFmetadata(input string) *MediaMeta {
 		log.Fatal(err)
 	}
 
+	media := MediaMeta{
+		Format: &Format{
+			Tags: &Tags{},
+		},
+	}
 
 	meta, err := f.GetSection("")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tags := Tags{}
-	meta.MapTo(&tags)
+	meta.MapTo(&media.Format.Tags)
 
-	media := MediaMeta{
-		Format: &Format{
-			Tags: &tags,
-		},
-	}
 
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")
 		for _, chap := range sec {
 			c := Chapter{}
 			err := chap.MapTo(&c)
-			ss, to := ffChapstoSeconds(c.Timebase, c.Start, c.End)
-			c.Start = ss
-			c.End = to
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -152,7 +149,7 @@ func ReadCueSheet(file string) []*Chapter {
 
 	var (
 		titles []string
-		indices []string
+		startTimes []int
 	)
 	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
@@ -163,8 +160,8 @@ func ReadCueSheet(file string) []*Chapter {
 			t = strings.Trim(t, `"`)
 			titles = append(titles, t)
 		} else if strings.Contains(s, "INDEX") {
-			start := cueStampToSecs(strings.TrimPrefix(s, "INDEX 01 "))
-			indices = append(indices, start)
+			start := cueStampToFFmpegTime(strings.TrimPrefix(s, "INDEX 01 "))
+			startTimes = append(startTimes, start)
 		}
 	}
 
@@ -173,16 +170,22 @@ func ReadCueSheet(file string) []*Chapter {
 	for i := 0; i < len(titles); i++ {
 		t := new(Chapter)
 		t.Title = titles[i]
-		t.Start = indices[i]
+		t.Start = startTimes[i]
 		if e < len(titles) {
-			t.End = indices[e]
+			t.End = startTimes[e]
 		}
 		e++
 		tracks = append(tracks, t)
-		//fmt.Printf("%v", t)
 	}
 
 	return tracks
+}
+
+func WriteFFmetadata(input string) {
+	cmd := NewFFmpegCmd()
+	cmd.In(NewMedia().Input(input))
+	cmd.Args().Post("f", "ffmetadata").ACodec("none").VCodec("none").Ext("ini")
+	cmd.Run()
 }
 
 type metaTemplates struct {
@@ -203,14 +206,14 @@ const cueTmpl = `FILE '{{.File}}' {{.Ext}}
 {{- range $index, $ch := .Meta.Chapters}}
 TRACK {{$index}} AUDIO
   TITLE "Chapter {{$index}}"
-  INDEX 01 {{cueStamp $ch.Start}}{{end}}`
+  INDEX 01 {{cueStamp $ch.StartToSeconds}}{{end}}`
 
 const ffChapTmpl = `
 {{- range $index, $ch := .Meta.Chapters -}}
 [CHAPTER]
 TITLE={{if ne $ch.Title ""}}{{.}}{{else}}Chapter {{$index}}{{end}}
-START={{$ch.StartTimebaseProduct}}
-END={{$ch.EndTimebaseProduct}}
+START={{$ch.StartToIntString}}
+END={{$ch.EndToIntString}}
 TIMEBASE=1/1000
 {{end -}}`
 

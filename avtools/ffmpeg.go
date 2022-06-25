@@ -130,6 +130,7 @@ func (ff *FFmpegCmd) Run() {
 	if stdout.String() != "" {
 		fmt.Printf("%v\n", stdout.String())
 	}
+	fmt.Println(cmd.String())
 }
 
 func (ff *FFmpegCmd) String() string {
@@ -286,11 +287,6 @@ func (ff *FFmpegCmd) mapInput() {
 		idx++
 	}
 }
-
-//func (ff *FFmpegCmd) metadata(meta string) {
-//  ff.push("-i")
-//  ff.push(meta)
-//}
 
 func (ff *FFmpegCmd) Output() {
 	var o string

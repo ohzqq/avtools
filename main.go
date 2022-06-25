@@ -13,6 +13,8 @@ import (
 
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	avtools.InitConfig()
 
 	cmd := avtools.NewCmd()
@@ -32,6 +34,15 @@ func main() {
 	join := flaggy.NewSubcommand("join")
 	join.AddPositionalValue(&cmd.Ext, "extension", 1, true, "specify the extension of the files")
 	flaggy.AttachSubcommand(join, 1)
+
+	cut := flaggy.NewSubcommand("cut")
+	cut.AddPositionalValue(&cmd.Input, "input", 1, true, "input for the command")
+	cut.String(&cmd.MetaFile, "m", "meta", "use ffmetadata file as markers")
+	cut.String(&cmd.CueFile, "c", "cue", "use cue sheet as markers")
+	cut.String(&cmd.Start, "ss", "start", "the start time")
+	cut.String(&cmd.End, "to", "end", "the end time")
+	cut.Int(&cmd.ChapNo, "n", "num", "chapter to cut")
+	flaggy.AttachSubcommand(cut, 1)
 
 	split := flaggy.NewSubcommand("split")
 	split.AddPositionalValue(&cmd.Input, "input", 1, true, "input for the command")
@@ -102,6 +113,8 @@ func main() {
 		cmd.Join()
 	case show.Used:
 		cmd.Show()
+	case cut.Used:
+		cmd.Cut(cmd.Start, cmd.End, cmd.ChapNo).Run()
 	case split.Used:
 		err := cmd.Split()
 		if err != nil {

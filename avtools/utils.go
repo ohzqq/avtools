@@ -13,25 +13,6 @@ import (
 
 var _ = fmt.Sprintf("%v", "")
 
-//func addAacCover(path, cover string) {
-//  cpath, err := filepath.Abs(cover)
-//  if err != nil {
-//    log.Fatal(err)
-//  }
-//  cmd := exec.Command("AtomicParsley", path, "--artwork", cpath, "--overWrite")
-//  var (
-//    stderr bytes.Buffer
-//    stdout bytes.Buffer
-//  )
-//  cmd.Stderr = &stderr
-//  cmd.Stdout = &stdout
-//  err = cmd.Run()
-//  if err != nil {
-//    log.Printf("%v finished with error: %v", cmd.String(), err)
-//    fmt.Printf("%v\n", stderr.String())
-//  }
-//}
-
 func secsToHHMMSS(sec string) string {
 	seconds := secsAtoi(sec)
 	h := seconds / 3600
@@ -49,13 +30,13 @@ func secsToCueStamp(sec string) string {
 	//return s
 }
 
-func cueStampToSecs(stamp string) string {
+func cueStampToFFmpegTime(stamp string) int {
 	split := strings.Split(stamp, ":")
 	dur, err := time.ParseDuration(split[0] + "m" + split[1] + "s")
 	if err != nil {
 		log.Fatal(err)
 	}
-	return strconv.Itoa(int(dur.Seconds()))
+	return int(dur.Seconds() * 1000)
 }
 
 func secsAtoi(sec string) int {
