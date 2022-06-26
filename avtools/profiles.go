@@ -17,6 +17,7 @@ var (
 		profiles: make(pros),
 		Defaults: &defaults{
 			Output: "tmp",
+			Padding: "%06d",
 		},
 	}
 )
@@ -55,7 +56,7 @@ type defaults struct {
 	Verbosity string
 	Overwrite bool
 	Profile string
-	Padding bool
+	Padding string
 }
 
 type pros map[string]*CmdArgs
@@ -91,7 +92,10 @@ func InitConfig() {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	Cfg().profiles["base"] = &CmdArgs{VideoCodec: "copy", AudioCodec: "copy"}
+	Cfg().profiles["base"] = &CmdArgs{
+		VideoCodec: "copy",
+		AudioCodec: "copy",
+	}
 }
 
 func (p pros) List() []string {

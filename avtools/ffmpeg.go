@@ -85,6 +85,10 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 		ff.args.AFilters(profile.AudioFilters)
 	}
 
+	if ff.args.Padding == "" {
+		ff.args.Padding = Cfg().Defaults.Padding
+	}
+
 	//if len(ff.args.FilterComplex) > 0 {
 	//  ff.args.Filter(profile.FilterComplex)
 	//}
@@ -311,28 +315,26 @@ func (ff *FFmpegCmd) mapInput() {
 }
 
 func (ff *FFmpegCmd) Output() {
-	var o string
-	var pad string
-	if Cfg().Defaults.Output != "" {
-		o = Cfg().Defaults.Output
-		if ff.padding {
-			pad = "%06d"
-		} else {
-			pad = ""
-		}
+	var (
+		name string
+		ext string
+	)
+
+	if out := ff.args.Output; out != "" {
+		name = out
 	}
 
-	var ext string
-	if ff.args.Extension != "" {
-		ext = ff.args.Extension
-	} else {
+	if p := ff.args.Padding; p != "" {
+		name = name + fmt.Sprintf(p, ff.args.num)
+	}
+
+	switch e := ff.args.Extension; e != "" {
+	case true:
+		ext = e
+	default:
 		ext = ff.MediaInput[0].Ext
 	}
 
-	if ff.args.Output == "" {
-		ff.push(o + pad + ext)
-	} else {
-		ff.push(ff.args.Output + pad + ext)
-	}
+	ff.push(name + ext)
 }
 

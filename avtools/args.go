@@ -25,12 +25,13 @@ type CmdArgs struct {
 	MiscParams []string
 	Verbosity string
 	Output string
-	Padding bool
+	Padding string
 	Extension string
 	Overwrite bool
 	CueSheet string
 	AlbumArt string
 	Metadata string
+	num int
 	pretty bool
 	streams string
 	entries string

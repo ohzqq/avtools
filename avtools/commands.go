@@ -227,7 +227,7 @@ func(c *Cmd) Cut(ss, to string, no int) *FFmpegCmd {
 	cmd.Args().
 		Pre("ss", start).
 		Pre("to", end).
-		Out("tmp" + fmt.Sprintf("%06d", count))
+		Out("tmp" + fmt.Sprintf(Cfg().Defaults.Padding, count))
 
 	return cmd
 }
