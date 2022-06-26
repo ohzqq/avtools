@@ -225,8 +225,8 @@ func(c *Cmd) Cut(ss, to string, no int) *FFmpegCmd {
 	}
 
 	cmd.Args().
-		Post("ss", start).
-		Post("to", end).
+		Pre("ss", start).
+		Pre("to", end).
 		Out("tmp" + fmt.Sprintf("%06d", count))
 
 	return cmd
@@ -243,7 +243,10 @@ func(c *Cmd) Join() {
 		ff.Profile(c.Profile)
 	}
 
-	ff.Args().Pre(flagArgs{"f": "concat", "safe": "0"}).VCodec("vn").Ext(c.Ext)
+	ff.Args().
+		Pre("f", "concat").
+		Pre("safe", "0").
+		VCodec("vn").Ext(c.Ext)
 
 	file, err := os.CreateTemp("", "audiofiles")
 	if err != nil {

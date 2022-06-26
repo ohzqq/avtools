@@ -3,12 +3,14 @@ package avtools
 import (
 	"path/filepath"
 	"log"
+	"fmt"
 	//"os"
 	//"strings"
 	//"os/exec"
 
 	//"github.com/alessio/shellescape"
 )
+var _ = fmt.Printf
 
 type CmdArgs struct {
 	PreInput flagArgs
@@ -19,7 +21,7 @@ type CmdArgs struct {
 	AudioCodec string
 	AudioParams flagArgs
 	AudioFilters string
-	FilterComplex string
+	FilterComplex []string
 	MiscParams []string
 	Verbosity string
 	Output string
@@ -37,25 +39,18 @@ type CmdArgs struct {
 }
 
 func NewArgs() *CmdArgs {
-	return &CmdArgs{
-		PreInput: make(flagArgs),
-		PostInput: make(flagArgs),
-		VideoParams: make(flagArgs),
-		AudioParams: make(flagArgs),
-	}
+	return &CmdArgs{}
 }
 
-type flagArgs map[string]string
-
-func newFlagArg(flag, arg string) flagArgs {
-	return flagArgs{flag: arg}
-}
+type flagArgs []map[string]string
 
 func (f flagArgs) Split() []string {
 	var args []string
-	for flag, arg := range f {
-		flag = "-" + flag
-		args = append(args, flag, arg)
+	for _, flArg := range f {
+		for flag, arg := range flArg {
+			flag = "-" + flag
+			args = append(args, flag, arg)
+		}
 	}
 	return args
 }
@@ -88,8 +83,8 @@ func (a *CmdArgs) LogLevel(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) Pre(s flagArgs) *CmdArgs {
-	a.PreInput = s
+func (a *CmdArgs) Pre(k, v string) *CmdArgs {
+	a.PreInput = append(a.PreInput, map[string]string{k: v})
 	return a
 }
 
@@ -99,10 +94,7 @@ func (a *CmdArgs) OverWrite() *CmdArgs {
 }
 
 func (a *CmdArgs) Post(k, v string) *CmdArgs {
-	if a.PostInput == nil {
-		a.PostInput = make(flagArgs)
-	}
-	a.PostInput[k] = v
+	a.PostInput = append(a.PostInput, map[string]string{k: v})
 	return a
 }
 
@@ -111,8 +103,8 @@ func (a *CmdArgs) VCodec(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) VParams(f flagArgs) *CmdArgs {
-	a.VideoParams = f
+func (a *CmdArgs) VParams(k, v string) *CmdArgs {
+	a.VideoParams = append(a.VideoParams, map[string]string{k: v})
 	return a
 }
 
@@ -121,10 +113,10 @@ func (a *CmdArgs) VFilters(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) Filter(s string) *CmdArgs {
-	a.FilterComplex = s
-	return a
-}
+//func (a *CmdArgs) Filter(s string) *CmdArgs {
+//  a.FilterComplex = s
+//  return a
+//}
 
 func (a *CmdArgs) Params(p []string) *CmdArgs {
 	a.MiscParams = p
@@ -136,8 +128,8 @@ func (a *CmdArgs) ACodec(s string) *CmdArgs {
 	return a
 }
 
-func (a *CmdArgs) AParams(s flagArgs) *CmdArgs {
-	a.AudioParams = s
+func (a *CmdArgs) AParams(k, v string) *CmdArgs {
+	a.AudioParams = append(a.AudioParams, map[string]string{k: v})
 	return a
 }
 

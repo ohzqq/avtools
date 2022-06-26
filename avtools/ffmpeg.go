@@ -5,7 +5,7 @@ import (
 	"log"
 	"fmt"
 	"bytes"
-	//"strings"
+	"strings"
 	"os/exec"
 	"strconv"
 	//"io/fs"
@@ -43,7 +43,64 @@ func (ff *FFmpegCmd) In(input *Media) *FFmpegCmd {
 
 func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	ff.profile = true
-	ff.args = Cfg().GetProfile(p)
+	profile := Cfg().GetProfile(p)
+
+	if ff.args.PreInput == nil {
+		for _, arg := range ff.args.PreInput {
+			ff.args.PreInput = append(ff.args.PreInput, arg)
+		}
+	}
+
+	if ff.args.PostInput == nil {
+		for _, arg := range ff.args.PostInput {
+			ff.args.PostInput = append(ff.args.PostInput, arg)
+		}
+	}
+
+	if ff.args.VideoParams == nil {
+		for _, arg := range ff.args.VideoParams {
+			ff.args.VideoParams = append(ff.args.VideoParams, arg)
+		}
+	}
+
+	if ff.args.VideoCodec == "" {
+		ff.args.VCodec(profile.VideoCodec)
+	}
+
+	if ff.args.VideoFilters == "" {
+		ff.args.VFilters(profile.VideoFilters)
+	}
+
+	if ff.args.AudioParams == nil {
+		for _, arg := range ff.args.AudioParams {
+			ff.args.AudioParams = append(ff.args.AudioParams, arg)
+		}
+	}
+
+	if ff.args.AudioCodec == "" {
+		ff.args.ACodec(profile.AudioCodec)
+	}
+
+	if ff.args.AudioFilters == "" {
+		ff.args.AFilters(profile.AudioFilters)
+	}
+
+	//if len(ff.args.FilterComplex) > 0 {
+	//  ff.args.Filter(profile.FilterComplex)
+	//}
+
+	if ff.args.Verbosity == "" {
+		ff.args.LogLevel(Cfg().Defaults.Verbosity)
+	}
+
+	if ff.args.Output == "" {
+		ff.args.Out(Cfg().Defaults.Output)
+	}
+
+	if ff.args.Overwrite == true {
+		ff.args.OverWrite()
+	}
+
 	return ff
 }
 
@@ -95,7 +152,7 @@ func (ff *FFmpegCmd) Run() {
 	if stdout.String() != "" {
 		fmt.Printf("%v\n", stdout.String())
 	}
-	//fmt.Println(cmd.String())
+	fmt.Println(cmd.String())
 }
 
 func (ff *FFmpegCmd) String() string {
@@ -168,9 +225,9 @@ func (ff *FFmpegCmd) buildCmd() *exec.Cmd {
 				ff.push(ff.args.VideoFilters)
 			}
 		case "FilterComplex":
-			if ff.args.FilterComplex != "" {
+			if len(ff.args.FilterComplex) > 0 {
 				ff.push("-vf")
-				ff.push(ff.args.FilterComplex)
+				ff.push(strings.Join(ff.args.FilterComplex, ","))
 			}
 		case "MiscParams":
 			if params := ff.args.MiscParams; len(params) > 0 {
