@@ -15,7 +15,7 @@ var (
 	cfgFile string
 	cfg = ffCfg{
 		profiles: make(pros),
-		Defaults: &defaults{
+		defaults: defaults{
 			Output: "tmp",
 			Padding: "%06d",
 		},
@@ -24,7 +24,7 @@ var (
 
 type ffCfg struct {
 	profiles pros
-	Defaults *defaults
+	defaults
 }
 
 func Cfg() ffCfg {
@@ -41,7 +41,7 @@ func(cfg ffCfg) Profiles() []string {
 
 func(cfg ffCfg) DefaultProfile() string {
 	def := "base"
-	if d := cfg.Defaults.Profile; slices.Contains(cfg.Profiles(), d) {
+	if d := cfg.defaults.Profile; slices.Contains(cfg.Profiles(), d) {
 		def = d
 	}
 	return def
@@ -53,7 +53,7 @@ func(cfg ffCfg) GetProfile(p string) *CmdArgs {
 
 type defaults struct {
 	Output string
-	Verbosity string
+	LogLevel string
 	Overwrite bool
 	Profile string
 	Padding string
@@ -84,15 +84,16 @@ func InitConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		viper.Sub("Defaults").Unmarshal(&cfg.Defaults)
+		viper.Sub("Defaults").Unmarshal(&cfg.defaults)
 		err := viper.Sub("Profiles").Unmarshal(&cfg.profiles)
+		fmt.Printf("%+v\n", cfg.Pros["gif"])
 		if err != nil {
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	Cfg().profiles["base"] = &CmdArgs{
+	Cfg().Pros["base"] = Arg{
 		VideoCodec: "copy",
 		AudioCodec: "copy",
 	}

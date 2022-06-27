@@ -19,9 +19,6 @@ type FFmpegCmd struct {
 	cmd *exec.Cmd
 	input []string
 	MediaInput []*Media
-	cover string
-	ffmeta string
-	padding bool
 	profile bool
 	tmpFile *os.File
 	args *CmdArgs
@@ -30,7 +27,6 @@ type FFmpegCmd struct {
 func NewFFmpegCmd() *FFmpegCmd {
 	ff := FFmpegCmd{
 		args: NewArgs(),
-		padding: false,
 		cmd: exec.Command("ffmpeg", "-hide_banner"),
 	}
 	return &ff
@@ -46,19 +42,19 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	profile := Cfg().GetProfile(p)
 
 	if ff.args.PreInput == nil {
-		for _, arg := range ff.args.PreInput {
+		for _, arg := range profile.PreInput {
 			ff.args.PreInput = append(ff.args.PreInput, arg)
 		}
 	}
 
 	if ff.args.PostInput == nil {
-		for _, arg := range ff.args.PostInput {
+		for _, arg := range profile.PostInput {
 			ff.args.PostInput = append(ff.args.PostInput, arg)
 		}
 	}
 
 	if ff.args.VideoParams == nil {
-		for _, arg := range ff.args.VideoParams {
+		for _, arg := range profile.VideoParams {
 			ff.args.VideoParams = append(ff.args.VideoParams, arg)
 		}
 	}
@@ -72,7 +68,7 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	}
 
 	if ff.args.AudioParams == nil {
-		for _, arg := range ff.args.AudioParams {
+		for _, arg := range profile.AudioParams {
 			ff.args.AudioParams = append(ff.args.AudioParams, arg)
 		}
 	}
@@ -86,35 +82,29 @@ func (ff *FFmpegCmd) Profile(p string) *FFmpegCmd {
 	}
 
 	if ff.args.Padding == "" {
-		ff.args.Padding = Cfg().Defaults.Padding
+		ff.args.Pad(Cfg().defaults.Padding)
 	}
 
-	//if len(ff.args.FilterComplex) > 0 {
-	//  ff.args.Filter(profile.FilterComplex)
-	//}
+	if len(ff.args.FilterComplex) == 0 {
+		ff.args.Filters(profile.FilterComplex)
+	}
 
 	if ff.args.Verbosity == "" {
-		ff.args.LogLevel(Cfg().Defaults.Verbosity)
+		ff.args.LogLevel(Cfg().defaults.Verbosity)
+	}
+
+	if profile.Extension != "" {
+		ff.args.Ext(profile.Extension)
 	}
 
 	if ff.args.Output == "" {
-		ff.args.Out(Cfg().Defaults.Output)
+		ff.args.Out(Cfg().defaults.Output)
 	}
 
 	if ff.args.Overwrite == true {
 		ff.args.OverWrite()
 	}
 
-	return ff
-}
-
-func (ff *FFmpegCmd) Cover(cover string) *FFmpegCmd {
-	ff.cover = cover
-	return ff
-}
-
-func (ff *FFmpegCmd) FFmeta(meta string) *FFmpegCmd {
-	ff.ffmeta = meta
 	return ff
 }
 
@@ -130,10 +120,6 @@ func(ff *FFmpegCmd) SetArgs(a *CmdArgs) *FFmpegCmd {
 func (ff *FFmpegCmd) Run() {
 	if ff.tmpFile != nil {
 		defer os.Remove(ff.tmpFile.Name())
-	}
-
-	if !ff.profile {
-		ff.Profile(Cfg().DefaultProfile())
 	}
 
 	cmd := ff.buildCmd()
@@ -156,7 +142,12 @@ func (ff *FFmpegCmd) Run() {
 	if stdout.String() != "" {
 		fmt.Printf("%v\n", stdout.String())
 	}
-	fmt.Println(cmd.String())
+
+		fmt.Println(cmd.String())
+	if ff.Args().verbose {
+		//fmt.Printf("%+v\n", ff.Args())
+		fmt.Println(cmd.String())
+	}
 }
 
 func (ff *FFmpegCmd) String() string {
@@ -186,12 +177,12 @@ func (ff *FFmpegCmd) buildCmd() *exec.Cmd {
 	for _, arg := range argOrder {
 		switch arg {
 		case "Verbosity":
-			if Cfg().Defaults.Verbosity != "" {
+			if Cfg().defaults.Verbosity != "" {
 				ff.push("-loglevel")
-				ff.push(Cfg().Defaults.Verbosity)
+				ff.push(Cfg().defaults.Verbosity)
 			}
 		case "Overwrite":
-			if Cfg().Defaults.Overwrite {
+			if Cfg().defaults.Overwrite {
 				ff.push("-y")
 			}
 
@@ -211,8 +202,9 @@ func (ff *FFmpegCmd) buildCmd() *exec.Cmd {
 			}
 		case "VideoCodec":
 			switch vc := ff.args.VideoCodec; vc {
-			case "none":
 			case "":
+			case "none":
+				fallthrough
 			case "vn":
 				ff.push("-vn")
 			default:
@@ -241,8 +233,9 @@ func (ff *FFmpegCmd) buildCmd() *exec.Cmd {
 			}
 		case "AudioCodec":
 			switch ac := ff.args.AudioCodec; ac {
-			case "none":
 			case "":
+			case "none":
+				fallthrough
 			case "an":
 				ff.push("-an")
 			default:

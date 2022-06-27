@@ -23,14 +23,23 @@ type CmdArgs struct {
 	AudioFilters string
 	FilterComplex []string
 	MiscParams []string
-	Verbosity string
+	Name string
+	Profile string
+	LogLevel string
 	Output string
 	Padding string
 	Extension string
+	Start string
+	ChapNo int
+	Cover bool
+	MetaFlag bool
+	CueFlag bool
+	ChapFlag bool
+	Verbose bool
 	Overwrite bool
-	CueSheet string
-	AlbumArt string
-	Metadata string
+	CoverFile string
+	MetaFile string
+	CueFile string
 	num int
 	pretty bool
 	streams string
@@ -40,7 +49,13 @@ type CmdArgs struct {
 }
 
 func NewArgs() *CmdArgs {
-	return &CmdArgs{}
+	return &CmdArgs{
+		Output: Cfg().defaults.Output,
+		LogLevel: Cfg().defaults.LogLevel,
+		Overwrite: Cfg().defaults.Overwrite,
+		Profile: Cfg().defaults.Profile,
+		Padding: Cfg().defaults.Padding,
+	}
 }
 
 type flagArgs []map[string]string
@@ -70,6 +85,11 @@ func (a *CmdArgs) Cue(s string) *CmdArgs {
 	return a
 }
 
+func (a *CmdArgs) Num(n int) *CmdArgs {
+	a.num = n
+	return a
+}
+
 func (a *CmdArgs) Meta(s string) *CmdArgs {
 	path, err := filepath.Abs(s)
 	if err != nil {
@@ -94,6 +114,11 @@ func (a *CmdArgs) OverWrite() *CmdArgs {
 	return a
 }
 
+func (a *CmdArgs) Verbose() *CmdArgs {
+	a.verbose = true
+	return a
+}
+
 func (a *CmdArgs) Post(k, v string) *CmdArgs {
 	a.PostInput = append(a.PostInput, map[string]string{k: v})
 	return a
@@ -114,10 +139,10 @@ func (a *CmdArgs) VFilters(s string) *CmdArgs {
 	return a
 }
 
-//func (a *CmdArgs) Filter(s string) *CmdArgs {
-//  a.FilterComplex = s
-//  return a
-//}
+func (a *CmdArgs) Filters(f []string) *CmdArgs {
+	a.FilterComplex = f
+	return a
+}
 
 func (a *CmdArgs) Params(p []string) *CmdArgs {
 	a.MiscParams = p
@@ -136,6 +161,11 @@ func (a *CmdArgs) AParams(k, v string) *CmdArgs {
 
 func (a *CmdArgs) AFilters(s string) *CmdArgs {
 	a.AudioFilters = s
+	return a
+}
+
+func (a *CmdArgs) Pad(s string) *CmdArgs {
+	a.Padding = s
 	return a
 }
 
