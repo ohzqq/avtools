@@ -130,10 +130,10 @@ func main() {
 
 	// Input
 	if cmd.Input != "" {
-		cmd.Media.Input(cmd.Input)
+		//cmd.Media.Input(cmd.Input)
 	}
 
-	cmd.Cli = args
+	cmd.CliArgs = args
 
 	// Handle flags
 	//if cmd.Overwrite {

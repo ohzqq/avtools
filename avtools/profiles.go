@@ -23,6 +23,7 @@ var (
 )
 
 type ffCfg struct {
+	proList []string
 	profiles pros
 	defaults
 }
@@ -32,11 +33,7 @@ func Cfg() ffCfg {
 }
 
 func(cfg ffCfg) Profiles() []string {
-	var list []string
-	for pro, _ := range cfg.profiles {
-		list = append(list, pro)
-	}
-	return list
+	return cfg.proList
 }
 
 func(cfg ffCfg) DefaultProfile() string {
@@ -47,7 +44,7 @@ func(cfg ffCfg) DefaultProfile() string {
 	return def
 }
 
-func(cfg ffCfg) GetProfile(p string) *CmdArgs {
+func(cfg ffCfg) GetProfile(p string) *Args {
 	return cfg.profiles[p]
 }
 
@@ -59,7 +56,7 @@ type defaults struct {
 	Padding string
 }
 
-type pros map[string]*CmdArgs
+type pros map[string]*Args
 
 // initConfig reads in config file and ENV variables if set.
 func InitConfig() {
@@ -82,20 +79,65 @@ func InitConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
+	var (
+		padding = "%06d"
+		output = "tmp"
+		overwrite bool
+		profile string
+		log string
+	)
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		viper.Sub("Defaults").Unmarshal(&cfg.defaults)
-		err := viper.Sub("Profiles").Unmarshal(&cfg.profiles)
-		fmt.Printf("%+v\n", cfg.Pros["gif"])
+		defaults := viper.Sub("defaults")
+		pros := viper.Sub("Profiles")
+		if defaults.IsSet("padding") {
+			padding = defaults.GetString("padding")
+		}
+		if defaults.IsSet("output") {
+			output = defaults.GetString("output")
+		}
+		if defaults.IsSet("profile") {
+			profile = defaults.GetString("profile")
+		}
+		if defaults.IsSet("loglevel") {
+			log = defaults.GetString("loglevel")
+		}
+		if defaults.IsSet("overwrite") {
+			overwrite = defaults.GetBool("overwrite")
+		}
+		err := pros.Unmarshal(&cfg.profiles)
 		if err != nil {
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
-		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	Cfg().Pros["base"] = Arg{
+	cfg.profiles["base"] = &Args{
 		VideoCodec: "copy",
 		AudioCodec: "copy",
+	}
+
+	for name, pro := range cfg.profiles {
+		cfg.proList = append(cfg.proList, name)
+
+		if pro.Output == "" {
+			pro.Output = output
+		}
+
+		if pro.Padding == "" {
+			pro.Padding = padding
+		}
+
+		if pro.LogLevel == "" {
+			pro.LogLevel = log
+		}
+
+		if !pro.Overwrite {
+			pro.Overwrite = overwrite
+		}
+
+		if name == profile {
+			cfg.profiles["default"] = pro
+		}
 	}
 }
 
