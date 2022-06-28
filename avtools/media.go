@@ -44,7 +44,7 @@ func(cmd *Cmd) GetJsonMeta() []byte {
 	cmd.args.entries = ffProbeMeta
 	cmd.args.showChaps = true
 	cmd.args.format = "json"
-	cmd.ParseArgs()
+	cmd.parseFFprobeArgs()
 
 	//cmd.Media.ffChaps = true
 	return cmd.Run()

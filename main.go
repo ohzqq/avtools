@@ -160,7 +160,7 @@ func main() {
 	case rm.Used, remove.Used:
 		//cmd.Remove()
 	case extract.Used, x.Used:
-		//cmd.Extract()
+		cmd.Extract()
 	case update.Used, u.Used:
 		//cmd.Update()
 	}

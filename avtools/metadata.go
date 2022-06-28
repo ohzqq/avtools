@@ -191,6 +191,10 @@ func(m *Media) RenderFFChaps() {
 }
 
 func(m *Media) FFmetaChapsToCue() {
+	if !m.HasChapters() {
+		log.Fatal("No chapters")
+	}
+
 	f, err := os.Create("chapters.cue")
 	if err != nil {
 		log.Fatal(err)

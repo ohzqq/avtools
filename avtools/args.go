@@ -37,6 +37,9 @@ type Args struct {
 	format string
 }
 
+type ffprobeArgs struct {
+}
+
 func NewArgs() *Args {
 	return &Args{
 		Flags: Flags{Profile: "default"},
@@ -44,6 +47,10 @@ func NewArgs() *Args {
 }
 
 type mapArgs []map[string]string
+
+func newMapArg(k, v string) map[string]string {
+	return map[string]string{k: v}
+}
 
 func(m mapArgs) Split() []string {
 	var args []string
@@ -61,7 +68,7 @@ func(s stringArgs) Join() string {
 	return strings.Join(s, ",")
 }
 
-func(cmd *Cmd) ParseArgs() *Cmd {
+func(cmd Cmd) ParseArgs() *Cmd {
 	if log := cmd.args.LogLevel; log != "" {
 		cmd.appendArgs("-v", log)
 	}
@@ -69,8 +76,10 @@ func(cmd *Cmd) ParseArgs() *Cmd {
 	// parse cmd args
 	switch {
 	case cmd.ffmpeg:
+		fmt.Println("ffmpeg")
 		cmd.parseFFmpegArgs()
 	case cmd.ffprobe:
+		fmt.Println("ffprobe")
 		cmd.parseFFprobeArgs()
 	}
 
@@ -80,7 +89,7 @@ func(cmd *Cmd) ParseArgs() *Cmd {
 	case cmd.ffprobe:
 		cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
 	}
-	return cmd
+	return &cmd
 }
 
 func(cmd *Cmd) appendArgs(args ...string) *Cmd {
@@ -205,6 +214,10 @@ func(cmd *Cmd) parseFFmpegArgs() *Cmd {
 }
 
 func(cmd *Cmd) parseFFprobeArgs() *Cmd {
+	if log := cmd.args.LogLevel; log != "" {
+		cmd.appendArgs("-v", log)
+	}
+
 	if cmd.args.pretty {
 		cmd.appendArgs("-pretty")
 	}
@@ -235,6 +248,7 @@ func(cmd *Cmd) parseFFprobeArgs() *Cmd {
 
 	cmd.appendArgs(cmd.Input)
 
+	cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
 	return cmd
 }
 

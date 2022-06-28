@@ -17,6 +17,7 @@ type Cmd struct {
 	Flags *Flags
 	Action string
 	cmdArgs []string
+	probeArgs []string
 	//FFmpegCmd *FFmpegCmd
 	//FFprobeCmd *FFprobeCmd
 	Input string
@@ -72,7 +73,7 @@ func(cmd *Cmd) Run() []byte {
 
 	err := cmd.exec.Run()
 	if err != nil {
-		log.Printf("Command finished with error: %v\n", cmd.exec.String())
+		//log.Fatal("Command finished with error: %v\n", cmd.exec.String())
 		fmt.Printf("%v\n", stderr.String())
 	}
 
@@ -81,6 +82,8 @@ func(cmd *Cmd) Run() []byte {
 		//fmt.Printf("%v\n", stdout.String())
 	}
 
+	fmt.Println(cmd.exec.String())
+	//cmd.cmdArgs = []string{}
 	return nil
 }
 
@@ -133,5 +136,30 @@ func(cmd *Cmd) Show() *Cmd {
 		fmt.Printf("%+v\n", cmd)
 	}
 	return cmd
+}
+
+func(c *Cmd) Extract() {
+	c.ParseFlags()
+
+	switch {
+	case c.Flags.ChapSwitch:
+		c.Media.FFmetaChapsToCue()
+		return
+	case c.Flags.CoverSwitch:
+		fmt.Println("cover")
+		c.args.AudioCodec = "an"
+		c.args.VideoCodec = "copy"
+		c.args.Output = "cover"
+		c.args.Ext = ".jpg"
+	case c.Flags.MetaSwitch:
+		c.args.PostInput = append(c.args.PostInput, newMapArg("f", "ffmetadata"))
+		c.args.AudioCodec = "none"
+		c.args.VideoCodec = "none"
+		c.args.Output = "ffmeta"
+		c.args.Ext = ".ini"
+	}
+	c.ffmpeg = true
+	c.ParseArgs()
+	c.Run()
 }
 
