@@ -89,8 +89,8 @@ func(cmd *Cmd) Show() *Cmd {
 	case "meta":
 		cmd.ffprobe = true
 	case "cmd":
-		//cmd.ffmpeg = true
-		cmd.ffprobe = true
+		cmd.ffmpeg = true
+		//cmd.ffprobe = true
 		cmd.ParseArgs()
 		//fmt.Printf("%+v\n", Cfg().GetProfile(cmd.Flags.Profile))
 		fmt.Printf("%+v\n", cmd.exec.String())

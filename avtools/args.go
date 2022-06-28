@@ -134,7 +134,13 @@ func(cmd *Cmd) parseFFmpegArgs() *Cmd {
 
 	//video codec
 	if codec := cmd.args.VideoCodec; codec != "" {
-		cmd.appendArgs("-c:v", codec)
+		switch codec {
+		case "":
+		case "none", "vn":
+			cmd.appendArgs("-vn")
+		default:
+			cmd.appendArgs("-c:v", codec)
+		}
 	}
 
 	//video params
