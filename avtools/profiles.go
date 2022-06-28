@@ -7,64 +7,27 @@ import (
 	"log"
 	//"strings"
 
-	"golang.org/x/exp/slices"
+	//"golang.org/x/exp/slices"
 	"github.com/spf13/viper"
 )
 
 var (
 	cfgFile string
-	cfg = ffCfg{
-		profiles: make(pros),
-		defaults: defaults{
-			Output: "tmp",
-			Padding: "%06d",
-		},
-	}
+	cfg = ffCfg{ profiles: make(map[string]*Args) }
 )
 
 type ffCfg struct {
+	pros *viper.Viper
+	defaults *viper.Viper
 	proList []string
-	profiles pros
-	defaults
+	profiles map[string]*Args
 }
 
-func Cfg() ffCfg {
-	return cfg
-}
-
-func(cfg ffCfg) Profiles() []string {
-	return cfg.proList
-}
-
-func(cfg ffCfg) DefaultProfile() string {
-	def := "base"
-	if d := cfg.defaults.Profile; slices.Contains(cfg.Profiles(), d) {
-		def = d
-	}
-	return def
-}
-
-func(cfg ffCfg) GetProfile(p string) *Args {
-	return cfg.profiles[p]
-}
-
-type defaults struct {
-	Output string
-	LogLevel string
-	Overwrite bool
-	Profile string
-	Padding string
-}
-
-type pros map[string]*Args
-
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in config file 
 func InitConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal(err)
@@ -77,41 +40,22 @@ func InitConfig() {
 		viper.SetConfigName("config.yml")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-
-	var (
-		padding = "%06d"
-		output = "tmp"
-		overwrite bool
-		profile string
-		log string
-	)
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		defaults := viper.Sub("defaults")
-		pros := viper.Sub("Profiles")
-		if defaults.IsSet("padding") {
-			padding = defaults.GetString("padding")
-		}
-		if defaults.IsSet("output") {
-			output = defaults.GetString("output")
-		}
-		if defaults.IsSet("profile") {
-			profile = defaults.GetString("profile")
-		}
-		if defaults.IsSet("loglevel") {
-			log = defaults.GetString("loglevel")
-		}
-		if defaults.IsSet("overwrite") {
-			overwrite = defaults.GetBool("overwrite")
-		}
-		err := pros.Unmarshal(&cfg.profiles)
+		cfg.pros = viper.Sub("Profiles")
+
+		cfg.defaults = viper.Sub("defaults")
+
+
+		err := cfg.pros.Unmarshal(&cfg.profiles)
 		if err != nil {
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
 	}
 
-	cfg.profiles["base"] = &Args{
+	cfg.profiles["default"] = &Args{
+		Flags: Flags{Output: "tmp"},
+		Padding: "%06d",
 		VideoCodec: "copy",
 		AudioCodec: "copy",
 	}
@@ -119,20 +63,9 @@ func InitConfig() {
 	for name, pro := range cfg.profiles {
 		cfg.proList = append(cfg.proList, name)
 
-		if pro.Output == "" {
-			pro.Output = output
-		}
-
-		if pro.Padding == "" {
-			pro.Padding = padding
-		}
-
-		if pro.LogLevel == "" {
-			pro.LogLevel = log
-		}
-
-		if !pro.Overwrite {
-			pro.Overwrite = overwrite
+		var profile string
+		if cfg.defaults.IsSet("profile") {
+			profile = cfg.defaults.GetString("profile")
 		}
 
 		if name == profile {
@@ -141,11 +74,33 @@ func InitConfig() {
 	}
 }
 
-func (p pros) List() []string {
-	var list []string
-	for pro, _ := range p {
-		list = append(list, pro)
+func Cfg() ffCfg {
+	return cfg
+}
+
+func(cfg ffCfg) GetProfile(p string) *Args {
+	pro := cfg.profiles[p]
+
+	if pro.Padding == "" {
+		pro.Padding = cfg.defaults.GetString("padding")
 	}
-	return list
+	if pro.Output == "" {
+		pro.Output = cfg.defaults.GetString("output")
+	}
+	if pro.LogLevel == "" {
+		pro.LogLevel = cfg.defaults.GetString("loglevel")
+	}
+	if !pro.Overwrite {
+		pro.Overwrite = cfg.defaults.GetBool("overwrite")
+	}
+	return pro
+}
+
+func(cfg ffCfg) Profiles() []string {
+	return cfg.proList
+}
+
+func(cfg ffCfg) DefaultProfile() *Args {
+	return cfg.GetProfile("default")
 }
 
