@@ -33,7 +33,7 @@ type Args struct {
 	pretty bool
 	streams string
 	entries string
-	chapters bool
+	showChaps bool
 	format string
 }
 
@@ -140,17 +140,16 @@ func(cmd *Cmd) parseFFmpegArgs() *Cmd {
 			cmd.appendArgs("-vn")
 		default:
 			cmd.appendArgs("-c:v", codec)
+			//video params
+			if params := cmd.args.VideoParams.Split(); len(params) > 0 {
+				cmd.appendArgs(params...)
+			}
+
+			//video filters
+			if filters := cmd.args.VideoFilters.Join(); len(filters) > 0 {
+				cmd.appendArgs("-vf", filters)
+			}
 		}
-	}
-
-	//video params
-	if params := cmd.args.VideoParams.Split(); len(params) > 0 {
-		cmd.appendArgs(params...)
-	}
-
-	//video filters
-	if filters := cmd.args.VideoFilters.Join(); len(filters) > 0 {
-		cmd.appendArgs("-vf", filters)
 	}
 
 	//filter complex
@@ -160,17 +159,22 @@ func(cmd *Cmd) parseFFmpegArgs() *Cmd {
 
 	//audio codec
 	if codec := cmd.args.AudioCodec; codec != "" {
-		cmd.appendArgs("-c:a", codec)
-	}
+		switch codec {
+		case "":
+		case "none", "an":
+			cmd.appendArgs("-an")
+		default:
+			cmd.appendArgs("-c:a", codec)
+			//audio params
+			if params := cmd.args.AudioParams.Split(); len(params) > 0 {
+				cmd.appendArgs(params...)
+			}
 
-	//audio params
-	if params := cmd.args.AudioParams.Split(); len(params) > 0 {
-		cmd.appendArgs(params...)
-	}
-
-	//audio filters
-	if filters := cmd.args.AudioFilters.Join(); len(filters) > 0 {
-		cmd.appendArgs("-af", filters)
+			//audio filters
+			if filters := cmd.args.AudioFilters.Join(); len(filters) > 0 {
+				cmd.appendArgs("-af", filters)
+			}
+		}
 	}
 
 	//output
@@ -213,7 +217,7 @@ func(cmd *Cmd) parseFFprobeArgs() *Cmd {
 		cmd.appendArgs("-show_entries", entries)
 	}
 
-	if cmd.args.chapters {
+	if cmd.args.showChaps {
 		cmd.appendArgs("-show_chapters")
 	}
 

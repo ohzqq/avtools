@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	//"bytes"
+	"bytes"
 	"log"
 	//"strings"
 	//"path/filepath"
@@ -58,9 +58,44 @@ func NewCmd() *Cmd {
 	}
 }
 
+func(cmd *Cmd) Run() []byte {
+	if cmd.tmpFile != nil {
+		defer os.Remove(cmd.tmpFile.Name())
+	}
+
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+	cmd.exec.Stderr = &stderr
+	cmd.exec.Stdout = &stdout
+
+	err := cmd.exec.Run()
+	if err != nil {
+		log.Printf("Command finished with error: %v\n", cmd.exec.String())
+		fmt.Printf("%v\n", stderr.String())
+	}
+
+	if len(stdout.Bytes()) > 0 {
+		return stdout.Bytes()
+		//fmt.Printf("%v\n", stdout.String())
+	}
+
+	return nil
+}
+
 func(cmd *Cmd) ParseFlags() {
 	cmd.args = Cfg().GetProfile(cmd.Flags.Profile)
 	cmd.Media = NewMedia(cmd.Input)
+	cmd.ParseJsonMeta()
+
+	if meta := cmd.Flags.MetaFile; meta != "" {
+		cmd.Media.SetMeta(LoadFFmetadataIni(meta))
+	}
+
+	if cue := cmd.Flags.CueFile; cue != "" {
+		cmd.Media.SetChapters(LoadCueSheet(cue))
+	}
 
 	if y := cmd.Flags.Overwrite; y {
 		cmd.args.Overwrite = y
@@ -87,11 +122,11 @@ func(cmd *Cmd) Show() *Cmd {
 	case "args":
 		fmt.Printf("%+v\n", cmd.args)
 	case "meta":
-		cmd.ffprobe = true
+		//cmd.Media.RenderFFChaps()
+		fmt.Printf("%+V\n", cmd.Media.Meta)
 	case "cmd":
-		cmd.ffmpeg = true
+		//cmd.ffmpeg = true
 		//cmd.ffprobe = true
-		cmd.ParseArgs()
 		//fmt.Printf("%+v\n", Cfg().GetProfile(cmd.Flags.Profile))
 		fmt.Printf("%+v\n", cmd.exec.String())
 	default:
@@ -99,3 +134,4 @@ func(cmd *Cmd) Show() *Cmd {
 	}
 	return cmd
 }
+
