@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	cfgFile string
 	cfg = ffCfg{ profiles: make(map[string]*Args) }
 )
 
