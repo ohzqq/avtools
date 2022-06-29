@@ -12,14 +12,14 @@ import (
 )
 
 var (
-	cfg = AVcfg{ profiles: make(map[string]*Args) }
+	cfg = AVcfg{ profiles: make(map[string]*ffmpegArgs) }
 )
 
 type AVcfg struct {
 	pros *viper.Viper
 	defaults *viper.Viper
 	ProList []string
-	profiles map[string]*Args
+	profiles map[string]*ffmpegArgs
 }
 
 func InitProfiles(defaults, profiles *viper.Viper) {
@@ -31,8 +31,8 @@ func InitProfiles(defaults, profiles *viper.Viper) {
 		fmt.Printf("unable to decode into struct, %v", err)
 	}
 
-	cfg.profiles["default"] = &Args{
-		Flags: Flags{Output: "tmp"},
+	cfg.profiles["default"] = &ffmpegArgs{
+		Flags: &Flags{Output: "tmp"},
 		Padding: "%06d",
 		VideoCodec: "copy",
 		AudioCodec: "copy",
@@ -56,7 +56,7 @@ func Cfg() AVcfg {
 	return cfg
 }
 
-func(cfg AVcfg) GetProfile(p string) *Args {
+func(cfg AVcfg) GetProfile(p string) *ffmpegArgs {
 	pro := cfg.profiles[p]
 
 	if pro.Padding == "" {
@@ -89,7 +89,7 @@ func(cfg AVcfg) Profiles() []string {
 	return cfg.ProList
 }
 
-func(cfg AVcfg) DefaultProfile() *Args {
+func(cfg AVcfg) DefaultProfile() *ffmpegArgs {
 	return cfg.GetProfile("default")
 }
 

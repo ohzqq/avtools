@@ -40,7 +40,7 @@ func(cmd *ffprobeCmd) String() string {
 	return cmd.exec.String()
 }
 
-func(cmd *ffprobeCmd) Parse() exe {
+func(cmd *ffprobeCmd) Parse() Cmd {
 	if log := Cfg().GetDefault("loglevel"); log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -75,7 +75,7 @@ func(cmd *ffprobeCmd) Parse() exe {
 
 	cmd.args.Append(cmd.Input)
 
-	return exe{cmd: exec.Command("ffprobe", cmd.args.args...)}
+	return Cmd{exec: exec.Command("ffprobe", cmd.args.args...)}
 }
 
 

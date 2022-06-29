@@ -11,55 +11,11 @@ import (
 )
 var _ = fmt.Printf
 
-type exe struct {
-	cmd *exec.Cmd
-	tmpFile *os.File
-}
-
-func(exe exe) Run() []byte {
-	if exe.tmpFile != nil {
-		defer os.Remove(exe.tmpFile.Name())
-	}
-
-	var (
-		stderr bytes.Buffer
-		stdout bytes.Buffer
-	)
-	exe.cmd.Stderr = &stderr
-	exe.cmd.Stdout = &stdout
-
-	err := exe.cmd.Run()
-	if err != nil {
-		//log.Fatal("Command finished with error: %v\n", cmd.exec.String())
-		fmt.Printf("%v\n", stderr.String())
-	}
-
-	if len(stdout.Bytes()) > 0 {
-		return stdout.Bytes()
-	}
-
-	//fmt.Printf("%+V\n", string(cmd.Media.json))
-	//fmt.Println(cmd.exec.String())
-	//cmd.cmdArgs = []string{}
-	return nil
-}
-
 type Cmd struct {
-	Media *Media
-	args *Args
-	Flags *Flags
-	Action string
-	cmdArgs []string
-	probeArgs []string
-	//FFmpegCmd *FFmpegCmd
-	//FFprobeCmd *FFprobeCmd
-	Input string
-	Ext string
+	flags *Flags
 	cwd string
 	exec *exec.Cmd
 	tmpFile *os.File
-	ffmpeg bool
-	ffprobe bool
 }
 
 type Flags struct {
@@ -87,12 +43,15 @@ func NewCmd() *Cmd {
 
 	return &Cmd{
 		cwd: cwd,
-		cmdArgs: []string{"-hide_banner"},
-		Flags: &Flags{Profile: "default"},
 	}
 }
 
-func(cmd *Cmd) Run() []byte {
+func(cmd *Cmd) SetFlags(f *Flags) *Cmd {
+	cmd.flags = f
+	return cmd
+}
+
+func(cmd Cmd) Run() []byte {
 	if cmd.tmpFile != nil {
 		defer os.Remove(cmd.tmpFile.Name())
 	}
@@ -112,7 +71,6 @@ func(cmd *Cmd) Run() []byte {
 
 	if len(stdout.Bytes()) > 0 {
 		return stdout.Bytes()
-		fmt.Printf("%v\n", stdout.String())
 	}
 
 	//fmt.Printf("%+V\n", string(cmd.Media.json))
@@ -121,53 +79,22 @@ func(cmd *Cmd) Run() []byte {
 	return nil
 }
 
-func(cmd *Cmd) ParseFlags() {
-	cmd.args = Cfg().GetProfile(cmd.Flags.Profile)
-	cmd.Media = NewMedia(cmd.Input)
-	cmd.ParseJsonMeta()
-
-	if meta := cmd.Flags.MetaFile; meta != "" {
-		cmd.Media.SetMeta(LoadFFmetadataIni(meta))
-	}
-
-	if cue := cmd.Flags.CueFile; cue != "" {
-		cmd.Media.SetChapters(LoadCueSheet(cue))
-	}
-
-	if y := cmd.Flags.Overwrite; y {
-		cmd.args.Overwrite = y
-	}
-
-	if o := cmd.Flags.Output; o != "" {
-		cmd.args.Name = o
-	}
-
-	if c := cmd.Flags.ChapNo; c  != 0 {
-		cmd.args.num = c
-	}
-
-	//if e := cmd.Ext; e != "" {
-	//  cmd.args.Ext = e
-	//}
-}
 
 func(cmd *Cmd) Show(action, input string) *Cmd {
-	cmd.Input = input
-	//cmd.ParseFlags()
 	switch action {
 	case "json":
-		cmd.ffprobe = true
+		NewMedia(input).JsonMeta().Print()
 		//fmt.Printf("%+V\n", string(cmd.Media.GetJsonMeta()))
 	case "flags":
-		fmt.Printf("%+v\n", cmd.Flags)
+		//fmt.Printf("%+v\n", cmd.Flags)
 	case "args":
-		fmt.Printf("%+v\n", cmd.args)
+		//fmt.Printf("%+v\n", cmd.args)
 	case "meta":
-		//cmd.Media.RenderFFChaps()
-		fmt.Printf("%+V\n", cmd.Media.Meta)
+		m := NewMedia(input).JsonMeta().Unmarshal()
+		fmt.Printf("%+V\n", m.Meta)
 	case "cmd":
-		m := NewMedia(input)
-		fmt.Println(string(m.JsonMeta()))
+		//m := NewMedia(input).JsonMeta().Unmarshal()
+		//fmt.Printf("%+V\n", m.Meta)
 		//cmd.ffmpeg = true
 		//cmd.ffprobe = true
 		//fmt.Printf("%+v\n", Cfg().GetProfile(cmd.Flags.Profile))
@@ -178,28 +105,28 @@ func(cmd *Cmd) Show(action, input string) *Cmd {
 	return cmd
 }
 
-func(c *Cmd) Extract() {
-	c.ParseFlags()
+func(c *Cmd) Extract(input string) {
+	ffmpeg := NewFFmpegCmd(input).SetFlags(c.flags)
 
 	switch {
-	case c.Flags.ChapSwitch:
-		c.Media.FFmetaChapsToCue()
+	case c.flags.ChapSwitch:
+		ffmpeg.media.FFmetaChapsToCue()
 		return
-	case c.Flags.CoverSwitch:
+	case c.flags.CoverSwitch:
 		fmt.Println("cover")
-		c.args.AudioCodec = "an"
-		c.args.VideoCodec = "copy"
-		c.args.Output = "cover"
-		c.args.Ext = ".jpg"
-	case c.Flags.MetaSwitch:
-		c.args.PostInput = append(c.args.PostInput, newMapArg("f", "ffmetadata"))
-		c.args.AudioCodec = "none"
-		c.args.VideoCodec = "none"
-		c.args.Output = "ffmeta"
-		c.args.Ext = ".ini"
+		ffmpeg.AudioCodec = "an"
+		ffmpeg.VideoCodec = "copy"
+		ffmpeg.Output = "cover"
+		ffmpeg.Ext = ".jpg"
+	case c.flags.MetaSwitch:
+		ffmpeg.PostInput = append(ffmpeg.PostInput, newMapArg("f", "ffmetadata"))
+		ffmpeg.AudioCodec = "none"
+		ffmpeg.VideoCodec = "none"
+		ffmpeg.Output = "ffmeta"
+		ffmpeg.Ext = ".ini"
 	}
-	c.ffmpeg = true
-	c.ParseArgs()
-	c.Run()
+	ffmpeg.Parse()
+	fmt.Println(ffmpeg.String())
+	//c.Run()
 }
 

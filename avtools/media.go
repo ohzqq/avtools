@@ -38,41 +38,26 @@ func NewMedia(input string) *Media {
 	return &m
 }
 
-func(m *Media) JsonMeta() []byte {
+func(m *Media) JsonMeta() *Media {
 	cmd := NewFFprobeCmd(m.Path)
 	cmd.entries = ffProbeMeta
 	cmd.showChaps = true
 	cmd.format = "json"
-	e := cmd.Parse()
-
-	//cmd.Media.ffChaps = true
-	return e.Run()
-}
-func(cmd *Cmd) GetJsonMeta() []byte {
-	cmd.ffprobe = true
-	cmd.args = NewArgs()
-	cmd.args.entries = ffProbeMeta
-	cmd.args.showChaps = true
-	cmd.args.format = "json"
-	c := cmd.parseFFprobeArgs()
-
-	//cmd.Media.ffChaps = true
-	return c.Run()
+	m.json = cmd.Parse().Run()
+	return m
 }
 
-func(cmd *Cmd) ParseJsonMeta() *Cmd {
-	err := json.Unmarshal(cmd.GetJsonMeta(), &cmd.Media.Meta)
+func(m *Media) Unmarshal() *Media {
+	err := json.Unmarshal(m.json, &m.Meta)
 	if err != nil {
 		fmt.Println("help")
 	}
-	fmt.Printf("%+V\n", string(cmd.GetJsonMeta()))
 
-
-	return cmd
+	return m
 }
 
-func(cmd *Cmd) PrintJsonMeta() {
-	fmt.Println(string(cmd.GetJsonMeta()))
+func(m *Media) Print() {
+	fmt.Println(string(m.json))
 }
 
 func(m *Media) SetMeta(meta *MediaMeta) *Media {

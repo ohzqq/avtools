@@ -3,7 +3,7 @@ package avtools
 import (
 	"fmt"
 	//"os"
-	//"os/exec"
+	"os/exec"
 	//"bytes"
 	//"log"
 	"strconv"
@@ -12,15 +12,8 @@ import (
 )
 var _ = fmt.Printf
 
-type ffmpegCmd struct {
-	Input string
-	media *Media
-	args cmdArgs
-	ffmpegArgs
-}
-
 type ffmpegArgs struct {
-	Flags
+	*Flags
 	PreInput mapArgs
 	PostInput mapArgs
 	VideoCodec string
@@ -60,7 +53,59 @@ func(s stringArgs) Join() string {
 	return strings.Join(s, ",")
 }
 
-func(cmd *ffmpegCmd) Parse() *ffmpegCmd {
+type ffmpegCmd struct {
+	Input string
+	media *Media
+	args cmdArgs
+	exec *exec.Cmd
+	*ffmpegArgs
+}
+
+func NewFFmpegCmd(i string) *ffmpegCmd {
+	return &ffmpegCmd{
+		Input: i,
+		media: NewMedia(i),
+	}
+}
+
+func(cmd *ffmpegCmd) SetFlags(f *Flags) *ffmpegCmd {
+	fmt.Printf("%+v\n", f)
+	cmd.ffmpegArgs.Flags = f
+	return cmd
+}
+
+func(cmd *ffmpegCmd) String() string {
+	return cmd.exec.String()
+}
+
+func(cmd *ffmpegCmd) ParseFlags() *ffmpegCmd {
+	cmd.ffmpegArgs = Cfg().GetProfile(cmd.Profile)
+	cmd.media.JsonMeta().Unmarshal()
+
+	if meta := cmd.MetaFile; meta != "" {
+		cmd.media.SetMeta(LoadFFmetadataIni(meta))
+	}
+
+	if cue := cmd.CueFile; cue != "" {
+		cmd.media.SetChapters(LoadCueSheet(cue))
+	}
+
+	if y := cmd.Overwrite; y {
+		cmd.Overwrite = y
+	}
+
+	if o := cmd.Output; o != "" {
+		cmd.Name = o
+	}
+
+	if c := cmd.ChapNo; c  != 0 {
+		cmd.num = c
+	}
+
+	return cmd
+}
+
+func(cmd *ffmpegCmd) Parse() Cmd {
 	if log := cmd.LogLevel; log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -168,8 +213,8 @@ func(cmd *ffmpegCmd) Parse() *ffmpegCmd {
 	}
 
 	switch {
-	case cmd.Ext != "":
-		ext = cmd.Ext
+	//case cmd.Ext != "":
+	//  ext = cmd.Ext
 	case cmd.Ext != "":
 		ext = cmd.Ext
 	default:
@@ -177,5 +222,5 @@ func(cmd *ffmpegCmd) Parse() *ffmpegCmd {
 	}
 	cmd.args.Append(name + ext)
 
-	return cmd
+	return Cmd{exec: exec.Command("ffmpeg", cmd.args.args...)}
 }

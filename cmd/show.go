@@ -18,12 +18,7 @@ var avCmd *avtools.Cmd
 var showCmd = &cobra.Command{
 	Use:   "show",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: ``,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Printf("%+v\n", avCmd.Show(args[0], args[1]))
@@ -33,8 +28,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-	avCmd = avtools.NewCmd()
-	avCmd.Flags = &flags
+	avCmd = avtools.NewCmd().SetFlags(&flags)
 
 	// Here you will define your flags and configuration settings.
 
