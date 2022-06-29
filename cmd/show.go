@@ -7,8 +7,12 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ohzqq/avtools/avtools"
+
 	"github.com/spf13/cobra"
 )
+
+var avCmd *avtools.Cmd
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
@@ -21,12 +25,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("show called")
+		fmt.Printf("%+v\n", avCfg.ProList)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
+	avCmd = avtools.NewCmd()
+	avCmd.Flags = &flags
+	avCmd.Action = "cmd"
 
 	// Here you will define your flags and configuration settings.
 

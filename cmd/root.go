@@ -7,7 +7,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"file/filepath"
+	"path/filepath"
+
+	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,6 +17,8 @@ import (
 
 var (
 	cfgFile string
+	flags avtools.Flags
+	avCfg avtools.AVcfg
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -40,11 +44,11 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.avtools.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/avtools/config.yml)")
+	rootCmd.PersistentFlags().StringVarP(&flags.Output, "output", "o", "", "set output name")
+	rootCmd.PersistentFlags().StringVarP(&flags.Profile, "profile", "p", "default", "set profile")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Verbose, "verbose", "v", false, "print ffmpeg/ffprobe command string")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Overwrite, "overwrite", "y", false, "overwrite existing files")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -69,5 +73,6 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		avCfg = avtools.InitProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
 	}
 }
