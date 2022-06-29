@@ -14,7 +14,6 @@ var _ = fmt.Printf
 
 type Media struct {
 	Meta *MediaMeta
-	Overwrite bool
 	File string
 	Path string
 	Dir string
@@ -39,15 +38,26 @@ func NewMedia(input string) *Media {
 	return &m
 }
 
+func(m *Media) JsonMeta() []byte {
+	cmd := NewFFprobeCmd(m.Path)
+	cmd.entries = ffProbeMeta
+	cmd.showChaps = true
+	cmd.format = "json"
+	e := cmd.Parse()
+
+	//cmd.Media.ffChaps = true
+	return e.Run()
+}
 func(cmd *Cmd) GetJsonMeta() []byte {
 	cmd.ffprobe = true
+	cmd.args = NewArgs()
 	cmd.args.entries = ffProbeMeta
 	cmd.args.showChaps = true
 	cmd.args.format = "json"
-	cmd.parseFFprobeArgs()
+	c := cmd.parseFFprobeArgs()
 
 	//cmd.Media.ffChaps = true
-	return cmd.Run()
+	return c.Run()
 }
 
 func(cmd *Cmd) ParseJsonMeta() *Cmd {
@@ -55,6 +65,8 @@ func(cmd *Cmd) ParseJsonMeta() *Cmd {
 	if err != nil {
 		fmt.Println("help")
 	}
+	fmt.Printf("%+V\n", string(cmd.GetJsonMeta()))
+
 
 	return cmd
 }

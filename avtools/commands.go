@@ -11,6 +11,39 @@ import (
 )
 var _ = fmt.Printf
 
+type exe struct {
+	cmd *exec.Cmd
+	tmpFile *os.File
+}
+
+func(exe exe) Run() []byte {
+	if exe.tmpFile != nil {
+		defer os.Remove(exe.tmpFile.Name())
+	}
+
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+	exe.cmd.Stderr = &stderr
+	exe.cmd.Stdout = &stdout
+
+	err := exe.cmd.Run()
+	if err != nil {
+		//log.Fatal("Command finished with error: %v\n", cmd.exec.String())
+		fmt.Printf("%v\n", stderr.String())
+	}
+
+	if len(stdout.Bytes()) > 0 {
+		return stdout.Bytes()
+	}
+
+	//fmt.Printf("%+V\n", string(cmd.Media.json))
+	//fmt.Println(cmd.exec.String())
+	//cmd.cmdArgs = []string{}
+	return nil
+}
+
 type Cmd struct {
 	Media *Media
 	args *Args
@@ -79,10 +112,11 @@ func(cmd *Cmd) Run() []byte {
 
 	if len(stdout.Bytes()) > 0 {
 		return stdout.Bytes()
-		//fmt.Printf("%v\n", stdout.String())
+		fmt.Printf("%v\n", stdout.String())
 	}
 
-	fmt.Println(cmd.exec.String())
+	//fmt.Printf("%+V\n", string(cmd.Media.json))
+	//fmt.Println(cmd.exec.String())
 	//cmd.cmdArgs = []string{}
 	return nil
 }
@@ -117,9 +151,13 @@ func(cmd *Cmd) ParseFlags() {
 	//}
 }
 
-func(cmd *Cmd) Show() *Cmd {
-	cmd.ParseFlags()
-	switch cmd.Action {
+func(cmd *Cmd) Show(action, input string) *Cmd {
+	cmd.Input = input
+	//cmd.ParseFlags()
+	switch action {
+	case "json":
+		cmd.ffprobe = true
+		//fmt.Printf("%+V\n", string(cmd.Media.GetJsonMeta()))
 	case "flags":
 		fmt.Printf("%+v\n", cmd.Flags)
 	case "args":
@@ -128,10 +166,12 @@ func(cmd *Cmd) Show() *Cmd {
 		//cmd.Media.RenderFFChaps()
 		fmt.Printf("%+V\n", cmd.Media.Meta)
 	case "cmd":
+		m := NewMedia(input)
+		fmt.Println(string(m.JsonMeta()))
 		//cmd.ffmpeg = true
 		//cmd.ffprobe = true
 		//fmt.Printf("%+v\n", Cfg().GetProfile(cmd.Flags.Profile))
-		fmt.Printf("%+v\n", cmd.exec.String())
+		//fmt.Printf("%+v\n", cmd.exec.String())
 	default:
 		fmt.Printf("%+v\n", cmd)
 	}

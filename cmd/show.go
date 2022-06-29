@@ -5,7 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	//"fmt"
 
 	"github.com/ohzqq/avtools/avtools"
 
@@ -24,8 +24,10 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%+v\n", avCfg.ProList)
+		//fmt.Printf("%+v\n", avCmd.Show(args[0], args[1]))
+		avCmd.Show(args[0], args[1])
 	},
 }
 
@@ -33,7 +35,6 @@ func init() {
 	rootCmd.AddCommand(showCmd)
 	avCmd = avtools.NewCmd()
 	avCmd.Flags = &flags
-	avCmd.Action = "cmd"
 
 	// Here you will define your flags and configuration settings.
 

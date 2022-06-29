@@ -5,7 +5,7 @@ import (
 	//"log"
 	"fmt"
 	//"os"
-	"strings"
+	//"strings"
 	"strconv"
 	"os/exec"
 
@@ -37,35 +37,18 @@ type Args struct {
 	format string
 }
 
-type ffprobeArgs struct {
-}
-
 func NewArgs() *Args {
 	return &Args{
 		Flags: Flags{Profile: "default"},
 	}
 }
 
-type mapArgs []map[string]string
-
-func newMapArg(k, v string) map[string]string {
-	return map[string]string{k: v}
+type cmdArgs struct {
+	args []string
 }
 
-func(m mapArgs) Split() []string {
-	var args []string
-	for _, flArg := range m {
-		for flag, arg := range flArg {
-			args = append(args, "-" + flag, arg)
-		}
-	}
-	return args
-}
-
-type stringArgs []string
-
-func(s stringArgs) Join() string {
-	return strings.Join(s, ",")
+func(arg *cmdArgs) Append(args ...string) {
+	arg.args = append(arg.args, args...)
 }
 
 func(cmd Cmd) ParseArgs() *Cmd {
@@ -76,10 +59,8 @@ func(cmd Cmd) ParseArgs() *Cmd {
 	// parse cmd args
 	switch {
 	case cmd.ffmpeg:
-		fmt.Println("ffmpeg")
 		cmd.parseFFmpegArgs()
 	case cmd.ffprobe:
-		fmt.Println("ffprobe")
 		cmd.parseFFprobeArgs()
 	}
 
@@ -87,7 +68,7 @@ func(cmd Cmd) ParseArgs() *Cmd {
 	case cmd.ffmpeg:
 		cmd.exec = exec.Command("ffmpeg", cmd.cmdArgs...)
 	case cmd.ffprobe:
-		cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
+		//cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
 	}
 	return &cmd
 }
@@ -248,7 +229,7 @@ func(cmd *Cmd) parseFFprobeArgs() *Cmd {
 
 	cmd.appendArgs(cmd.Input)
 
-	cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
+	//cmd.exec = exec.Command("ffprobe", cmd.cmdArgs...)
 	return cmd
 }
 

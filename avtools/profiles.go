@@ -10,7 +10,6 @@ import (
 	//"golang.org/x/exp/slices"
 	"github.com/spf13/viper"
 )
-var _ = fmt.Printf
 
 var (
 	cfg = AVcfg{ profiles: make(map[string]*Args) }
@@ -23,9 +22,14 @@ type AVcfg struct {
 	profiles map[string]*Args
 }
 
-func InitProfiles(defaults, profiles *viper.Viper) AVcfg {
+func InitProfiles(defaults, profiles *viper.Viper) {
 	cfg.defaults = defaults
 	cfg.pros = profiles
+
+	err := cfg.pros.Unmarshal(&cfg.profiles)
+	if err != nil {
+		fmt.Printf("unable to decode into struct, %v", err)
+	}
 
 	cfg.profiles["default"] = &Args{
 		Flags: Flags{Output: "tmp"},
@@ -35,7 +39,6 @@ func InitProfiles(defaults, profiles *viper.Viper) AVcfg {
 	}
 
 	for name, pro := range cfg.profiles {
-		fmt.Println(name)
 		cfg.ProList = append(cfg.ProList, name)
 
 		var profile string
@@ -47,8 +50,6 @@ func InitProfiles(defaults, profiles *viper.Viper) AVcfg {
 			cfg.profiles["default"] = pro
 		}
 	}
-
-	return cfg
 }
 
 func Cfg() AVcfg {
