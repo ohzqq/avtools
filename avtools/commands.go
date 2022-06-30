@@ -6,10 +6,7 @@ import (
 	"os/exec"
 	"bytes"
 	"log"
-	//"strings"
-	//"path/filepath"
 )
-var _ = fmt.Printf
 
 type Cmd struct {
 	verbose bool

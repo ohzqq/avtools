@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 )
 
-var _ = fmt.Sprintf("%v", "")
-
 func secsToHHMMSS(sec string) string {
 	seconds := secsAtoi(sec)
 	h := seconds / 3600

@@ -2,20 +2,15 @@ package avtools
 
 import (
 	"log"
-	//"bytes"
 	"os"
 	"bufio"
 	"fmt"
 	"strings"
 	"strconv"
 	"text/template"
-	//"regexp"
-	//"encoding/json"
-	//"reflect"
 
 	"github.com/go-ini/ini"
 )
-var _ = fmt.Printf
 
 const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
 

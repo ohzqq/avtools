@@ -1,17 +1,9 @@
 package avtools
 
 import (
-	//"path/filepath"
-	//"log"
 	"fmt"
-	//"os"
 	"strings"
-	//"strconv"
-	//"os/exec"
-
-	//"github.com/alessio/shellescape"
 )
-var _ = fmt.Printf
 
 type Args struct {
 	Options

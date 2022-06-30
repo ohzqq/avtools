@@ -7,10 +7,7 @@ import (
 	"os"
 	"bytes"
 	"encoding/json"
-	//"strconv"
-	//"strings"
 )
-var _ = fmt.Printf
 
 type Media struct {
 	Meta *MediaMeta

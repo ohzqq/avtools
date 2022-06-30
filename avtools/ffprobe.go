@@ -3,12 +3,7 @@ package avtools
 import (
 	"fmt"
 	"os/exec"
-	//"bytes"
-	//"log"
-	//"strings"
-	//"path/filepath"
 )
-var _ = fmt.Printf
 
 type ffprobeCmd struct {
 	media *Media

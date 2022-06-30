@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	//"bytes"
 	"log"
 	"strconv"
-	//"strings"
 	"path/filepath"
 )
 var _ = fmt.Printf

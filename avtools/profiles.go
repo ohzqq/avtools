@@ -1,13 +1,8 @@
 package avtools
 
 import (
-	//"path/filepath"
-	//"os"
 	"fmt"
-	//"log"
-	//"strings"
 
-	//"golang.org/x/exp/slices"
 	"github.com/spf13/viper"
 )
 
