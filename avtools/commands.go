@@ -12,8 +12,10 @@ import (
 var _ = fmt.Printf
 
 type Cmd struct {
+	input string
 	flags *Flags
 	cwd string
+	ffmpeg *ffmpegCmd
 	exec *exec.Cmd
 	tmpFile *os.File
 }
@@ -35,7 +37,7 @@ type Flags struct {
 	CueFile string
 }
 
-func NewCmd() *Cmd {
+func NewCmd(i string) *Cmd {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -43,10 +45,20 @@ func NewCmd() *Cmd {
 
 	return &Cmd{
 		cwd: cwd,
+		input: i,
 	}
 }
 
-func(cmd *Cmd) SetFlags(f *Flags) *Cmd {
+func(cmd *Cmd) FFmpeg() *ffmpegCmd {
+	cmd.ffmpeg = &ffmpegCmd{
+		flags: cmd.flags,
+		Args: Cfg().GetProfile(cmd.flags.Profile),
+		media: NewMedia(cmd.input),
+	}
+	return cmd.ffmpeg.ParseFlags()
+}
+
+func(cmd *Cmd) Options(f *Flags) *Cmd {
 	cmd.flags = f
 	return cmd
 }
@@ -65,7 +77,7 @@ func(cmd Cmd) Run() []byte {
 
 	err := cmd.exec.Run()
 	if err != nil {
-		//log.Fatal("Command finished with error: %v\n", cmd.exec.String())
+		log.Fatal("Command finished with error: %v\n", cmd.exec.String())
 		fmt.Printf("%v\n", stderr.String())
 	}
 
@@ -73,24 +85,28 @@ func(cmd Cmd) Run() []byte {
 		return stdout.Bytes()
 	}
 
-	//fmt.Printf("%+V\n", string(cmd.Media.json))
-	//fmt.Println(cmd.exec.String())
-	//cmd.cmdArgs = []string{}
+	if cmd.flags.Verbose {
+		fmt.Println(cmd.exec.String())
+	}
 	return nil
 }
 
+func(cmd Cmd) String() string {
+	return cmd.exec.String()
+}
 
-func(cmd *Cmd) Show(action, input string) *Cmd {
+func(cmd *Cmd) Show(action string) *Cmd {
+	media := NewMedia(cmd.input)
 	switch action {
 	case "json":
-		NewMedia(input).JsonMeta().Print()
+		media.JsonMeta().Print()
 		//fmt.Printf("%+V\n", string(cmd.Media.GetJsonMeta()))
 	case "flags":
 		//fmt.Printf("%+v\n", cmd.Flags)
 	case "args":
 		//fmt.Printf("%+v\n", cmd.args)
 	case "meta":
-		m := NewMedia(input).JsonMeta().Unmarshal()
+		m := media.JsonMeta().Unmarshal()
 		fmt.Printf("%+V\n", m.Meta)
 	case "cmd":
 		//m := NewMedia(input).JsonMeta().Unmarshal()
@@ -103,30 +119,5 @@ func(cmd *Cmd) Show(action, input string) *Cmd {
 		fmt.Printf("%+v\n", cmd)
 	}
 	return cmd
-}
-
-func(c *Cmd) Extract(input string) {
-	ffmpeg := NewFFmpegCmd(input).SetFlags(c.flags)
-
-	switch {
-	case c.flags.ChapSwitch:
-		ffmpeg.media.FFmetaChapsToCue()
-		return
-	case c.flags.CoverSwitch:
-		fmt.Println("cover")
-		ffmpeg.AudioCodec = "an"
-		ffmpeg.VideoCodec = "copy"
-		ffmpeg.Output = "cover"
-		ffmpeg.Ext = ".jpg"
-	case c.flags.MetaSwitch:
-		ffmpeg.PostInput = append(ffmpeg.PostInput, newMapArg("f", "ffmetadata"))
-		ffmpeg.AudioCodec = "none"
-		ffmpeg.VideoCodec = "none"
-		ffmpeg.Output = "ffmeta"
-		ffmpeg.Ext = ".ini"
-	}
-	ffmpeg.Parse()
-	fmt.Println(ffmpeg.String())
-	//c.Run()
 }
 

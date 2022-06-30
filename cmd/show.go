@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var avCmd *avtools.Cmd
-
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
@@ -22,13 +20,12 @@ var showCmd = &cobra.Command{
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Printf("%+v\n", avCmd.Show(args[0], args[1]))
-		avCmd.Show(args[0], args[1])
+		avtools.NewCmd(args[0]).Options(&flags).Show(args[1])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-	avCmd = avtools.NewCmd().SetFlags(&flags)
 
 	// Here you will define your flags and configuration settings.
 

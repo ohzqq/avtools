@@ -5,7 +5,7 @@ import (
 	//"log"
 	"fmt"
 	//"os"
-	//"strings"
+	"strings"
 	//"strconv"
 	//"os/exec"
 
@@ -49,4 +49,26 @@ type cmdArgs struct {
 
 func(arg *cmdArgs) Append(args ...string) {
 	arg.args = append(arg.args, args...)
+}
+
+type mapArgs []map[string]string
+
+func newMapArg(k, v string) map[string]string {
+	return map[string]string{k: v}
+}
+
+func(m mapArgs) Split() []string {
+	var args []string
+	for _, flArg := range m {
+		for flag, arg := range flArg {
+			args = append(args, "-" + flag, arg)
+		}
+	}
+	return args
+}
+
+type stringArgs []string
+
+func(s stringArgs) Join() string {
+	return strings.Join(s, ",")
 }

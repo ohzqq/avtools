@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var exCmd *avtools.Cmd
-
 // extractCmd represents the extract command
 var extractCmd = &cobra.Command{
 	Use:   "extract",
@@ -21,13 +19,12 @@ var extractCmd = &cobra.Command{
 	Long: ``,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		exCmd.Extract(args[0])
+		avtools.NewCmd(args[0]).Options(&flags).FFmpeg().Extract()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(extractCmd)
-	exCmd = avtools.NewCmd().SetFlags(&flags)
 
 	// Here you will define your flags and configuration settings.
 

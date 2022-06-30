@@ -7,58 +7,18 @@ import (
 	//"bytes"
 	//"log"
 	"strconv"
-	"strings"
+	//"strings"
 	//"path/filepath"
 )
 var _ = fmt.Printf
-
-type ffmpegArgs struct {
-	*Flags
-	PreInput mapArgs
-	PostInput mapArgs
-	VideoCodec string
-	VideoParams mapArgs
-	VideoFilters stringArgs
-	AudioCodec string
-	AudioParams mapArgs
-	AudioFilters stringArgs
-	FilterComplex stringArgs
-	MiscParams stringArgs
-	LogLevel string
-	Name string
-	Padding string
-	Ext string
-	num int
-}
-
-type mapArgs []map[string]string
-
-func newMapArg(k, v string) map[string]string {
-	return map[string]string{k: v}
-}
-
-func(m mapArgs) Split() []string {
-	var args []string
-	for _, flArg := range m {
-		for flag, arg := range flArg {
-			args = append(args, "-" + flag, arg)
-		}
-	}
-	return args
-}
-
-type stringArgs []string
-
-func(s stringArgs) Join() string {
-	return strings.Join(s, ",")
-}
 
 type ffmpegCmd struct {
 	Input string
 	media *Media
 	args cmdArgs
 	exec *exec.Cmd
-	*ffmpegArgs
+	flags *Flags
+	*Args
 }
 
 func NewFFmpegCmd(i string) *ffmpegCmd {
@@ -68,9 +28,36 @@ func NewFFmpegCmd(i string) *ffmpegCmd {
 	}
 }
 
+func(c *ffmpegCmd) Extract() {
+	fmt.Printf("%+v\n", c.Flags)
+	fmt.Println("extracting...")
+	switch {
+	case c.flags.CueSwitch:
+		fmt.Println("cue file")
+		c.media.FFmetaChapsToCue()
+		return
+	//case c.flags.CoverSwitch:
+	//  fmt.Println("cover")
+	//  ffmpeg.AudioCodec = "an"
+	//  ffmpeg.VideoCodec = "copy"
+	//  ffmpeg.Output = "cover"
+	//  ffmpeg.Ext = ".jpg"
+	//case c.flags.MetaSwitch:
+	//  ffmpeg.PostInput = append(ffmpeg.PostInput, newMapArg("f", "ffmetadata"))
+	//  ffmpeg.AudioCodec = "none"
+	//  ffmpeg.VideoCodec = "none"
+	//  ffmpeg.Output = "ffmeta"
+	//  ffmpeg.Ext = ".ini"
+	}
+	//cmd := c.Parse()
+	fmt.Println(c.Parse().String())
+	//cmd.Run()
+}
+
 func(cmd *ffmpegCmd) SetFlags(f *Flags) *ffmpegCmd {
 	fmt.Printf("%+v\n", f)
-	cmd.ffmpegArgs.Flags = f
+	cmd.Args = Cfg().GetProfile(f.Profile)
+	//cmd.ffmpegArgs.Flags = f
 	return cmd
 }
 
@@ -79,26 +66,26 @@ func(cmd *ffmpegCmd) String() string {
 }
 
 func(cmd *ffmpegCmd) ParseFlags() *ffmpegCmd {
-	cmd.ffmpegArgs = Cfg().GetProfile(cmd.Profile)
+	//cmd.Args = Cfg().GetProfile(cmd.Profile)
 	cmd.media.JsonMeta().Unmarshal()
 
-	if meta := cmd.MetaFile; meta != "" {
+	if meta := cmd.flags.MetaFile; meta != "" {
 		cmd.media.SetMeta(LoadFFmetadataIni(meta))
 	}
 
-	if cue := cmd.CueFile; cue != "" {
+	if cue := cmd.flags.CueFile; cue != "" {
 		cmd.media.SetChapters(LoadCueSheet(cue))
 	}
 
-	if y := cmd.Overwrite; y {
+	if y := cmd.flags.Overwrite; y {
 		cmd.Overwrite = y
 	}
 
-	if o := cmd.Output; o != "" {
+	if o := cmd.flags.Output; o != "" {
 		cmd.Name = o
 	}
 
-	if c := cmd.ChapNo; c  != 0 {
+	if c := cmd.flags.ChapNo; c  != 0 {
 		cmd.num = c
 	}
 
@@ -120,7 +107,7 @@ func(cmd *ffmpegCmd) Parse() Cmd {
 	}
 
 	// input
-	cmd.args.Append("-i", cmd.Input)
+	cmd.args.Append("-i", cmd.media.Path)
 	cover := cmd.Flags.CoverFile
 	meta := cmd.Flags.MetaFile
 	if meta != "" {
