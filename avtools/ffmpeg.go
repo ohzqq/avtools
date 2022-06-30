@@ -13,7 +13,6 @@ import (
 var _ = fmt.Printf
 
 type ffmpegCmd struct {
-	Input string
 	media *Media
 	args cmdArgs
 	exec *exec.Cmd
@@ -22,21 +21,15 @@ type ffmpegCmd struct {
 }
 
 func NewFFmpegCmd(i string) *ffmpegCmd {
-	return &ffmpegCmd{
-		Input: i,
-		media: NewMedia(i),
-	}
+	return &ffmpegCmd{media: NewMedia(i)}
 }
 
 func(c *ffmpegCmd) Extract() {
-	fmt.Println("extracting...")
 	switch {
 	case c.flags.CueSwitch:
-		fmt.Println("cue file")
 		c.media.FFmetaChapsToCue()
 		return
 	case c.flags.CoverSwitch:
-		fmt.Println("cover")
 		c.AudioCodec = "an"
 		c.VideoCodec = "copy"
 		c.Output = "cover"

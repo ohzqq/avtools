@@ -86,7 +86,7 @@ func(cmd Cmd) Run() []byte {
 	}
 
 	if cmd.flags.Verbose {
-		fmt.Println(cmd.exec.String())
+		fmt.Println(cmd.String())
 	}
 	return nil
 }
