@@ -41,12 +41,12 @@ func(c *ffmpegCmd) Extract() {
 		c.VideoCodec = "copy"
 		c.Output = "cover"
 		c.Ext = ".jpg"
-	//case c.flags.MetaSwitch:
-	//  ffmpeg.PostInput = append(ffmpeg.PostInput, newMapArg("f", "ffmetadata"))
-	//  ffmpeg.AudioCodec = "none"
-	//  ffmpeg.VideoCodec = "none"
-	//  ffmpeg.Output = "ffmeta"
-	//  ffmpeg.Ext = ".ini"
+	case c.flags.MetaSwitch:
+		c.PostInput = append(c.PostInput, newMapArg("f", "ffmetadata"))
+		c.AudioCodec = "none"
+		c.VideoCodec = "none"
+		c.Output = "ffmeta"
+		c.Ext = ".ini"
 	}
 	cmd := c.Parse()
 	cmd.Run()
