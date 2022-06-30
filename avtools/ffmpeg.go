@@ -52,19 +52,11 @@ func(c *ffmpegCmd) Extract() {
 	cmd.Run()
 }
 
-func(cmd *ffmpegCmd) SetFlags(f *Flags) *ffmpegCmd {
-	fmt.Printf("%+v\n", f)
-	cmd.Args = Cfg().GetProfile(f.Profile)
-	//cmd.ffmpegArgs.Flags = f
-	return cmd
-}
-
 func(cmd *ffmpegCmd) String() string {
 	return cmd.exec.String()
 }
 
 func(cmd *ffmpegCmd) ParseFlags() *ffmpegCmd {
-	//cmd.Args = Cfg().GetProfile(cmd.Profile)
 	cmd.media.JsonMeta().Unmarshal()
 
 	if meta := cmd.flags.MetaFile; meta != "" {
