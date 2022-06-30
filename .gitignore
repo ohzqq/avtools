@@ -1,5 +1,10 @@
 # tmp
 tmp/
+*m4b
+*ini
+*cue
+*m4a
+*mp3
 # Binaries for programs and plugins
 *.exe
 *.exe~
