@@ -53,6 +53,7 @@ func(c *ffmpegCmd) getChapters() ([]*Chapter, error) {
 func(c *ffmpegCmd) Extract() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
+
 	switch {
 	case c.opts.CueSwitch:
 		c.media.FFmetaChapsToCue()
@@ -69,6 +70,7 @@ func(c *ffmpegCmd) Extract() {
 		c.Output = "ffmeta"
 		c.Ext = ".ini"
 	}
+
 	cmd := c.ParseArgs()
 	cmd.Run()
 }
