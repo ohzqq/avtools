@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"bufio"
-	"fmt"
 	"strings"
 	"strconv"
 	"text/template"

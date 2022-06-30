@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"path/filepath"
 )
-var _ = fmt.Printf
 
 type ffmpegCmd struct {
 	media *Media
@@ -141,6 +140,7 @@ func(cmd *ffmpegCmd) Join(ext string) {
 func(c *ffmpegCmd) Remove() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
+
 	if c.opts.ChapSwitch {
 		c.AppendMapArg("post", "map_chapters", "-1")
 	}

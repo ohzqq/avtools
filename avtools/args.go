@@ -1,7 +1,6 @@
 package avtools
 
 import (
-	"fmt"
 	"strings"
 )
 
