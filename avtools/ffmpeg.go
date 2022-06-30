@@ -8,7 +8,7 @@ import (
 	"log"
 	"strconv"
 	//"strings"
-	//"path/filepath"
+	"path/filepath"
 )
 var _ = fmt.Printf
 
@@ -69,8 +69,46 @@ func(c *ffmpegCmd) Extract() {
 		c.Output = "ffmeta"
 		c.Ext = ".ini"
 	}
-	cmd := c.Parse()
+	cmd := c.ParseArgs()
 	cmd.Run()
+}
+
+func(cmd *ffmpegCmd) Update() {
+	cmd.media.JsonMeta().Unmarshal()
+	cmd.ParseOptions()
+
+	var cmdExec *Cmd
+
+	if cmd.opts.CoverFile != "" {
+		switch codec := cmd.media.AudioCodec(); codec {
+		case "aac":
+			cmdExec = cmd.addAacCover()
+		case "mp3":
+			cmd.VideoCodec = ""
+			cmd.AppendMapArg("audioParams", "id3v2_version", "3")
+			cmd.AppendMapArg("audioParams", "metadata:s:v", "title='Album cover'")
+			cmd.AppendMapArg("audioParams", "metadata:s:v", "comment='Cover (front)'")
+			cmd.Output = "with-cover"
+			cmdExec = cmd.ParseArgs()
+		}
+	}
+
+	if cmd.opts.MetaFile != "" {
+		cmdExec = cmd.ParseArgs()
+	}
+
+	cmdExec.Run()
+}
+
+func(cmd *ffmpegCmd) addAacCover() *Cmd {
+	cpath, err := filepath.Abs(cmd.opts.CoverFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return NewCmd(
+		exec.Command("AtomicParsley", cmd.media.Path, "--artwork", cpath, "--overWrite"),
+		cmd.opts.Verbose,
+	)
 }
 
 func(cmd *ffmpegCmd) Join(ext string) {
@@ -94,7 +132,7 @@ func(cmd *ffmpegCmd) Join(ext string) {
 	cmd.VideoCodec = "vn"
 	cmd.Ext = ext
 
-	c := cmd.Parse()
+	c := cmd.ParseArgs()
 	c.tmpFile = tmp
 
 	c.Run()
@@ -115,7 +153,7 @@ func(c *ffmpegCmd) Remove() {
 		c.AppendMapArg("post", "map_metadata", "-1")
 	}
 
-	cmd := c.Parse()
+	cmd := c.ParseArgs()
 	cmd.Run()
 }
 
@@ -163,7 +201,7 @@ func(cmd *ffmpegCmd) Cut(ss, to string, no int) {
 		cmd.AppendMapArg("pre", "to", end)
 	}
 
-	c := cmd.Parse()
+	c := cmd.ParseArgs()
 	c.Run()
 }
 
@@ -193,7 +231,7 @@ func(cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	return cmd
 }
 
-func(cmd *ffmpegCmd) Parse() *Cmd {
+func(cmd *ffmpegCmd) ParseArgs() *Cmd {
 	if log := cmd.LogLevel; log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -229,13 +267,9 @@ func(cmd *ffmpegCmd) Parse() *Cmd {
 
 	//map input
 	idx := 0
-	if cover != "" || meta != "" {
-		cmd.args.Append("-map", strconv.Itoa(idx) + ":0")
-		idx++
-	}
-
 	if cover != "" {
-		cmd.args.Append("-map", "0:" + strconv.Itoa(idx))
+		cmd.args.Append("-map", strconv.Itoa(idx) + ":0")
+		//cmd.args.Append("-map", "0:" + strconv.Itoa(idx))
 		idx++
 	}
 
@@ -309,8 +343,6 @@ func(cmd *ffmpegCmd) Parse() *Cmd {
 	}
 
 	switch {
-	//case cmd.Ext != "":
-	//  ext = cmd.Ext
 	case cmd.Ext != "":
 		ext = cmd.Ext
 	default:
