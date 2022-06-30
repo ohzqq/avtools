@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"log"
 	"fmt"
-	//"os"
-	//"bytes"
+	"os"
+	"bytes"
 	"encoding/json"
 	//"strconv"
 	//"strings"
@@ -58,6 +58,32 @@ func(m *Media) Unmarshal() *Media {
 
 func(m *Media) Print() {
 	fmt.Println(string(m.json))
+}
+
+func(m *Media) RenderFFChaps() {
+	var f bytes.Buffer
+
+	err := metaTmpl.ffchaps.ExecuteTemplate(&f, "ffchaps", m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	fmt.Println(f.String())
+}
+
+func(m *Media) FFmetaChapsToCue() {
+	if !m.HasChapters() {
+		log.Fatal("No chapters")
+	}
+
+	f, err := os.Create("chapters.cue")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = metaTmpl.cue.ExecuteTemplate(f, "cue", m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
 }
 
 func(m *Media) SetMeta(meta *MediaMeta) *Media {

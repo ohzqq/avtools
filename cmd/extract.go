@@ -19,7 +19,7 @@ var extractCmd = &cobra.Command{
 	Long: ``,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		avtools.NewCmd(args[0]).Options(&flags).FFmpeg().Extract()
+		avtools.NewFFmpegCmd(args[0]).Options(&flags).Extract()
 	},
 }
 

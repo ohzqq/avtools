@@ -14,7 +14,7 @@ import (
 var _ = fmt.Printf
 
 type Args struct {
-	Flags
+	Options
 	PreInput mapArgs
 	PostInput mapArgs
 	VideoCodec string
@@ -37,9 +37,26 @@ type Args struct {
 	format string
 }
 
+type Options struct {
+	Overwrite bool
+	Profile string
+	Start string
+	End string
+	Output string
+	ChapNo int
+	MetaSwitch bool
+	CoverSwitch bool
+	CueSwitch bool
+	ChapSwitch bool
+	Verbose bool
+	CoverFile string
+	MetaFile string
+	CueFile string
+}
+
 func NewArgs() *Args {
 	return &Args{
-		Flags: Flags{Profile: "default"},
+		Options: Options{Profile: "default"},
 	}
 }
 
@@ -55,6 +72,20 @@ type mapArgs []map[string]string
 
 func newMapArg(k, v string) map[string]string {
 	return map[string]string{k: v}
+}
+
+func(a *Args) AppendMapArg(key, flag, value string) {
+	mapArg := newMapArg(flag, value)
+	switch key {
+	case "pre":
+		a.PreInput = append(a.PreInput, mapArg)
+	case "post":
+		a.PostInput = append(a.PostInput, mapArg)
+	case "videoParams":
+		a.VideoParams = append(a.VideoParams, mapArg)
+	case "audioParams":
+		a.AudioParams = append(a.AudioParams, mapArg)
+	}
 }
 
 func(m mapArgs) Split() []string {

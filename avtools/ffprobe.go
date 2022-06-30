@@ -2,7 +2,6 @@ package avtools
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	//"bytes"
 	//"log"
@@ -12,11 +11,8 @@ import (
 var _ = fmt.Printf
 
 type ffprobeCmd struct {
-	Input string
 	media *Media
 	args cmdArgs
-	exec *exec.Cmd
-	tmpFile *os.File
 	ffprobeArgs
 }
 
@@ -30,17 +26,10 @@ type ffprobeArgs struct {
 }
 
 func NewFFprobeCmd(i string) *ffprobeCmd {
-	return &ffprobeCmd{
-		Input: i,
-		media: NewMedia(i),
-	}
+	return &ffprobeCmd{media: NewMedia(i)}
 }
 
-func(cmd *ffprobeCmd) String() string {
-	return cmd.exec.String()
-}
-
-func(cmd *ffprobeCmd) Parse() Cmd {
+func(cmd *ffprobeCmd) Parse() *Cmd {
 	if log := Cfg().GetDefault("loglevel"); log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -73,9 +62,9 @@ func(cmd *ffprobeCmd) Parse() Cmd {
 		cmd.args.Append("json=c=1")
 	}
 
-	cmd.args.Append(cmd.Input)
+	cmd.args.Append(cmd.media.Path)
 
-	return Cmd{exec: exec.Command("ffprobe", cmd.args.args...)}
+	return NewCmd(exec.Command("ffprobe", cmd.args.args...), false)
 }
 
 

@@ -17,7 +17,7 @@ import (
 
 var (
 	cfgFile string
-	flags avtools.Flags
+	flags avtools.Options
 )
 
 // rootCmd represents the base command when called without any subcommands

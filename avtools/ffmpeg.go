@@ -15,27 +15,51 @@ var _ = fmt.Printf
 type ffmpegCmd struct {
 	media *Media
 	args cmdArgs
-	exec *exec.Cmd
-	flags *Flags
+	opts *Options
 	*Args
 }
 
 func NewFFmpegCmd(i string) *ffmpegCmd {
-	return &ffmpegCmd{media: NewMedia(i)}
+	ff := &ffmpegCmd{media: NewMedia(i)}
+	return ff
+}
+
+func(cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
+	cmd.opts = f
+	return cmd
+}
+
+func(c *ffmpegCmd) getChapters() ([]*Chapter, error) {
+	if len(c.media.json) == 0 {
+		c.media.JsonMeta().Unmarshal()
+	}
+
+	switch {
+	case c.opts.CueFile != "":
+		return LoadCueSheet(c.opts.CueFile), nil
+	case c.opts.MetaFile != "":
+		return LoadFFmetadataIni(c.opts.MetaFile).Chapters, nil
+	case c.media.HasChapters():
+		return c.media.Meta.Chapters, nil
+	default:
+		return nil, fmt.Errorf("There are no chapters!")
+	}
 }
 
 func(c *ffmpegCmd) Extract() {
+	c.media.JsonMeta().Unmarshal()
+	c.ParseOptions()
 	switch {
-	case c.flags.CueSwitch:
+	case c.opts.CueSwitch:
 		c.media.FFmetaChapsToCue()
 		return
-	case c.flags.CoverSwitch:
+	case c.opts.CoverSwitch:
 		c.AudioCodec = "an"
 		c.VideoCodec = "copy"
 		c.Output = "cover"
 		c.Ext = ".jpg"
-	case c.flags.MetaSwitch:
-		c.PostInput = append(c.PostInput, newMapArg("f", "ffmetadata"))
+	case c.opts.MetaSwitch:
+		c.AppendMapArg("post", "f", "ffmetadata")
 		c.AudioCodec = "none"
 		c.VideoCodec = "none"
 		c.Output = "ffmeta"
@@ -45,33 +69,96 @@ func(c *ffmpegCmd) Extract() {
 	cmd.Run()
 }
 
-func(cmd *ffmpegCmd) ParseFlags() *ffmpegCmd {
-	cmd.media.JsonMeta().Unmarshal()
+func(c *ffmpegCmd) Remove() {
+	c.media.JsonMeta().Unmarshal()
+	c.ParseOptions()
+	if c.opts.ChapSwitch {
+		c.AppendMapArg("post", "map_chapters", "-1")
+	}
 
-	if meta := cmd.flags.MetaFile; meta != "" {
+	if c.opts.CoverSwitch {
+		c.VideoCodec = "vn"
+	}
+
+	if c.opts.MetaSwitch {
+		c.AppendMapArg("post", "map_metadata", "-1")
+	}
+
+	cmd := c.Parse()
+	cmd.Run()
+}
+
+//func(c *Cmd) Split() error {
+//  chaps, err := c.getChapters()
+//  if err != nil {
+//    return err
+//  }
+
+//  for i, ch := range chaps {
+//    cmd := c.Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
+//    if c.Overwrite {
+//      cmd.Args().OverWrite()
+//    }
+//    cmd.Run()
+//  }
+//  return nil
+//}
+
+//func(c *Cmd) Cut(ss, to string, no int) *FFmpegCmd {
+//  var (
+//    count = no + 1
+//    start = ss
+//    end = to
+//  )
+
+//  if c.Arg.ChapNo != 0 {
+//    chaps, err := c.getChapters()
+//    if err != nil {
+//      log.Fatal(err)
+//    }
+//    ch := chaps[c.Arg.ChapNo - 1]
+//    count = c.Arg.ChapNo
+//    start = ch.StartToSeconds()
+//    end = ch.EndToSeconds()
+//  }
+
+//  c.Args().
+//    Pre("ss", start).
+//    Pre("to", end).
+//    Num(count).
+//    Out("tmp")
+
+//  cmd := c.Parse()
+//  cmd.Run()
+//}
+
+func(cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
+	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
+
+	if meta := cmd.opts.MetaFile; meta != "" {
 		cmd.media.SetMeta(LoadFFmetadataIni(meta))
 	}
 
-	if cue := cmd.flags.CueFile; cue != "" {
+	if cue := cmd.opts.CueFile; cue != "" {
 		cmd.media.SetChapters(LoadCueSheet(cue))
 	}
 
-	if y := cmd.flags.Overwrite; y {
+	if y := cmd.opts.Overwrite; y {
 		cmd.Overwrite = y
 	}
 
-	if o := cmd.flags.Output; o != "" {
+	if o := cmd.opts.Output; o != "" {
 		cmd.Name = o
 	}
 
-	if c := cmd.flags.ChapNo; c  != 0 {
+	if c := cmd.opts.ChapNo; c  != 0 {
 		cmd.num = c
 	}
 
 	return cmd
 }
 
-func(cmd *ffmpegCmd) Parse() Cmd {
+func(cmd *ffmpegCmd) Parse() *Cmd {
 	if log := cmd.LogLevel; log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -87,8 +174,8 @@ func(cmd *ffmpegCmd) Parse() Cmd {
 
 	// input
 	cmd.args.Append("-i", cmd.media.Path)
-	cover := cmd.Flags.CoverFile
-	meta := cmd.Flags.MetaFile
+	cover := cmd.opts.CoverFile
+	meta := cmd.opts.MetaFile
 	if meta != "" {
 		cmd.args.Append("-i", meta)
 	}
@@ -188,5 +275,5 @@ func(cmd *ffmpegCmd) Parse() Cmd {
 	}
 	cmd.args.Append(name + ext)
 
-	return Cmd{exec: exec.Command("ffmpeg", cmd.args.args...), flags: cmd.flags}
+	return NewCmd(exec.Command("ffmpeg", cmd.args.args...), cmd.opts.Verbose)
 }

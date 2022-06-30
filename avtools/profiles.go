@@ -32,7 +32,7 @@ func InitProfiles(defaults, profiles *viper.Viper) {
 	}
 
 	cfg.profiles["default"] = &Args{
-		Flags: Flags{Output: "tmp"},
+		Options: Options{Output: "tmp"},
 		Padding: "%06d",
 		VideoCodec: "copy",
 		AudioCodec: "copy",
