@@ -1,11 +1,11 @@
 package avtools
 
 import (
+	"bufio"
 	"log"
 	"os"
-	"bufio"
-	"strings"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/go-ini/ini"
@@ -15,8 +15,8 @@ const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=co
 
 type MediaMeta struct {
 	Chapters []*Chapter
-	Streams []*Stream
-	Format *Format
+	Streams  []*Stream
+	Format   *Format
 }
 
 type Stream struct {
@@ -27,49 +27,49 @@ type Stream struct {
 type Format struct {
 	Filename string
 	Duration string
-	Size string
-	BitRate string `json:"bit_rate"`
-	Tags *Tags `json:"tags"`
+	Size     string
+	BitRate  string `json:"bit_rate"`
+	Tags     *Tags  `json:"tags"`
 }
 
 type Tags struct {
-	Title string `json:"title"`
-	Artist string `json:"artist"`
+	Title    string `json:"title"`
+	Artist   string `json:"artist"`
 	Composer string `json:"composer"`
-	Album string `json:"album"`
-	Comment string `json:"comment"`
-	Genre string `json:"genre"`
+	Album    string `json:"album"`
+	Comment  string `json:"comment"`
+	Genre    string `json:"genre"`
 }
 
 type Chapter struct {
 	Timebase string `json:"time_base"`
-	Start int `json:"start"`
-	End int `json:"end"`
-	Tags *Tags `json:"tags"`
-	Title string `ini:"title"`
+	Start    int    `json:"start"`
+	End      int    `json:"end"`
+	Tags     *Tags  `json:"tags"`
+	Title    string `ini:"title"`
 }
 
-func(c *Chapter) StartToIntString() string {
+func (c *Chapter) StartToIntString() string {
 	result := float64(c.Start) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
 }
 
-func(c *Chapter) StartToSeconds() string {
+func (c *Chapter) StartToSeconds() string {
 	result := float64(c.Start) / c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 3, 64)
 }
 
-func(c *Chapter) EndToIntString() string {
+func (c *Chapter) EndToIntString() string {
 	result := float64(c.End) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
 }
 
-func(c *Chapter) EndToSeconds() string {
+func (c *Chapter) EndToSeconds() string {
 	result := float64(c.End) / c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 3, 64)
 }
 
-func(c Chapter) TimebaseFloat() float64 {
+func (c Chapter) TimebaseFloat() float64 {
 	base := "1000"
 	if tb := c.Timebase; tb != "" {
 		base = strings.ReplaceAll(tb, "1/", "")
@@ -102,7 +102,6 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 	}
 	meta.MapTo(&media.Format.Tags)
 
-
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")
 		for _, chap := range sec {
@@ -126,7 +125,7 @@ func LoadCueSheet(file string) []*Chapter {
 	defer contents.Close()
 
 	var (
-		titles []string
+		titles     []string
 		startTimes []int
 	)
 
@@ -161,7 +160,7 @@ func LoadCueSheet(file string) []*Chapter {
 }
 
 type metaTemplates struct {
-	cue *template.Template
+	cue     *template.Template
 	ffchaps *template.Template
 }
 
@@ -170,7 +169,7 @@ var funcs = template.FuncMap{
 }
 
 var metaTmpl = metaTemplates{
-	cue: template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+	cue:     template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
 	ffchaps: template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
 }
 
@@ -199,4 +198,3 @@ END=
 {{- end}}
 TIMEBASE=1/1000
 {{end -}}`
-

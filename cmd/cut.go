@@ -10,8 +10,8 @@ import (
 var cutCmd = &cobra.Command{
 	Use:   "cut",
 	Short: "cut files",
-	Long: `This can cut a file based either on provided timestamps or using a chapter number.`,
-	Args: cobra.ExactArgs(1),
+	Long:  `This can cut a file based either on provided timestamps or using a chapter number.`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Cut(flags.Start, flags.End, flags.ChapNo)
 	},

@@ -1,14 +1,14 @@
 package avtools
 
 import (
+	"fmt"
+	"log"
+	"math"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"log"
-	"fmt"
 	"time"
-	"os"
-	"math"
-	"path/filepath"
 )
 
 func secsToHHMMSS(sec string) string {
@@ -55,8 +55,8 @@ func ffChapstoSeconds(timebase, start, end string) (string, string) {
 	tb := timeBaseFloat(timebase)
 	ss, _ := strconv.ParseFloat(start, 64)
 	to, _ := strconv.ParseFloat(end, 64)
-	s := strconv.FormatFloat(ss / tb, 'f', 6, 64)
-	e := strconv.FormatFloat(to / tb, 'f', 6, 64)
+	s := strconv.FormatFloat(ss/tb, 'f', 6, 64)
+	e := strconv.FormatFloat(to/tb, 'f', 6, 64)
 	return s, e
 }
 
@@ -79,4 +79,3 @@ func find(ext string) []string {
 	}
 	return files
 }
-

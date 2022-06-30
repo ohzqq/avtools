@@ -2,17 +2,17 @@ package avtools
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
-	"log"
-	"strconv"
 	"path/filepath"
+	"strconv"
 )
 
 type ffmpegCmd struct {
 	media *Media
-	args cmdArgs
-	opts *Options
+	args  cmdArgs
+	opts  *Options
 	*Args
 }
 
@@ -25,12 +25,12 @@ func NewFFmpegCmd(i string) *ffmpegCmd {
 	return &ff
 }
 
-func(cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
+func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 	cmd.opts = f
 	return cmd
 }
 
-func(c *ffmpegCmd) getChapters() ([]*Chapter, error) {
+func (c *ffmpegCmd) getChapters() ([]*Chapter, error) {
 	if len(c.media.json) == 0 {
 		c.media.JsonMeta().Unmarshal()
 	}
@@ -47,7 +47,7 @@ func(c *ffmpegCmd) getChapters() ([]*Chapter, error) {
 	}
 }
 
-func(c *ffmpegCmd) Extract() {
+func (c *ffmpegCmd) Extract() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
@@ -72,7 +72,7 @@ func(c *ffmpegCmd) Extract() {
 	cmd.Run()
 }
 
-func(cmd *ffmpegCmd) Update() {
+func (cmd *ffmpegCmd) Update() {
 	cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()
 
@@ -99,7 +99,7 @@ func(cmd *ffmpegCmd) Update() {
 	cmdExec.Run()
 }
 
-func(cmd *ffmpegCmd) addAacCover() *Cmd {
+func (cmd *ffmpegCmd) addAacCover() *Cmd {
 	cpath, err := filepath.Abs(cmd.opts.CoverFile)
 	if err != nil {
 		log.Fatal(err)
@@ -110,7 +110,7 @@ func(cmd *ffmpegCmd) addAacCover() *Cmd {
 	)
 }
 
-func(cmd *ffmpegCmd) Join(ext string) {
+func (cmd *ffmpegCmd) Join(ext string) {
 	cmd.ParseOptions()
 
 	tmp, err := os.CreateTemp("", "audiofiles")
@@ -137,7 +137,7 @@ func(cmd *ffmpegCmd) Join(ext string) {
 	c.Run()
 }
 
-func(c *ffmpegCmd) Remove() {
+func (c *ffmpegCmd) Remove() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
@@ -157,7 +157,7 @@ func(c *ffmpegCmd) Remove() {
 	cmd.Run()
 }
 
-func(cmd *ffmpegCmd) Split() error {
+func (cmd *ffmpegCmd) Split() error {
 	chaps, err := cmd.getChapters()
 	if err != nil {
 		return err
@@ -169,14 +169,14 @@ func(cmd *ffmpegCmd) Split() error {
 	return nil
 }
 
-func(cmd *ffmpegCmd) Cut(ss, to string, no int) {
+func (cmd *ffmpegCmd) Cut(ss, to string, no int) {
 	cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()
 
 	var (
 		count = no + 1
 		start = ss
-		end = to
+		end   = to
 	)
 
 	if cmd.opts.ChapNo != 0 {
@@ -184,7 +184,7 @@ func(cmd *ffmpegCmd) Cut(ss, to string, no int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		ch := chaps[cmd.opts.ChapNo - 1]
+		ch := chaps[cmd.opts.ChapNo-1]
 		count = cmd.opts.ChapNo
 		start = ch.StartToSeconds()
 		end = ch.EndToSeconds()
@@ -205,7 +205,7 @@ func(cmd *ffmpegCmd) Cut(ss, to string, no int) {
 	c.Run()
 }
 
-func(cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
+func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
@@ -224,14 +224,14 @@ func(cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 		cmd.Name = o
 	}
 
-	if c := cmd.opts.ChapNo; c  != 0 {
+	if c := cmd.opts.ChapNo; c != 0 {
 		cmd.num = c
 	}
 
 	return cmd
 }
 
-func(cmd *ffmpegCmd) ParseArgs() *Cmd {
+func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 	if log := cmd.LogLevel; log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -268,7 +268,7 @@ func(cmd *ffmpegCmd) ParseArgs() *Cmd {
 	//map input
 	idx := 0
 	if cover != "" {
-		cmd.args.Append("-map", strconv.Itoa(idx) + ":0")
+		cmd.args.Append("-map", strconv.Itoa(idx)+":0")
 		//cmd.args.Append("-map", "0:" + strconv.Itoa(idx))
 		idx++
 	}
@@ -331,7 +331,7 @@ func(cmd *ffmpegCmd) ParseArgs() *Cmd {
 	//output
 	var (
 		name string
-		ext string
+		ext  string
 	)
 
 	if out := cmd.Output; out != "" {

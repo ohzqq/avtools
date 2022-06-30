@@ -10,8 +10,8 @@ import (
 var rmCmd = &cobra.Command{
 	Use:   "rm",
 	Short: "remove/delete album art, metadata, or chapters",
-	Long: `Use this to remove metadata, art, or chapters from a/v files`,
-	Args: cobra.ExactArgs(1),
+	Long:  `Use this to remove metadata, art, or chapters from a/v files`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Remove()
 	},

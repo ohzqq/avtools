@@ -1,17 +1,17 @@
 package avtools
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
-	"bytes"
-	"log"
 )
 
 type Cmd struct {
 	verbose bool
-	cwd string
-	exec *exec.Cmd
+	cwd     string
+	exec    *exec.Cmd
 	tmpFile *os.File
 }
 
@@ -22,18 +22,18 @@ func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
 	}
 
 	return &Cmd{
-		cwd: cwd,
-		exec: cmd,
+		cwd:     cwd,
+		exec:    cmd,
 		verbose: verbose,
 	}
 }
 
-func(cmd *Cmd) tmp(f *os.File) *Cmd {
+func (cmd *Cmd) tmp(f *os.File) *Cmd {
 	cmd.tmpFile = f
 	return cmd
 }
 
-func(cmd Cmd) Run() []byte {
+func (cmd Cmd) Run() []byte {
 	if cmd.tmpFile != nil {
 		defer os.Remove(cmd.tmpFile.Name())
 	}

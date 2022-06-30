@@ -1,22 +1,22 @@
 package avtools
 
 import (
-	"path/filepath"
-	"log"
-	"fmt"
-	"os"
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 )
 
 type Media struct {
-	Meta *MediaMeta
-	File string
-	Path string
-	Dir string
-	Ext string
+	Meta     *MediaMeta
+	File     string
+	Path     string
+	Dir      string
+	Ext      string
 	CueChaps bool
-	json []byte
+	json     []byte
 }
 
 func NewMedia(input string) *Media {
@@ -35,7 +35,7 @@ func NewMedia(input string) *Media {
 	return &m
 }
 
-func(m *Media) JsonMeta() *Media {
+func (m *Media) JsonMeta() *Media {
 	cmd := NewFFprobeCmd(m.Path)
 	cmd.entries = ffProbeMeta
 	cmd.showChaps = true
@@ -44,7 +44,7 @@ func(m *Media) JsonMeta() *Media {
 	return m
 }
 
-func(m *Media) Unmarshal() *Media {
+func (m *Media) Unmarshal() *Media {
 	err := json.Unmarshal(m.json, &m.Meta)
 	if err != nil {
 		fmt.Println("help")
@@ -53,11 +53,11 @@ func(m *Media) Unmarshal() *Media {
 	return m
 }
 
-func(m *Media) Print() {
+func (m *Media) Print() {
 	fmt.Println(string(m.json))
 }
 
-func(m *Media) RenderFFChaps() {
+func (m *Media) RenderFFChaps() {
 	var f bytes.Buffer
 
 	err := metaTmpl.ffchaps.ExecuteTemplate(&f, "ffchaps", m)
@@ -67,7 +67,7 @@ func(m *Media) RenderFFChaps() {
 	fmt.Println(f.String())
 }
 
-func(m *Media) FFmetaChapsToCue() {
+func (m *Media) FFmetaChapsToCue() {
 	if !m.HasChapters() {
 		log.Fatal("No chapters")
 	}
@@ -83,7 +83,7 @@ func(m *Media) FFmetaChapsToCue() {
 	}
 }
 
-func(m *Media) SetMeta(meta *MediaMeta) *Media {
+func (m *Media) SetMeta(meta *MediaMeta) *Media {
 	m.Meta = meta
 	return m
 }
@@ -92,7 +92,7 @@ func (m *Media) SetChapters(ch []*Chapter) {
 	m.Meta.Chapters = ch
 }
 
-func(m *Media) HasChapters() bool {
+func (m *Media) HasChapters() bool {
 	if m.HasMeta() && len(m.Meta.Chapters) != 0 {
 		return true
 	}
@@ -151,7 +151,7 @@ func (m *Media) HasMeta() bool {
 }
 
 func (m *Media) HasStreams() bool {
-	if m.HasMeta() && m.Meta.Streams != nil{
+	if m.HasMeta() && m.Meta.Streams != nil {
 		return true
 	}
 	return false
@@ -167,4 +167,3 @@ func (m *Media) HasFormat() bool {
 func (m *Media) Duration() string {
 	return secsToHHMMSS(m.Meta.Format.Duration)
 }
-

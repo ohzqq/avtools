@@ -10,8 +10,8 @@ import (
 var splitCmd = &cobra.Command{
 	Use:   "split",
 	Short: "split a/v files",
-	Long: `split files by embedded chapters markers, an ffmpeg metadata file, or a cue sheet`,
-	Args: cobra.ExactArgs(1),
+	Long:  `split files by embedded chapters markers, an ffmpeg metadata file, or a cue sheet`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Split()
 	},

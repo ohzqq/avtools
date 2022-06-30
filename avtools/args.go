@@ -6,44 +6,44 @@ import (
 
 type Args struct {
 	Options
-	Input string
-	PreInput mapArgs
-	PostInput mapArgs
-	VideoCodec string
-	VideoParams mapArgs
-	VideoFilters stringArgs
-	AudioCodec string
-	AudioParams mapArgs
-	AudioFilters stringArgs
+	Input         string
+	PreInput      mapArgs
+	PostInput     mapArgs
+	VideoCodec    string
+	VideoParams   mapArgs
+	VideoFilters  stringArgs
+	AudioCodec    string
+	AudioParams   mapArgs
+	AudioFilters  stringArgs
 	FilterComplex stringArgs
-	MiscParams stringArgs
-	LogLevel string
-	Name string
-	Padding string
-	Ext string
-	num int
-	pretty bool
-	streams string
-	entries string
-	showChaps bool
-	format string
+	MiscParams    stringArgs
+	LogLevel      string
+	Name          string
+	Padding       string
+	Ext           string
+	num           int
+	pretty        bool
+	streams       string
+	entries       string
+	showChaps     bool
+	format        string
 }
 
 type Options struct {
-	Overwrite bool
-	Profile string
-	Start string
-	End string
-	Output string
-	ChapNo int
-	MetaSwitch bool
+	Overwrite   bool
+	Profile     string
+	Start       string
+	End         string
+	Output      string
+	ChapNo      int
+	MetaSwitch  bool
 	CoverSwitch bool
-	CueSwitch bool
-	ChapSwitch bool
-	Verbose bool
-	CoverFile string
-	MetaFile string
-	CueFile string
+	CueSwitch   bool
+	ChapSwitch  bool
+	Verbose     bool
+	CoverFile   string
+	MetaFile    string
+	CueFile     string
 }
 
 func NewArgs() *Args {
@@ -56,7 +56,7 @@ type cmdArgs struct {
 	args []string
 }
 
-func(arg *cmdArgs) Append(args ...string) {
+func (arg *cmdArgs) Append(args ...string) {
 	arg.args = append(arg.args, args...)
 }
 
@@ -66,7 +66,7 @@ func newMapArg(k, v string) map[string]string {
 	return map[string]string{k: v}
 }
 
-func(a *Args) AppendMapArg(key, flag, value string) {
+func (a *Args) AppendMapArg(key, flag, value string) {
 	mapArg := newMapArg(flag, value)
 	switch key {
 	case "pre":
@@ -80,11 +80,11 @@ func(a *Args) AppendMapArg(key, flag, value string) {
 	}
 }
 
-func(m mapArgs) Split() []string {
+func (m mapArgs) Split() []string {
 	var args []string
 	for _, flArg := range m {
 		for flag, arg := range flArg {
-			args = append(args, "-" + flag, arg)
+			args = append(args, "-"+flag, arg)
 		}
 	}
 	return args
@@ -92,6 +92,6 @@ func(m mapArgs) Split() []string {
 
 type stringArgs []string
 
-func(s stringArgs) Join() string {
+func (s stringArgs) Join() string {
 	return strings.Join(s, ",")
 }

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	//"fmt"
-
 	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/spf13/cobra"
@@ -12,8 +10,8 @@ import (
 var extractCmd = &cobra.Command{
 	Use:   "extract",
 	Short: "Extract chapters, album art, or metadata",
-	Long: ``,
-	Args: cobra.ExactArgs(1),
+	Long:  ``,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Extract()
 	},

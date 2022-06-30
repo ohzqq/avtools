@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	cfg = AVcfg{ profiles: make(map[string]*Args) }
+	cfg = AVcfg{profiles: make(map[string]*Args)}
 )
 
 type AVcfg struct {
-	pros *viper.Viper
+	pros     *viper.Viper
 	defaults *viper.Viper
-	ProList []string
+	ProList  []string
 	profiles map[string]*Args
 }
 
@@ -27,8 +27,8 @@ func InitProfiles(defaults, profiles *viper.Viper) {
 	}
 
 	cfg.profiles["default"] = &Args{
-		Options: Options{Output: "tmp"},
-		Padding: "%06d",
+		Options:    Options{Output: "tmp"},
+		Padding:    "%06d",
 		VideoCodec: "copy",
 		AudioCodec: "copy",
 	}
@@ -51,7 +51,7 @@ func Cfg() AVcfg {
 	return cfg
 }
 
-func(cfg AVcfg) GetProfile(p string) *Args {
+func (cfg AVcfg) GetProfile(p string) *Args {
 	pro := cfg.profiles[p]
 
 	if pro.Padding == "" {
@@ -69,22 +69,21 @@ func(cfg AVcfg) GetProfile(p string) *Args {
 	return pro
 }
 
-func(cfg AVcfg) GetDefault(p string) string {
+func (cfg AVcfg) GetDefault(p string) string {
 	if p != "overwrite" {
 		return cfg.defaults.GetString(p)
 	}
 	return ""
 }
 
-func(cfg AVcfg) OverwriteDefault() bool {
+func (cfg AVcfg) OverwriteDefault() bool {
 	return cfg.defaults.GetBool("overwrite")
 }
 
-func(cfg AVcfg) Profiles() []string {
+func (cfg AVcfg) Profiles() []string {
 	return cfg.ProList
 }
 
-func(cfg AVcfg) DefaultProfile() *Args {
+func (cfg AVcfg) DefaultProfile() *Args {
 	return cfg.GetProfile("default")
 }
-

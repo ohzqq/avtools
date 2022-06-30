@@ -6,24 +6,24 @@ import (
 
 type ffprobeCmd struct {
 	media *Media
-	args cmdArgs
+	args  cmdArgs
 	ffprobeArgs
 }
 
 type ffprobeArgs struct {
-	LogLevel string
-	pretty bool
-	streams string
-	entries string
+	LogLevel  string
+	pretty    bool
+	streams   string
+	entries   string
 	showChaps bool
-	format string
+	format    string
 }
 
 func NewFFprobeCmd(i string) *ffprobeCmd {
 	return &ffprobeCmd{media: NewMedia(i)}
 }
 
-func(cmd *ffprobeCmd) Parse() *Cmd {
+func (cmd *ffprobeCmd) Parse() *Cmd {
 	if log := Cfg().GetDefault("loglevel"); log != "" {
 		cmd.args.Append("-v", log)
 	}
@@ -60,5 +60,3 @@ func(cmd *ffprobeCmd) Parse() *Cmd {
 
 	return NewCmd(exec.Command("ffprobe", cmd.args.args...), false)
 }
-
-
