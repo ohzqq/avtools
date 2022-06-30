@@ -52,10 +52,6 @@ func(c *ffmpegCmd) Extract() {
 	cmd.Run()
 }
 
-func(cmd *ffmpegCmd) String() string {
-	return cmd.exec.String()
-}
-
 func(cmd *ffmpegCmd) ParseFlags() *ffmpegCmd {
 	cmd.media.JsonMeta().Unmarshal()
 
