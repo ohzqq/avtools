@@ -29,19 +29,18 @@ func NewFFmpegCmd(i string) *ffmpegCmd {
 }
 
 func(c *ffmpegCmd) Extract() {
-	fmt.Printf("%+v\n", c.Flags)
 	fmt.Println("extracting...")
 	switch {
 	case c.flags.CueSwitch:
 		fmt.Println("cue file")
 		c.media.FFmetaChapsToCue()
 		return
-	//case c.flags.CoverSwitch:
-	//  fmt.Println("cover")
-	//  ffmpeg.AudioCodec = "an"
-	//  ffmpeg.VideoCodec = "copy"
-	//  ffmpeg.Output = "cover"
-	//  ffmpeg.Ext = ".jpg"
+	case c.flags.CoverSwitch:
+		fmt.Println("cover")
+		c.AudioCodec = "an"
+		c.VideoCodec = "copy"
+		c.Output = "cover"
+		c.Ext = ".jpg"
 	//case c.flags.MetaSwitch:
 	//  ffmpeg.PostInput = append(ffmpeg.PostInput, newMapArg("f", "ffmetadata"))
 	//  ffmpeg.AudioCodec = "none"
@@ -49,9 +48,8 @@ func(c *ffmpegCmd) Extract() {
 	//  ffmpeg.Output = "ffmeta"
 	//  ffmpeg.Ext = ".ini"
 	}
-	//cmd := c.Parse()
-	fmt.Println(c.Parse().String())
-	//cmd.Run()
+	cmd := c.Parse()
+	cmd.Run()
 }
 
 func(cmd *ffmpegCmd) SetFlags(f *Flags) *ffmpegCmd {
@@ -209,5 +207,5 @@ func(cmd *ffmpegCmd) Parse() Cmd {
 	}
 	cmd.args.Append(name + ext)
 
-	return Cmd{exec: exec.Command("ffmpeg", cmd.args.args...)}
+	return Cmd{exec: exec.Command("ffmpeg", cmd.args.args...), flags: cmd.flags}
 }
