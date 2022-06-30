@@ -15,6 +15,7 @@ var _ = fmt.Printf
 
 type Args struct {
 	Options
+	Input string
 	PreInput mapArgs
 	PostInput mapArgs
 	VideoCodec string

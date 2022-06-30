@@ -5,7 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	//"github.com/ohzqq/avtools/avtools"
+	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +17,7 @@ var splitCmd = &cobra.Command{
 	Long: ``,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		avtools.NewFFmpegCmd(args[0]).Options(&flags).Split()
 	},
 }
 

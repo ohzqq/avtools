@@ -31,6 +31,11 @@ func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
 	}
 }
 
+func(cmd *Cmd) tmp(f *os.File) *Cmd {
+	cmd.tmpFile = f
+	return cmd
+}
+
 func(cmd Cmd) Run() []byte {
 	if cmd.tmpFile != nil {
 		defer os.Remove(cmd.tmpFile.Name())
