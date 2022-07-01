@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -65,7 +64,6 @@ func initConfig() {
 
 		// Search config in home directory with name ".avtools" (without extension).
 		viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
-		viper.AddConfigPath(filepath.Join(home, "Sync/code/avtools/tmp/"))
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config.yml")
 	}
@@ -74,7 +72,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 		avtools.InitProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
 	}
 }
