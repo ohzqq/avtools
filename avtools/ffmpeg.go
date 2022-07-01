@@ -267,6 +267,11 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 
 	//map input
 	idx := 0
+	if cover != "" || meta != "" {
+		cmd.args.Append("-map", strconv.Itoa(idx)+":0")
+		idx++
+	}
+
 	if cover != "" {
 		cmd.args.Append("-map", strconv.Itoa(idx)+":0")
 		//cmd.args.Append("-map", "0:" + strconv.Itoa(idx))

@@ -69,10 +69,11 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
+	avtools.InitCfg()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		avtools.InitProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
+		avtools.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
 	}
 }

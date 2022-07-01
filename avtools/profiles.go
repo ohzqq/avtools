@@ -12,33 +12,54 @@ var (
 
 type AVcfg struct {
 	pros     *viper.Viper
-	defaults *viper.Viper
+	defaults defaults
 	ProList  []string
 	profiles map[string]*Args
 }
 
-func InitProfiles(defaults, profiles *viper.Viper) {
-	cfg.defaults = defaults
-	cfg.pros = profiles
+type defaults struct {
+	Profile   string
+	Padding   string
+	Output    string
+	LogLevel  string
+	Overwrite bool
+}
 
-	err := cfg.pros.Unmarshal(&cfg.profiles)
+func InitCfg() {
+	cfg.defaults = defaults{
+		Padding:   "%06d",
+		Profile:   "default",
+		Output:    "tmp",
+		LogLevel:  "error",
+		Overwrite: false,
+	}
+
+	cfg.ProList = append(cfg.ProList, "default")
+	cfg.profiles["default"] = &Args{
+		VideoCodec: "copy",
+		AudioCodec: "copy",
+	}
+}
+
+func CfgProfiles(def, profiles *viper.Viper) {
+	var err error
+	err = def.Unmarshal(&cfg.defaults)
 	if err != nil {
 		fmt.Printf("unable to decode into struct, %v", err)
 	}
 
-	cfg.profiles["default"] = &Args{
-		Options:    Options{Output: "tmp"},
-		Padding:    "%06d",
-		VideoCodec: "copy",
-		AudioCodec: "copy",
+	cfg.pros = profiles
+	err = cfg.pros.Unmarshal(&cfg.profiles)
+	if err != nil {
+		fmt.Printf("unable to decode into struct, %v", err)
 	}
 
 	for name, pro := range cfg.profiles {
 		cfg.ProList = append(cfg.ProList, name)
 
 		var profile string
-		if cfg.defaults.IsSet("profile") {
-			profile = cfg.defaults.GetString("profile")
+		if def.IsSet("profile") {
+			profile = def.GetString("profile")
 		}
 
 		if name == profile {
@@ -55,29 +76,40 @@ func (cfg AVcfg) GetProfile(p string) *Args {
 	pro := cfg.profiles[p]
 
 	if pro.Padding == "" {
-		pro.Padding = cfg.defaults.GetString("padding")
+		pro.Padding = cfg.defaults.Padding
 	}
+
 	if pro.Output == "" {
-		pro.Output = cfg.defaults.GetString("output")
+		pro.Output = cfg.defaults.Output
 	}
+
 	if pro.LogLevel == "" {
-		pro.LogLevel = cfg.defaults.GetString("loglevel")
+		pro.LogLevel = cfg.defaults.LogLevel
 	}
+
 	if !pro.Overwrite {
-		pro.Overwrite = cfg.defaults.GetBool("overwrite")
+		pro.Overwrite = cfg.defaults.Overwrite
 	}
+
 	return pro
 }
 
 func (cfg AVcfg) GetDefault(p string) string {
-	if p != "overwrite" {
-		return cfg.defaults.GetString(p)
+	switch p {
+	case "padding":
+		return cfg.defaults.Padding
+	case "output":
+		return cfg.defaults.Output
+	case "profile":
+		return cfg.defaults.Profile
+	case "logLevel":
+		return cfg.defaults.LogLevel
 	}
 	return ""
 }
 
 func (cfg AVcfg) OverwriteDefault() bool {
-	return cfg.defaults.GetBool("overwrite")
+	return cfg.defaults.Overwrite
 }
 
 func (cfg AVcfg) Profiles() []string {
