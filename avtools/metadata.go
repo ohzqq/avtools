@@ -183,7 +183,7 @@ const ffChapTmpl = `
 {{- $media := . -}}
 {{- range $index, $ch := $media.Meta.Chapters -}}
 [CHAPTER]
-TITLE={{if ne $ch.Title ""}}{{.}}{{else}}Chapter {{$index}}{{end}}
+TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
 START=
 {{- if $media.CueChaps -}}
 	{{- $ch.StartToIntString -}}

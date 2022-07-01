@@ -96,6 +96,10 @@ func (cmd *ffmpegCmd) Update() {
 		cmdExec = cmd.ParseArgs()
 	}
 
+	if cmd.opts.CueFile != "" {
+		log.Fatal("cue sheets can't be used")
+	}
+
 	cmdExec.Run()
 }
 
@@ -209,10 +213,16 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
+		NewMedia(cmd.opts.MetaFile).IsMeta()
 		cmd.media.SetMeta(LoadFFmetadataIni(meta))
 	}
 
+	if cover := cmd.opts.CoverFile; cover != "" {
+		NewMedia(cmd.opts.CoverFile).IsImage()
+	}
+
 	if cue := cmd.opts.CueFile; cue != "" {
+		NewMedia(cmd.opts.CueFile).IsPlainText()
 		cmd.media.SetChapters(LoadCueSheet(cue))
 	}
 
@@ -274,7 +284,6 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 
 	if cover != "" {
 		cmd.args.Append("-map", strconv.Itoa(idx)+":0")
-		//cmd.args.Append("-map", "0:" + strconv.Itoa(idx))
 		idx++
 	}
 
