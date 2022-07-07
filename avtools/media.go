@@ -56,6 +56,7 @@ func (m *Media) Unmarshal() *Media {
 	if err != nil {
 		fmt.Println("help")
 	}
+	m.Meta.Tags = m.Meta.Format.Tags
 
 	return m
 }

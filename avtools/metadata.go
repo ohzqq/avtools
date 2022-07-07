@@ -17,6 +17,7 @@ type MediaMeta struct {
 	Chapters []*Chapter
 	Streams  []*Stream
 	Format   *Format
+	Tags     map[string]string
 }
 
 type Stream struct {
