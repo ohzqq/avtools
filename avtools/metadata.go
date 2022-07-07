@@ -29,7 +29,8 @@ type Format struct {
 	Duration string
 	Size     string
 	BitRate  string `json:"bit_rate"`
-	Tags     *Tags  `json:"tags"`
+	Tags     map[string]string
+	//Tags     *Tags  `json:"tags"`
 }
 
 type Tags struct {
@@ -45,7 +46,7 @@ type Chapter struct {
 	Timebase string `json:"time_base"`
 	Start    int    `json:"start"`
 	End      int    `json:"end"`
-	Tags     *Tags  `json:"tags"`
+	Tags     map[string]string
 	Title    string `ini:"title"`
 }
 
@@ -98,15 +99,15 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 
 	media := MediaMeta{
 		Format: &Format{
-			Tags: &Tags{},
+			Tags: f.Section("").KeysHash(),
 		},
 	}
 
-	meta, err := f.GetSection("")
-	if err != nil {
-		log.Fatal(err)
-	}
-	meta.MapTo(&media.Format.Tags)
+	//meta, err := f.GetSection("")
+	//if err != nil {
+	//  log.Fatal(err)
+	//}
+	//meta.MapTo(&media.Format.Tags)
 
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")

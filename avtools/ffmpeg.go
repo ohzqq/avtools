@@ -30,6 +30,12 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 	return cmd
 }
 
+func (c *ffmpegCmd) ShowMeta() {
+	c.media.JsonMeta().Unmarshal()
+	c.ParseOptions()
+	fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
+}
+
 func (c *ffmpegCmd) getChapters() ([]*Chapter, error) {
 	if len(c.media.json) == 0 {
 		c.media.JsonMeta().Unmarshal()
