@@ -31,7 +31,6 @@ type Format struct {
 	Size     string
 	BitRate  string `json:"bit_rate"`
 	Tags     map[string]string
-	//Tags     *Tags  `json:"tags"`
 }
 
 type Tags struct {
@@ -103,12 +102,6 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 			Tags: f.Section("").KeysHash(),
 		},
 	}
-
-	//meta, err := f.GetSection("")
-	//if err != nil {
-	//  log.Fatal(err)
-	//}
-	//meta.MapTo(&media.Format.Tags)
 
 	if f.HasSection("chapter") {
 		sec, _ := f.SectionsByName("chapter")

@@ -61,6 +61,15 @@ func (m *Media) Unmarshal() *Media {
 	return m
 }
 
+func (m Media) GetTag(t string) string {
+	for key, val := range m.Meta.Format.Tags {
+		if t == key {
+			return val
+		}
+	}
+	return ""
+}
+
 func (m *Media) Print() {
 	fmt.Println(string(m.json))
 }
