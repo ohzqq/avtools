@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/spf13/cobra"
@@ -13,6 +15,10 @@ var updateCmd = &cobra.Command{
 	Long:  `Adds album art or updates the metadata (using ffmpeg's metadata format). Album art of aac requires Atomic Parsley`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if flags.CueFile != "" {
+			cue := avtools.LoadCueSheet(flags.CueFile)
+			fmt.Printf("%+V\n", cue.CueToFFmeta())
+		}
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Update()
 	},
 }
@@ -21,5 +27,5 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 	updateCmd.PersistentFlags().StringVarP(&flags.CoverFile, "artFile", "a", "", "update album art")
 	updateCmd.PersistentFlags().StringVarP(&flags.MetaFile, "metaFile", "m", "", "update ffmetadata")
-	extractCmd.PersistentFlags().StringVarP(&flags.CueFile, "cue", "c", "", "update chapter metadata")
+	updateCmd.PersistentFlags().StringVarP(&flags.CueFile, "cue", "c", "", "update chapter metadata")
 }

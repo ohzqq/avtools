@@ -2,6 +2,7 @@ package avtools
 
 import (
 	"bufio"
+	"bytes"
 	"log"
 	"os"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
 
 type MediaMeta struct {
-	Chapters []*Chapter
+	Chapters Chapters
 	Streams  []*Stream
 	Format   *Format
 	Tags     map[string]string
@@ -42,12 +43,23 @@ type Tags struct {
 	Genre    string `json:"genre"`
 }
 
+type Chapters []*Chapter
+
 type Chapter struct {
 	Timebase string `json:"time_base"`
 	Start    int    `json:"start"`
 	End      int    `json:"end"`
 	Tags     map[string]string
 	Title    string `ini:"title"`
+}
+
+func (c Chapters) CueToFFmeta() string {
+	var chaps bytes.Buffer
+	err := metaTmpl.cueToFFchaps.ExecuteTemplate(&chaps, "cueToFF", c)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	return chaps.String()
 }
 
 func (c *Chapter) StartToIntString() string {
@@ -118,7 +130,7 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 	return &media
 }
 
-func LoadCueSheet(file string) []*Chapter {
+func LoadCueSheet(file string) Chapters {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -144,7 +156,7 @@ func LoadCueSheet(file string) []*Chapter {
 		}
 	}
 
-	var tracks []*Chapter
+	var tracks Chapters
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		t := new(Chapter)
@@ -161,8 +173,9 @@ func LoadCueSheet(file string) []*Chapter {
 }
 
 type metaTemplates struct {
-	cue     *template.Template
-	ffchaps *template.Template
+	cue          *template.Template
+	ffchaps      *template.Template
+	cueToFFchaps *template.Template
 }
 
 var funcs = template.FuncMap{
@@ -170,8 +183,9 @@ var funcs = template.FuncMap{
 }
 
 var metaTmpl = metaTemplates{
-	cue:     template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
-	ffchaps: template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
+	cue:          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+	ffchaps:      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
+	cueToFFchaps: template.Must(template.New("cueToFF").Funcs(funcs).Parse(cueToChapTmpl)),
 }
 
 const cueTmpl = `FILE '{{.File}}' {{.Ext}}
@@ -179,6 +193,15 @@ const cueTmpl = `FILE '{{.File}}' {{.Ext}}
 TRACK {{$index}} AUDIO
   TITLE "Chapter {{$index}}"
   INDEX 01 {{cueStamp $ch.StartToSeconds}}{{end}}`
+
+const cueToChapTmpl = `
+{{- range $index, $ch := . -}}
+[CHAPTER]
+TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
+START={{$ch.Start}}
+END={{$ch.End}}
+TIMEBASE=1/1000
+{{end}}`
 
 const ffChapTmpl = `
 {{- $media := . -}}
