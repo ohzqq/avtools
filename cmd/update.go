@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ohzqq/avtools/avtools"
 
 	"github.com/spf13/cobra"
@@ -16,8 +14,12 @@ var updateCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if flags.CueFile != "" {
-			cue := avtools.LoadCueSheet(flags.CueFile)
-			fmt.Printf("%+V\n", cue)
+			cue := avtools.NewFileFormat(flags.CueFile)
+			cue.ConvertTo("cue").Print()
+		}
+		if flags.MetaFile != "" {
+			cue := avtools.NewFileFormat(flags.MetaFile)
+			cue.ConvertTo("json").Print()
 		}
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Update()
 	},

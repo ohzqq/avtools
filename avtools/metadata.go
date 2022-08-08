@@ -2,8 +2,10 @@ package avtools
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -33,6 +35,13 @@ type Format struct {
 	Tags     map[string]string
 }
 
+func (f Format) Ext() string {
+	if f.Filename != "" {
+		return strings.TrimPrefix(path.Ext(f.Filename), ".")
+	}
+	return ""
+}
+
 type Tags struct {
 	Title    string `json:"title"`
 	Artist   string `json:"artist"`
@@ -55,6 +64,14 @@ type Chapter struct {
 func (c *Chapter) StartToIntString() string {
 	result := float64(c.Start) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
+}
+
+func (c *Chapter) CueStamp() string {
+	sec := float64(c.Start) / c.TimebaseFloat()
+	m := int(sec) / 60
+	s := int(sec) % 60
+	return fmt.Sprintf("%02d:%02d:00", m, s)
+	//return s
 }
 
 func (c *Chapter) StartToSeconds() string {

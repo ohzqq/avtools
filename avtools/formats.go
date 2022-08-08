@@ -21,34 +21,7 @@ type FileFormat struct {
 	data   []byte
 }
 
-func GetFormat(name string) (*FileFormat, error) {
-	var formats = map[string]*FileFormat{
-		"cue": &FileFormat{
-			name: "cue",
-			ext:  ".cue",
-			meta: &MediaMeta{},
-		},
-		"ffmeta": &FileFormat{
-			name: "ffmeta",
-			ext:  ".ini",
-			meta: &MediaMeta{},
-		},
-		"json": &FileFormat{
-			name: "json",
-			ext:  ".json",
-			meta: &MediaMeta{},
-		},
-	}
-
-	for n, _ := range formats {
-		if n == name {
-			return formats[n], nil
-		}
-	}
-	return &FileFormat{}, fmt.Errorf("%v is not a recognized format")
-}
-
-func Convert(file string) *FileFormat {
+func NewFileFormat(file string) *FileFormat {
 	switch ext := path.Ext(file); ext {
 	case ".cue":
 		fmt, err := GetFormat("cue")
@@ -68,51 +41,50 @@ func Convert(file string) *FileFormat {
 	return &FileFormat{}
 }
 
-func fromFFmeta(fmt *FileFormat) *FileFormat {
+func GetFormat(name string) (*FileFormat, error) {
+	var formats = map[string]*FileFormat{
+		"cue": &FileFormat{
+			name:   "cue",
+			ext:    ".cue",
+			meta:   &MediaMeta{},
+			buffer: &bytes.Buffer{},
+		},
+		"ffmeta": &FileFormat{
+			name:   "ffmeta",
+			ext:    ".ini",
+			meta:   &MediaMeta{},
+			buffer: &bytes.Buffer{},
+		},
+		"json": &FileFormat{
+			name:   "json",
+			ext:    ".json",
+			meta:   &MediaMeta{},
+			buffer: &bytes.Buffer{},
+		},
+	}
+
+	for n, _ := range formats {
+		if n == name {
+			return formats[n], nil
+		}
+	}
+	return &FileFormat{}, fmt.Errorf("%v is not a recognized format", name)
+}
+
+func (fmt *FileFormat) ConvertTo(kind string) *FileFormat {
+	fmt.to = kind
 	switch fmt.to {
 	case "json":
 		return fmt.MarshalJson()
+	case "ffmeta":
+		return fmt.Render("cueToFFchaps")
 	case "cue":
 		if len(fmt.meta.Chapters) == 0 {
 			log.Fatal("No chapters")
 		}
 		return fmt.Render("cue")
-	default:
-		return fmt.Render("ffmeta")
 	}
-}
-
-func fromCue(fmt *FileFormat) *FileFormat {
-	switch fmt.to {
-	case "json":
-		return fmt.MarshalJson()
-	case "ffmeta":
-		return fmt.Render("ffmeta")
-	default:
-		if len(fmt.meta.Chapters) == 0 {
-			log.Fatal("No chapters")
-		}
-		return fmt.Render("cue")
-	}
-}
-
-func fromJson(fmt *FileFormat) *FileFormat {
-	switch fmt.to {
-	case "ffmeta":
-		return fmt.Render("ffmeta")
-	case "cue":
-		if len(fmt.meta.Chapters) == 0 {
-			log.Fatal("No chapters")
-		}
-		return fmt.Render("cue")
-	default:
-		return fmt.MarshalJson()
-	}
-}
-
-func (f *FileFormat) ConvertTo(kind string) *FileFormat {
-	f.to = kind
-	return f
+	return fmt
 }
 
 func (f *FileFormat) MarshalJson() *FileFormat {
@@ -129,10 +101,12 @@ func (f *FileFormat) Render(name string) *FileFormat {
 	if err != nil {
 		log.Println("executing template:", err)
 	}
-	err = tmpl.Execute(f.buffer, f.meta)
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, f.meta)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
+	f.data = buf.Bytes()
 	return f
 }
 
@@ -140,7 +114,7 @@ func GetTmpl(name string) (*template.Template, error) {
 	var metaTmpl = map[string]*template.Template{
 		"cue":          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
 		"ffchaps":      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
-		"cueToFFchaps": template.Must(template.New("cueToFF").Funcs(funcs).Parse(cueToChapTmpl)),
+		"cueToFFchaps": template.Must(template.New("cueToFFchaps").Funcs(funcs).Parse(cueToChapTmpl)),
 	}
 
 	for n, _ := range metaTmpl {
@@ -148,7 +122,7 @@ func GetTmpl(name string) (*template.Template, error) {
 			return metaTmpl[n], nil
 		}
 	}
-	return &template.Template{}, fmt.Errorf("%v is not a template")
+	return &template.Template{}, fmt.Errorf("%v is not a template", name)
 }
 
 func (f *FileFormat) SetMeta(m *MediaMeta) *FileFormat {
@@ -167,7 +141,7 @@ func (f *FileFormat) SetExt(ext string) *FileFormat {
 }
 
 func (f *FileFormat) Print() {
-	println(f.buffer.String())
+	println(string(f.data))
 }
 
 //func CueToFFmeta(c Chapters) string {
@@ -189,14 +163,15 @@ var funcs = template.FuncMap{
 	"cueStamp": secsToCueStamp,
 }
 
-const cueTmpl = `FILE "{{.File}}" {{.Ext}}
-{{- range $index, $ch := .Meta.Chapters}}
+const cueTmpl = `FILE "{{.Format.Filename}}" {{.Format.Ext}}
+{{- range $index, $ch := .Chapters}}
 TRACK {{$index}} AUDIO
-  TITLE "Chapter {{$index}}"
-  INDEX 01 {{cueStamp $ch.StartToSeconds}}{{end}}`
+  TITLE "Chapter {{$ch.Title}}"
+  INDEX 01 {{$ch.CueStamp}}
+{{- end}}`
 
 const cueToChapTmpl = `
-{{- range $index, $ch := . -}}
+{{- range $index, $ch := .Chapters -}}
 [CHAPTER]
 TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
 START={{$ch.Start}}
