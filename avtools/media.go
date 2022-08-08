@@ -84,22 +84,6 @@ func (m *Media) RenderFFChaps() string {
 	return chaps.String()
 }
 
-func (m *Media) FFmetaChapsToCue() {
-	if !m.HasChapters() {
-		log.Fatal("No chapters")
-	}
-
-	f, err := os.Create("chapters.cue")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = metaTmpl.cue.ExecuteTemplate(f, "cue", m)
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-}
-
 func (m *Media) SetMeta(meta *MediaMeta) *Media {
 	m.Meta = meta
 	return m

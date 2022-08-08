@@ -2,12 +2,10 @@ package avtools
 
 import (
 	"bufio"
-	"bytes"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/go-ini/ini"
 )
@@ -51,15 +49,6 @@ type Chapter struct {
 	End      int    `json:"end"`
 	Tags     map[string]string
 	Title    string `ini:"title"`
-}
-
-func (c Chapters) CueToFFmeta() string {
-	var chaps bytes.Buffer
-	err := metaTmpl.cueToFFchaps.ExecuteTemplate(&chaps, "cueToFF", c)
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-	return chaps.String()
 }
 
 func (c *Chapter) StartToIntString() string {
@@ -126,7 +115,6 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 			media.Chapters = append(media.Chapters, &c)
 		}
 	}
-
 	return &media
 }
 
@@ -171,54 +159,3 @@ func LoadCueSheet(file string) Chapters {
 
 	return tracks
 }
-
-type metaTemplates struct {
-	cue          *template.Template
-	ffchaps      *template.Template
-	cueToFFchaps *template.Template
-}
-
-var funcs = template.FuncMap{
-	"cueStamp": secsToCueStamp,
-}
-
-var metaTmpl = metaTemplates{
-	cue:          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
-	ffchaps:      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffChapTmpl)),
-	cueToFFchaps: template.Must(template.New("cueToFF").Funcs(funcs).Parse(cueToChapTmpl)),
-}
-
-const cueTmpl = `FILE '{{.File}}' {{.Ext}}
-{{- range $index, $ch := .Meta.Chapters}}
-TRACK {{$index}} AUDIO
-  TITLE "Chapter {{$index}}"
-  INDEX 01 {{cueStamp $ch.StartToSeconds}}{{end}}`
-
-const cueToChapTmpl = `
-{{- range $index, $ch := . -}}
-[CHAPTER]
-TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
-START={{$ch.Start}}
-END={{$ch.End}}
-TIMEBASE=1/1000
-{{end}}`
-
-const ffChapTmpl = `
-{{- $media := . -}}
-{{- range $index, $ch := $media.Meta.Chapters -}}
-[CHAPTER]
-TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
-START=
-{{- if $media.CueChaps -}}
-	{{- $ch.StartToIntString -}}
-{{- else -}}
-	{{- $ch.Start -}}
-{{- end}}
-END=
-{{- if $media.CueChaps -}}
-	{{- $ch.EndToIntString -}}
-{{- else -}}
-	{{- $ch.End -}}
-{{- end}}
-TIMEBASE=1/1000
-{{end -}}`

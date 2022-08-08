@@ -9,7 +9,22 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gosimple/slug"
 )
+
+func WriteFile(name, ext string, data []byte) {
+	file, err := os.Create(slug.Make(name) + ext)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func secsToHHMMSS(sec string) string {
 	seconds := secsAtoi(sec)
