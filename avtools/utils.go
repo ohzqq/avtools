@@ -13,17 +13,44 @@ import (
 	"github.com/gosimple/slug"
 )
 
-func WriteFile(name, ext string, data []byte) {
+func TmpFile(d []byte) string {
+	tmp, err := os.CreateTemp("", "tmp")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tmp.Close()
+
+	name := tmp.Name()
+
+	_, err = tmp.Write(d)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return name
+}
+
+func Write(file *os.File, data []byte) *os.File {
+	_, err := file.Write(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return file
+}
+
+func WriteFile(name, ext string, data []byte) string {
 	file, err := os.Create(slug.Make(name) + ext)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
+	n := file.Name()
 
 	_, err = file.Write(data)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return n
 }
 
 func secsToHHMMSS(sec string) string {
@@ -50,6 +77,14 @@ func cueStampToFFmpegTime(stamp string) int {
 		log.Fatal(err)
 	}
 	return int(dur.Seconds() * 1000)
+}
+
+func decimalSecsToFloat(sec string) float64 {
+	seconds, err := strconv.ParseFloat(sec, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return seconds
 }
 
 func secsAtoi(sec string) int {

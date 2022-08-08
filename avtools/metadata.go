@@ -42,6 +42,11 @@ func (f Format) Ext() string {
 	return ""
 }
 
+func (f Format) DurationSecs(timebase float64) int {
+	seconds := decimalSecsToFloat(f.Duration) * timebase
+	return int(seconds)
+}
+
 type Tags struct {
 	Title    string `json:"title"`
 	Artist   string `json:"artist"`

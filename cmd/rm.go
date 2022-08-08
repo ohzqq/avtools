@@ -21,4 +21,5 @@ func init() {
 	rootCmd.AddCommand(rmCmd)
 	rmCmd.PersistentFlags().BoolVarP(&flags.MetaSwitch, "meta", "m", false, "delete all embedded metadata")
 	rmCmd.PersistentFlags().BoolVarP(&flags.CoverSwitch, "albumArt", "a", false, "remove embedded album art")
+	rmCmd.PersistentFlags().BoolVarP(&flags.ChapSwitch, "chapters", "c", false, "remove embedded album art")
 }

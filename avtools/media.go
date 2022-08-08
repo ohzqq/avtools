@@ -77,11 +77,14 @@ func (m *Media) RenderFFChaps() string {
 		m.JsonMeta().Unmarshal()
 	}
 
+	lastCh := m.Meta.Chapters[len(m.Meta.Chapters)-1]
+	lastCh.End = m.Meta.Format.DurationSecs(lastCh.TimebaseFloat())
+
 	fmt, err := GetFormat("cue")
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.SetMeta(m.Meta).ConvertTo("cue")
+	fmt.SetMeta(m.Meta).ConvertTo("ffmeta")
 
 	return fmt.String()
 }

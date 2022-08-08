@@ -103,7 +103,13 @@ func (cmd *ffmpegCmd) Update() {
 	}
 
 	if cmd.opts.CueFile != "" {
-		log.Fatal("cue sheets can't be used")
+		cmd.ParseOptions()
+		meta := cmd.media.RenderFFChaps()
+		tmp := TmpFile([]byte(meta))
+
+		cmd.AppendMapArg("post", "i", tmp)
+		cmd.AppendMapArg("post", "map_chapters", "1")
+		cmdExec = cmd.ParseArgs()
 	}
 
 	if cmd.opts.CueFile == "" && cmd.opts.MetaFile == "" && cmd.opts.CoverFile == "" {

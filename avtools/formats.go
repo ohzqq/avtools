@@ -161,16 +161,16 @@ TRACK {{$index}} AUDIO
   INDEX 01 {{$ch.CueStamp}}
 {{- end}}`
 
-const cueToChapTmpl = `
-{{- range $index, $ch := .Chapters -}}
+const cueToChapTmpl = `;FFMETADATA1
+{{range $index, $ch := .Chapters -}}
 [CHAPTER]
-TITLE={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
+TIMEBASE=1/1000
 START={{$ch.Start}}
 END={{$ch.End}}
-TIMEBASE=1/1000
+title={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
 {{end}}`
 
-const ffChapTmpl = `
+const ffChapTmpl = `;FFMETADATA1
 {{- $media := . -}}
 {{- range $index, $ch := $media.Meta.Chapters -}}
 [CHAPTER]
