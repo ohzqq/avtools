@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -118,7 +119,7 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 	return &media
 }
 
-func LoadCueSheet(file string) Chapters {
+func LoadCueSheet(file string) *MediaMeta {
 	contents, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -128,11 +129,17 @@ func LoadCueSheet(file string) Chapters {
 	var (
 		titles     []string
 		startTimes []int
+		meta       = MediaMeta{Format: &Format{}}
+		fileRegexp = regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
 	)
 
 	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
 		s := strings.TrimSpace(scanner.Text())
+		if strings.Contains(s, "FILE") {
+			matches := fileRegexp.FindStringSubmatch(s)
+			meta.Format.Filename = matches[fileRegexp.SubexpIndex("title")]
+		}
 		if strings.Contains(s, "TITLE") {
 			t := strings.TrimPrefix(s, "TITLE ")
 			t = strings.Trim(t, "'")
@@ -144,7 +151,6 @@ func LoadCueSheet(file string) Chapters {
 		}
 	}
 
-	var tracks Chapters
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		t := new(Chapter)
@@ -154,8 +160,8 @@ func LoadCueSheet(file string) Chapters {
 			t.End = startTimes[e]
 		}
 		e++
-		tracks = append(tracks, t)
+		meta.Chapters = append(meta.Chapters, t)
 	}
 
-	return tracks
+	return &meta
 }

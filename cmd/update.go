@@ -17,7 +17,7 @@ var updateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if flags.CueFile != "" {
 			cue := avtools.LoadCueSheet(flags.CueFile)
-			fmt.Printf("%+V\n", cue.CueToFFmeta())
+			fmt.Printf("%+V\n", cue)
 		}
 		avtools.NewFFmpegCmd(args[0]).Options(&flags).Update()
 	},

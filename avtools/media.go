@@ -57,7 +57,6 @@ func (m *Media) Unmarshal() *Media {
 		fmt.Println("help")
 	}
 	m.Meta.Tags = m.Meta.Format.Tags
-
 	return m
 }
 
@@ -77,7 +76,12 @@ func (m *Media) Print() {
 func (m *Media) RenderFFChaps() string {
 	var chaps bytes.Buffer
 
-	err := metaTmpl.ffchaps.ExecuteTemplate(&chaps, "ffchaps", m)
+	tmpl, err := GetTmpl("ffchaps")
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = tmpl.Execute(&chaps, m)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
@@ -117,6 +121,27 @@ func (m Media) IsMeta() bool {
 		}
 	}
 	return false
+}
+
+func (m *Media) FFmetaChapsToCue() {
+	if !m.HasChapters() {
+		log.Fatal("No chapters")
+	}
+
+	f, err := os.Create("chapters.cue")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpl, err := GetTmpl("cue")
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = tmpl.Execute(f, m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
 }
 
 func (m Media) IsImage() bool {

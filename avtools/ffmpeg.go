@@ -43,7 +43,7 @@ func (c *ffmpegCmd) getChapters() ([]*Chapter, error) {
 
 	switch {
 	case c.opts.CueFile != "":
-		return LoadCueSheet(c.opts.CueFile), nil
+		return LoadCueSheet(c.opts.CueFile).Chapters, nil
 	case c.opts.MetaFile != "":
 		return LoadFFmetadataIni(c.opts.MetaFile).Chapters, nil
 	case c.media.HasChapters():
@@ -229,7 +229,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 
 	if cue := cmd.opts.CueFile; cue != "" {
 		NewMedia(cmd.opts.CueFile).IsPlainText()
-		cmd.media.SetChapters(LoadCueSheet(cue))
+		cmd.media.SetChapters(LoadCueSheet(cue).Chapters)
 	}
 
 	if y := cmd.opts.Overwrite; y {
