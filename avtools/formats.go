@@ -20,39 +20,34 @@ type Format struct {
 	buffer *bytes.Buffer
 }
 
-var Formats = map[string]*Format{
-	"cue": &Format{
-		name: "cue",
-		ext:  ".cue",
-		meta: &MediaMeta{},
-		tmpl: metaTemplate,
-	},
-	"ffmeta": &Format{
-		name: "ffmeta",
-		ext:  ".ini",
-		meta: &MediaMeta{},
-		tmpl: metaTemplate,
-	},
-	"json": &Format{
-		name: "json",
-		ext:  ".json",
-		meta: &MediaMeta{},
-		tmpl: metaTemplate,
-	},
-}
+func GetFormat(name string) (*Format, error) {
+	var Formats = map[string]*Format{
+		"cue": &Format{
+			name: "cue",
+			ext:  ".cue",
+			meta: &MediaMeta{},
+			tmpl: metaTemplate,
+		},
+		"ffmeta": &Format{
+			name: "ffmeta",
+			ext:  ".ini",
+			meta: &MediaMeta{},
+			tmpl: metaTemplate,
+		},
+		"json": &Format{
+			name: "json",
+			ext:  ".json",
+			meta: &MediaMeta{},
+			tmpl: metaTemplate,
+		},
+	}
 
-func NewFormat(name string) (*Format, error) {
-	for _, f := range []string{"cue", "ffmeta", "json"} {
-		if name != f {
-			return &Format{}, fmt.Errorf("%v is not a recognized format")
+	for n, _ := range Formats {
+		if n == name {
+			return Formats[n], nil
 		}
 	}
-	format := &Format{
-		name: name,
-		meta: &MediaMeta{},
-		tmpl: metaTemplate,
-	}
-	return format, nil
+	return &Format{}, fmt.Errorf("%v is not a recognized format")
 }
 
 func (f *Format) ConvertTo(f string) *Format {
