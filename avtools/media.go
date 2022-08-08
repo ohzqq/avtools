@@ -2,7 +2,6 @@ package avtools
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -74,18 +73,17 @@ func (m *Media) Print() {
 }
 
 func (m *Media) RenderFFChaps() string {
-	var chaps bytes.Buffer
+	if m.Meta == nil {
+		m.JsonMeta().Unmarshal()
+	}
 
-	tmpl, err := GetTmpl("ffchaps")
+	fmt, err := GetFormat("cue")
 	if err != nil {
 		log.Println(err)
 	}
+	fmt.SetMeta(m.Meta).ConvertTo("cue")
 
-	err = tmpl.Execute(&chaps, m)
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-	return chaps.String()
+	return fmt.String()
 }
 
 func (m *Media) SetMeta(meta *MediaMeta) *Media {

@@ -17,7 +17,6 @@ type FileFormat struct {
 	to     string
 	ext    string
 	render func(to string) *FileFormat
-	buffer *bytes.Buffer
 	data   []byte
 }
 
@@ -44,22 +43,19 @@ func NewFileFormat(file string) *FileFormat {
 func GetFormat(name string) (*FileFormat, error) {
 	var formats = map[string]*FileFormat{
 		"cue": &FileFormat{
-			name:   "cue",
-			ext:    ".cue",
-			meta:   &MediaMeta{},
-			buffer: &bytes.Buffer{},
+			name: "cue",
+			ext:  ".cue",
+			meta: &MediaMeta{},
 		},
 		"ffmeta": &FileFormat{
-			name:   "ffmeta",
-			ext:    ".ini",
-			meta:   &MediaMeta{},
-			buffer: &bytes.Buffer{},
+			name: "ffmeta",
+			ext:  ".ini",
+			meta: &MediaMeta{},
 		},
 		"json": &FileFormat{
-			name:   "json",
-			ext:    ".json",
-			meta:   &MediaMeta{},
-			buffer: &bytes.Buffer{},
+			name: "json",
+			ext:  ".json",
+			meta: &MediaMeta{},
 		},
 	}
 
@@ -141,17 +137,12 @@ func (f *FileFormat) SetExt(ext string) *FileFormat {
 }
 
 func (f *FileFormat) Print() {
-	println(string(f.data))
+	println(f.String())
 }
 
-//func CueToFFmeta(c Chapters) string {
-//  var chaps bytes.Buffer
-//  err := metaTmpl.cueToFFchaps.ExecuteTemplate(&chaps, "cueToFF", c)
-//  if err != nil {
-//    log.Println("executing template:", err)
-//  }
-//  return chaps.String()
-//}
+func (f *FileFormat) String() string {
+	return string(f.data)
+}
 
 type metaTemplates struct {
 	cue          *template.Template
@@ -166,7 +157,7 @@ var funcs = template.FuncMap{
 const cueTmpl = `FILE "{{.Format.Filename}}" {{.Format.Ext}}
 {{- range $index, $ch := .Chapters}}
 TRACK {{$index}} AUDIO
-  TITLE "Chapter {{$ch.Title}}"
+  TITLE {{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
   INDEX 01 {{$ch.CueStamp}}
 {{- end}}`
 

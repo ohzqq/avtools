@@ -13,6 +13,8 @@ var updateCmd = &cobra.Command{
 	Long:  `Adds album art or updates the metadata (using ffmpeg's metadata format). Album art of aac requires Atomic Parsley`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		media := avtools.NewMedia(args[0])
+		println(media.RenderFFChaps())
 		if flags.CueFile != "" {
 			cue := avtools.NewFileFormat(flags.CueFile)
 			cue.ConvertTo("cue").Print()

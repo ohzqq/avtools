@@ -106,6 +106,10 @@ func (cmd *ffmpegCmd) Update() {
 		log.Fatal("cue sheets can't be used")
 	}
 
+	if cmd.opts.CueFile == "" && cmd.opts.MetaFile == "" && cmd.opts.CoverFile == "" {
+		log.Fatal("the update command requires *something* to update")
+	}
+
 	cmdExec.Run()
 }
 

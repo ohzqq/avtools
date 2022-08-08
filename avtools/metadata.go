@@ -76,7 +76,7 @@ func (c *Chapter) CueStamp() string {
 
 func (c *Chapter) StartToSeconds() string {
 	if c.Start == 0 {
-		return ""
+		return "0"
 	}
 	result := float64(c.Start) / c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 3, 64)
@@ -89,7 +89,7 @@ func (c *Chapter) EndToIntString() string {
 
 func (c *Chapter) EndToSeconds() string {
 	if c.End == 0 {
-		return ""
+		return "0"
 	}
 	result := float64(c.End) / c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 3, 64)
