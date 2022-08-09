@@ -7,12 +7,16 @@ import (
 	"log"
 	"mime"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 type Media struct {
 	Meta     *MediaMeta
+	Format   *FileFormat
+	Formats  []*FileFormat
 	File     string
 	Path     string
 	Dir      string
@@ -37,8 +41,46 @@ func NewMedia(input string) *Media {
 	m.Dir = filepath.Dir(input)
 	m.Ext = filepath.Ext(input)
 	m.mimetype = mime.TypeByExtension(m.Ext)
+	m.Formats = []*FileFormat{
+		&FileFormat{
+			name:   "cue",
+			ext:    ".cue",
+			parse:  LoadCueSheet,
+			render: RenderTmpl,
+			tmpl:   template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+		},
+		&FileFormat{
+			name:   "ffmeta",
+			ext:    ".ini",
+			parse:  LoadFFmetadataIni,
+			render: RenderTmpl,
+			tmpl:   template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
+		},
+		&FileFormat{
+			name:   "json",
+			ext:    ".json",
+			parse:  JsonMeta,
+			render: MarshalJson,
+		},
+	}
 
 	return &m
+}
+
+func (m *Media) GetFormat(f string) *FileFormat {
+	for _, format := range m.Formats {
+		if f == format.ext {
+			return format
+		}
+	}
+	return m.Formats[2]
+}
+
+func (m *Media) AddFileFormat(f string) *Media {
+	format := m.GetFormat(path.Ext(f))
+	format.file = f
+	format.Parse()
+	return m
 }
 
 func (m *Media) JsonMeta() *Media {
@@ -59,38 +101,31 @@ func (m *Media) Unmarshal() *Media {
 	return m
 }
 
-func (m Media) GetTag(t string) string {
-	for key, val := range m.Meta.Format.Tags {
-		if t == key {
-			return val
-		}
-	}
-	return ""
-}
-
 func (m *Media) Print() {
 	fmt.Println(string(m.json))
 }
 
-func (m *Media) RenderFFChaps() string {
-	if m.Meta == nil {
-		m.JsonMeta().Unmarshal()
-	}
+//func (m *Media) RenderFFChaps() string {
+//  if m.Meta == nil {
+//    m.JsonMeta().Unmarshal()
+//  }
 
-	lastCh := m.Meta.Chapters[len(m.Meta.Chapters)-1]
-	lastCh.End = m.Meta.Format.DurationSecs(lastCh.TimebaseFloat())
+//  lastCh := m.Meta.Chapters[len(m.Meta.Chapters)-1]
+//  lastCh.End = m.Meta.Format.DurationSecs(lastCh.TimebaseFloat())
 
-	fmt, err := GetFormat("cue")
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.SetMeta(m.Meta).ConvertTo("ffmeta")
+//  fmt, err := GetFormat("cue")
+//  if err != nil {
+//    log.Println(err)
+//  }
+//  //fmt.SetMeta(m.Meta).ConvertTo("ffmeta")
 
-	return fmt.String()
-}
+//  return fmt.String()
+//}
 
 func (m *Media) SetMeta(meta *MediaMeta) *Media {
-	m.Meta = meta
+	m.Meta.Format.Tags = meta.Format.Tags
+	m.Meta.Tags = meta.Tags
+	m.Meta.Chapters = meta.Chapters
 	return m
 }
 
@@ -154,7 +189,7 @@ func (m Media) IsImage() bool {
 	return false
 }
 
-func (m *Media) SetChapters(ch []*Chapter) {
+func (m *Media) SetChapters(ch Chapters) {
 	m.Meta.Chapters = ch
 }
 

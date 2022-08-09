@@ -26,9 +26,8 @@ func (cmd *ffmpegCmd) Update() {
 	}
 
 	if cmd.opts.CueFile != "" {
-		cmd.ParseOptions()
-		meta := cmd.media.RenderFFChaps()
-		tmp := TmpFile([]byte(meta))
+		meta := cmd.media.GetFormat(cmd.opts.CueFile).Render()
+		tmp := TmpFile([]byte(meta.data))
 
 		cmd.AppendMapArg("post", "i", tmp)
 		cmd.AppendMapArg("post", "map_chapters", "1")
@@ -54,6 +53,7 @@ func addAacCover(file, cover string, verbose bool) *Cmd {
 }
 
 func (cmd *ffmpegCmd) addMp3Cover() *Cmd {
+	//cmd := ffmpegCmd{}
 	cmd.VideoCodec = ""
 	cmd.AppendMapArg("audioParams", "id3v2_version", "3")
 	cmd.AppendMapArg("audioParams", "metadata:s:v", "title='Album cover'")

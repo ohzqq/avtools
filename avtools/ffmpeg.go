@@ -32,10 +32,21 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 func (c *ffmpegCmd) ShowMeta() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
+	if meta := c.opts.MetaFile; meta != "" {
+		NewMedia(c.opts.MetaFile).IsMeta()
+		c.media.SetMeta(LoadFFmetadataIni(meta))
+		c.media.AddFileFormat(c.media.Path)
+		c.media.GetFormat("json").Render().Print()
+		//ff := *f
+		//f.render(f) //.Print()
+		//fmt.Printf("cue meta %+V\n", f)
+	}
+	//f, _ := GetFormat("cue")
+	//meta := f.parse(c.opts.CueFile)
 	fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
 }
 
-func (c *ffmpegCmd) getChapters() ([]*Chapter, error) {
+func (c *ffmpegCmd) getChapters() (Chapters, error) {
 	if len(c.media.json) == 0 {
 		c.media.JsonMeta().Unmarshal()
 	}

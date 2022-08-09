@@ -2,10 +2,12 @@ package avtools
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,7 +21,15 @@ type MediaMeta struct {
 	Chapters Chapters
 	Streams  []*Stream
 	Format   *Format
-	Tags     map[string]string
+	Tags     Tags
+	//Tags     map[string]string
+}
+
+func (m *MediaMeta) LastChapterEnd() {
+	if m.Format.Duration != "" && len(m.Chapters) > 0 {
+		lastCh := m.Chapters[len(m.Chapters)-1]
+		lastCh.End = m.Format.DurationSecs(lastCh.TimebaseFloat())
+	}
 }
 
 type Stream struct {
@@ -32,7 +42,7 @@ type Format struct {
 	Duration string
 	Size     string
 	BitRate  string `json:"bit_rate"`
-	Tags     map[string]string
+	Tags            //map[string]string
 }
 
 func (f Format) Ext() string {
@@ -48,22 +58,22 @@ func (f Format) DurationSecs(timebase float64) int {
 }
 
 type Tags struct {
-	Title    string `json:"title"`
-	Artist   string `json:"artist"`
-	Composer string `json:"composer"`
-	Album    string `json:"album"`
-	Comment  string `json:"comment"`
-	Genre    string `json:"genre"`
+	Title    string `json:"title",ini:"title"`
+	Artist   string `json:"artist",ini:"artist"`
+	Composer string `json:"composer",ini:"composer"`
+	Album    string `json:"album",ini:"album"`
+	Comment  string `json:"comment",ini:"comment"`
+	Genre    string `json:"genre",ini:"genre"`
 }
 
 type Chapters []*Chapter
 
 type Chapter struct {
-	Timebase string `json:"time_base"`
-	Start    int    `json:"start"`
-	End      int    `json:"end"`
-	Tags     map[string]string
-	Title    string `ini:"title"`
+	Timebase string `json:"time_base",ini:"timebase"`
+	Start    int    `json:"start",ini:"start"`
+	End      int    `json:"end",ini:"end"`
+	//Tags     map[string]string
+	Title string `ini:"title"`
 }
 
 func (c *Chapter) StartToIntString() string {
@@ -109,6 +119,22 @@ func (c Chapter) TimebaseFloat() float64 {
 	return baseFloat
 }
 
+func (m *MediaMeta) ToFFmeta() {
+	m.LastChapterEnd()
+	tmpl, err := GetTmpl("ffmeta")
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, m)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	println(buf.String())
+	//if len(m.Chapters) != 0 {
+	//}
+}
+
 func LoadFFmetadataIni(input string) *MediaMeta {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
@@ -116,15 +142,18 @@ func LoadFFmetadataIni(input string) *MediaMeta {
 	opts.IgnoreInlineComment = true
 	opts.AllowNonUniqueSections = true
 
-	f, err := ini.LoadSources(opts, input)
+	abs, _ := filepath.Abs(input)
+	f, err := ini.LoadSources(opts, abs)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	media := MediaMeta{
-		Format: &Format{
-			Tags: f.Section("").KeysHash(),
-		},
+		Format: &Format{},
+	}
+	err = f.Section("").MapTo(&media.Format.Tags)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	if f.HasSection("chapter") {
@@ -175,14 +204,15 @@ func LoadCueSheet(file string) *MediaMeta {
 
 	e := 1
 	for i := 0; i < len(titles); i++ {
-		t := new(Chapter)
+		t := Chapter{}
+		//t := new(Chapter)
 		t.Title = titles[i]
 		t.Start = startTimes[i]
 		if e < len(titles) {
 			t.End = startTimes[e]
 		}
 		e++
-		meta.Chapters = append(meta.Chapters, t)
+		meta.Chapters = append(meta.Chapters, &t)
 	}
 
 	return &meta
