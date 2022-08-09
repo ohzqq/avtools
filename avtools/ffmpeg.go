@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 )
 
@@ -76,58 +75,6 @@ func (c *ffmpegCmd) Extract() {
 
 	cmd := c.ParseArgs()
 	cmd.Run()
-}
-
-func (cmd *ffmpegCmd) Update() {
-	cmd.media.JsonMeta().Unmarshal()
-	cmd.ParseOptions()
-
-	var cmdExec *Cmd
-
-	if cmd.opts.CoverFile != "" {
-		switch codec := cmd.media.AudioCodec(); codec {
-		case "aac":
-			cmdExec = cmd.addAacCover()
-		case "mp3":
-			cmd.VideoCodec = ""
-			cmd.AppendMapArg("audioParams", "id3v2_version", "3")
-			cmd.AppendMapArg("audioParams", "metadata:s:v", "title='Album cover'")
-			cmd.AppendMapArg("audioParams", "metadata:s:v", "comment='Cover (front)'")
-			cmd.Output = "with-cover"
-			cmdExec = cmd.ParseArgs()
-		}
-	}
-
-	if cmd.opts.MetaFile != "" {
-		cmdExec = cmd.ParseArgs()
-	}
-
-	if cmd.opts.CueFile != "" {
-		cmd.ParseOptions()
-		meta := cmd.media.RenderFFChaps()
-		tmp := TmpFile([]byte(meta))
-
-		cmd.AppendMapArg("post", "i", tmp)
-		cmd.AppendMapArg("post", "map_chapters", "1")
-		cmdExec = cmd.ParseArgs()
-	}
-
-	if cmd.opts.CueFile == "" && cmd.opts.MetaFile == "" && cmd.opts.CoverFile == "" {
-		log.Fatal("the update command requires *something* to update")
-	}
-
-	cmdExec.Run()
-}
-
-func (cmd *ffmpegCmd) addAacCover() *Cmd {
-	cpath, err := filepath.Abs(cmd.opts.CoverFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return NewCmd(
-		exec.Command("AtomicParsley", cmd.media.Path, "--artwork", cpath, "--overWrite"),
-		cmd.opts.Verbose,
-	)
 }
 
 func (cmd *ffmpegCmd) Join(ext string) {
