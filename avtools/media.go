@@ -139,7 +139,7 @@ func (m *Media) FFmetaChapsToCue() {
 		log.Println(err)
 	}
 
-	err = tmpl.Execute(f, m)
+	err = tmpl.Execute(f, m.Meta)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
