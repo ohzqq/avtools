@@ -1,54 +1,108 @@
 package avtools
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
-	"path"
+	"mime"
+	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
-
-	"gopkg.in/ini.v1"
 )
 
 type FileFormats struct {
-	fmt  []*FileFormat
-	from *FileFormat
-	to   *FileFormat
+	formats []*FileFormat
+	from    *FileFormat
+	to      *FileFormat
+}
+
+func (f FileFormats) ListFormats() []string {
+	var formats []string
+	for _, f := range f.formats {
+		formats = append(formats, f.Ext)
+	}
+	return formats
 }
 
 func (f FileFormats) GetFormat(format string) *FileFormat {
-	for _, fmt := range f.fmt {
-		if format == fmt.ext {
+	for _, fmt := range f.formats {
+		if fmt.IsAudio() {
+			return fmt
+		}
+		if format == fmt.Ext {
 			return fmt
 		}
 	}
-	return f.fmt[2]
+	return f.formats[0]
 }
 
-func (f *FileFormats) AddFileFormat(file string) *FileFormats {
-	fmt := f.GetFormat(path.Ext(file))
-	fmt.file = file
-	fmt.Parse()
+func (f *FileFormats) AddFormat(file string) *FileFormats {
+	format := NewFormat(file)
+	format.Parse()
+	f.formats = append(f.formats, format)
 	return f
 }
 
 type FileFormat struct {
-	name   string
-	file   string
-	meta   *MediaMeta
-	from   string
-	to     string
-	ext    string
-	ini    *ini.File
-	tmpl   *template.Template
-	parse  func(file string) *MediaMeta
-	render func(f *FileFormat) []byte
-	data   []byte
+	name     string
+	meta     *MediaMeta
+	from     string
+	to       string
+	File     string
+	Path     string
+	Dir      string
+	Ext      string
+	Mimetype string
+	tmpl     *template.Template
+	parse    func(file string) *MediaMeta
+	render   func(f *FileFormat) []byte
+	data     []byte
+}
+
+func NewFormat(input string) *FileFormat {
+	mime.AddExtensionType(".ini", "text/plain")
+	mime.AddExtensionType(".cue", "text/plain")
+	mime.AddExtensionType(".m4b", "audio/mp4")
+
+	abs, err := filepath.Abs(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f := FileFormat{
+		Path: abs,
+		File: filepath.Base(input),
+		Dir:  filepath.Dir(input),
+		Ext:  filepath.Ext(input),
+	}
+	f.Mimetype = mime.TypeByExtension(f.Ext)
+
+	switch f.Ext {
+	case ".ini", "ini", "ffmeta":
+		f.parse = LoadFFmetadataIni
+		f.render = RenderTmpl
+		f.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+	case ".cue", "cue":
+		f.parse = LoadCueSheet
+		f.render = RenderTmpl
+		f.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+	case ".jpg", "jpg", ".png", "png":
+	default:
+		if f.IsAudio() {
+			f.parse = EmbeddedJsonMeta
+			f.render = MarshalJson
+		}
+	}
+	//fmt.Printf("%+V\n", f.Path)
+	return &f
+
 }
 
 func (f *FileFormat) Parse() *FileFormat {
-	f.meta = f.parse(f.file)
+	f.meta = f.parse(f.Path)
 	return f
 }
 
@@ -57,12 +111,47 @@ func (f *FileFormat) Render() *FileFormat {
 	return f
 }
 
-func JsonMeta(file string) *MediaMeta {
-	cmd := NewFFprobeCmd(file)
-	cmd.entries = ffProbeMeta
-	cmd.showChaps = true
-	cmd.format = "json"
-	data := cmd.Parse().Run()
+func (f FileFormat) IsAudio() bool {
+	if strings.Contains(f.Mimetype, "audio") {
+		return true
+	} else {
+		log.Fatalln("not an audio file")
+	}
+	return false
+}
+
+func (f FileFormat) IsPlainText() bool {
+	if strings.Contains(f.Mimetype, "text/plain") {
+		return true
+	} else {
+		log.Fatalln("needs to be plain text file")
+	}
+	return false
+}
+
+func (f FileFormat) IsFFmeta() bool {
+	if f.IsPlainText() {
+		contents, err := os.Open(f.Path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer contents.Close()
+
+		scanner := bufio.NewScanner(contents)
+		line := 0
+		for scanner.Scan() {
+			if line == 0 && scanner.Text() == ";FFMETADATA1" {
+				return true
+			} else {
+				log.Fatalln("ffmpeg metadata files need to have ';FFMETADATA1' as the first line")
+			}
+		}
+	}
+	return false
+}
+
+func EmbeddedJsonMeta(file string) *MediaMeta {
+	data := NewFFprobeCmd(file).EmbeddedMeta()
 
 	meta := MediaMeta{}
 	err := json.Unmarshal(data, &meta)
@@ -132,7 +221,7 @@ func (f *FileFormat) SetFileName(n string) *FileFormat {
 }
 
 func (f *FileFormat) SetExt(ext string) *FileFormat {
-	f.ext = ext
+	f.Ext = ext
 	return f
 }
 

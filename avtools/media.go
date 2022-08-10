@@ -7,16 +7,12 @@ import (
 	"log"
 	"mime"
 	"os"
-	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 type Media struct {
-	FileFormats
+	*FileFormats
 	Meta     *MediaMeta
-	format   *FileFormat
-	Formats  []*FileFormat
 	File     string
 	Path     string
 	Dir      string
@@ -29,42 +25,43 @@ type Media struct {
 func NewMedia(input string) *Media {
 	mime.AddExtensionType(".ini", "text/plain")
 	mime.AddExtensionType(".cue", "text/plain")
-	m := Media{}
+	m := Media{FileFormats: &FileFormats{}}
+	m.AddFormat(input)
 
-	abs, err := filepath.Abs(input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//abs, err := filepath.Abs(input)
+	//if err != nil {
+	//  log.Fatal(err)
+	//}
 
-	m.Path = abs
-	m.File = filepath.Base(input)
-	m.Dir = filepath.Dir(input)
-	m.Ext = filepath.Ext(input)
-	m.mimetype = mime.TypeByExtension(m.Ext)
-	var formats = []*FileFormat{
-		&FileFormat{
-			name:   "cue",
-			ext:    ".cue",
-			parse:  LoadCueSheet,
-			render: RenderTmpl,
-			tmpl:   template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
-		},
-		&FileFormat{
-			name:   "ffmeta",
-			ext:    ".ini",
-			parse:  LoadFFmetadataIni,
-			render: RenderTmpl,
-			tmpl:   template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
-		},
-		&FileFormat{
-			name:   "json",
-			ext:    ".json",
-			parse:  JsonMeta,
-			render: MarshalJson,
-		},
-	}
-	m.Formats = formats
-	m.FileFormats.fmt = formats
+	//m.Path = abs
+	//m.File = filepath.Base(input)
+	//m.Dir = filepath.Dir(input)
+	//m.Ext = filepath.Ext(input)
+	//m.mimetype = mime.TypeByExtension(m.Ext)
+	//var formats = []*FileFormat{
+	//  &FileFormat{
+	//    name:   "cue",
+	//    Ext:    ".cue",
+	//    parse:  LoadCueSheet,
+	//    render: RenderTmpl,
+	//    tmpl:   template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+	//  },
+	//  &FileFormat{
+	//    name:   "ffmeta",
+	//    Ext:    ".ini",
+	//    parse:  LoadFFmetadataIni,
+	//    render: RenderTmpl,
+	//    tmpl:   template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
+	//  },
+	//  &FileFormat{
+	//    name:   "json",
+	//    Ext:    ".json",
+	//    parse:  EmbeddedJsonMeta,
+	//    render: MarshalJson,
+	//  },
+	//}
+	//m.Formats = formats
+	//m.FileFormats.fmt = formats
 
 	return &m
 }

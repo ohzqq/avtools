@@ -1,10 +1,8 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ohzqq/avtools/avtools"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +13,13 @@ var showCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		avtools.NewFFmpegCmd(args[0]).Options(&flags).ShowMeta()
+		input := args[0]
+		//avtools.NewFFmpegCmd(input).Options(&flags).ShowMeta()
+		f := avtools.NewMedia(input)
+		f.AddFormat(flags.MetaFile)
+		f.AddFormat(flags.CueFile)
+		fmt.Printf("%+V\n", f.ListFormats())
+		fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }
 

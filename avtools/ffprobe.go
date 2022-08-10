@@ -1,11 +1,14 @@
 package avtools
 
 import (
+	"log"
 	"os/exec"
+	"path/filepath"
 )
 
 type ffprobeCmd struct {
 	media *Media
+	input string
 	args  cmdArgs
 	ffprobeArgs
 }
@@ -20,7 +23,20 @@ type ffprobeArgs struct {
 }
 
 func NewFFprobeCmd(i string) *ffprobeCmd {
-	return &ffprobeCmd{media: NewMedia(i)}
+	//return &ffprobeCmd{media: NewMedia(i)}
+	abs, err := filepath.Abs(i)
+	if err != nil {
+		log.Fatal(err)
+	}
+	println(i)
+	return &ffprobeCmd{input: abs}
+}
+
+func (cmd *ffprobeCmd) EmbeddedMeta() []byte {
+	cmd.entries = ffProbeMeta
+	cmd.showChaps = true
+	cmd.format = "json"
+	return cmd.Parse().Run()
 }
 
 func (cmd *ffprobeCmd) Parse() *Cmd {
@@ -56,7 +72,7 @@ func (cmd *ffprobeCmd) Parse() *Cmd {
 		cmd.args.Append("json=c=1")
 	}
 
-	cmd.args.Append(cmd.media.Path)
+	cmd.args.Append(cmd.input)
 
 	return NewCmd(exec.Command("ffprobe", cmd.args.args...), false)
 }

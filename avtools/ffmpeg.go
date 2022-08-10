@@ -35,8 +35,8 @@ func (c *ffmpegCmd) ShowMeta() {
 	if meta := c.opts.MetaFile; meta != "" {
 		//NewMedia(c.opts.MetaFile).IsMeta()
 		c.media.SetMeta(LoadFFmetadataIni(meta))
-		c.media.AddFileFormat(c.media.Path)
-		c.media.GetFormat("json").Render().Print()
+		c.media.AddFormat(c.media.Path)
+		//c.media.GetFormat("json").Render().Print()
 		//ff := *f
 		//f.render(f) //.Print()
 		//fmt.Printf("cue meta %+V\n", f)
