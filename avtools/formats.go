@@ -39,6 +39,10 @@ func (f FileFormats) GetFormat(format string) *FileFormat {
 	}
 	for _, fmt := range f.formats {
 		switch ext {
+		case "cover":
+			if fmt.IsImage() {
+				return fmt
+			}
 		case "audio":
 			if fmt.IsAudio() {
 				return fmt
@@ -52,7 +56,9 @@ func (f FileFormats) GetFormat(format string) *FileFormat {
 
 func (f *FileFormats) AddFormat(file string) *FileFormats {
 	format := NewFormat(file)
-	format.Parse()
+	if !format.IsImage() {
+		format.Parse()
+	}
 	f.formats = append(f.formats, format)
 	return f
 }
@@ -128,6 +134,13 @@ func (f *FileFormat) Parse() *FileFormat {
 func (f *FileFormat) Render() *FileFormat {
 	f.data = f.render(f)
 	return f
+}
+
+func (f FileFormat) IsImage() bool {
+	if strings.Contains(f.Mimetype, "image") {
+		return true
+	}
+	return false
 }
 
 func (f FileFormat) IsAudio() bool {

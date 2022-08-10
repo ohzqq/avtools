@@ -29,13 +29,13 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 	return cmd
 }
 
-func (c *ffmpegCmd) ShowMeta() {
-	c.ParseOptions()
-	fmt.Printf("%+V\n", c.media.ListFormats())
-	fmt.Printf("%+V\n", c.media.HasChapters())
-	//f, _ := GetFormat("cue")
-	//meta := f.parse(c.opts.CueFile)
-	//fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
+func (cmd *ffmpegCmd) ShowMeta() {
+	cmd.ParseOptions()
+	if cover := cmd.opts.CoverFile; cover != "" {
+		cmd.media.AddFormat(cover)
+	}
+	fmt.Printf("%+V\n", cmd.media.ListFormats())
+	fmt.Printf("%+V\n", cmd.media.GetFormat("cover"))
 }
 
 func (c *ffmpegCmd) getChapters() (Chapters, error) {
@@ -133,8 +133,9 @@ func (cmd *ffmpegCmd) Split() error {
 		return err
 	}
 
+	m := cmd.media.GetFormat("audio")
 	for i, ch := range chaps {
-		NewFFmpegCmd(cmd.media.Path).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
+		NewFFmpegCmd(m.Path).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
 	}
 	return nil
 }
@@ -183,7 +184,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	}
 
 	if cover := cmd.opts.CoverFile; cover != "" {
-		NewMedia(cmd.opts.CoverFile).IsImage()
+		//NewMedia(cmd.opts.CoverFile).IsImage()
 	}
 
 	if cue := cmd.opts.CueFile; cue != "" {
@@ -221,8 +222,9 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 
 	// input
 
+	m := cmd.media.GetFormat("audio")
 	if cmd.media != nil {
-		cmd.args.Append("-i", cmd.media.Path)
+		cmd.args.Append("-i", m.Path)
 	}
 
 	if cmd.Input != "" {
@@ -320,11 +322,12 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 		name = name + fmt.Sprintf(p, cmd.num)
 	}
 
+	media := cmd.media.GetFormat("audio")
 	switch {
 	case cmd.Ext != "":
 		ext = cmd.Ext
 	default:
-		ext = cmd.media.Ext
+		ext = media.Ext
 	}
 	cmd.args.Append(name + ext)
 

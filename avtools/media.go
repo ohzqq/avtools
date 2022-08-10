@@ -4,17 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 )
 
 type Media struct {
 	*FileFormats
 	*MediaMeta
-	File     string
-	Path     string
-	Dir      string
-	Ext      string
-	mimetype string
 	CueChaps bool
 	json     []byte
 }
@@ -22,6 +16,7 @@ type Media struct {
 func NewMedia(input string) *Media {
 	m := Media{FileFormats: &FileFormats{}}
 	m.AddFormat(input)
+	//m.Ext = m.GetFormat("audio").Ext
 	m.MediaMeta = m.GetFormat("audio").meta
 	return &m
 }
@@ -78,15 +73,6 @@ func (m *Media) FFmetaChapsToCue() {
 	if err != nil {
 		log.Println("executing template:", err)
 	}
-}
-
-func (m Media) IsImage() bool {
-	if strings.Contains(m.mimetype, "image") {
-		return true
-	} else {
-		log.Fatalln("this switch requires an image file")
-	}
-	return false
 }
 
 //func (m *Media) SetChapters(ch Chapters) {
