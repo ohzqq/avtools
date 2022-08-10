@@ -7,15 +7,15 @@ import (
 	"log"
 	"mime"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 )
 
 type Media struct {
+	FileFormats
 	Meta     *MediaMeta
-	Format   *FileFormat
+	format   *FileFormat
 	Formats  []*FileFormat
 	File     string
 	Path     string
@@ -41,7 +41,7 @@ func NewMedia(input string) *Media {
 	m.Dir = filepath.Dir(input)
 	m.Ext = filepath.Ext(input)
 	m.mimetype = mime.TypeByExtension(m.Ext)
-	m.Formats = []*FileFormat{
+	var formats = []*FileFormat{
 		&FileFormat{
 			name:   "cue",
 			ext:    ".cue",
@@ -63,24 +63,29 @@ func NewMedia(input string) *Media {
 			render: MarshalJson,
 		},
 	}
+	m.Formats = formats
+	m.FileFormats.fmt = formats
 
 	return &m
 }
 
-func (m *Media) GetFormat(f string) *FileFormat {
-	for _, format := range m.Formats {
-		if f == format.ext {
-			return format
-		}
-	}
-	return m.Formats[2]
-}
+func (m *Media) ConvertTo(kind string) *FileFormat {
+	f := m.GetFormat(kind)
+	f.render(f)
 
-func (m *Media) AddFileFormat(f string) *Media {
-	format := m.GetFormat(path.Ext(f))
-	format.file = f
-	format.Parse()
-	return m
+	//switch kind {
+	//case "json", ".json":
+	//  f.data = MarshalJson(f)
+	//case "ffmeta", "ini", ".ini":
+	//  f.data = RenderTmpl(f)
+	//case "cue", ".cue":
+	//  if len(f.meta.Chapters) == 0 {
+	//    log.Fatal("No chapters")
+	//  }
+	//  f.data = RenderTmpl(f)
+	//  //    return fmt.Render("cue")
+	//}
+	return f
 }
 
 func (m *Media) JsonMeta() *Media {

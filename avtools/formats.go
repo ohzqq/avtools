@@ -5,10 +5,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path"
 	"text/template"
 
 	"gopkg.in/ini.v1"
 )
+
+type FileFormats struct {
+	fmt  []*FileFormat
+	from *FileFormat
+	to   *FileFormat
+}
+
+func (f FileFormats) GetFormat(format string) *FileFormat {
+	for _, fmt := range f.fmt {
+		if format == fmt.ext {
+			return fmt
+		}
+	}
+	return f.fmt[2]
+}
+
+func (f *FileFormats) AddFileFormat(format string) *FileFormats {
+	fmt := f.GetFormat(path.Ext(format))
+	fmt.file = format
+	fmt.Parse()
+	return f
+}
 
 type FileFormat struct {
 	name   string
@@ -30,46 +53,7 @@ func (f *FileFormat) Parse() *FileFormat {
 }
 
 func (f *FileFormat) Render() *FileFormat {
-	d := f.render(f)
-	f.data = d
-	return f
-}
-
-//func NewFileFormat(file string) *FileFormat {
-//  switch ext := path.Ext(file); ext {
-//  case ".cue", "cue":
-//    fmt, err := GetFormat("cue")
-//    if err != nil {
-//      log.Fatal(err)
-//    }
-//    fmt.meta = LoadCueSheet(file)
-//    return fmt
-//  case ".ini", "ini":
-//    fmt, err := GetFormat("ffmeta")
-//    if err != nil {
-//      log.Fatal(err)
-//    }
-//    fmt.meta = LoadFFmetadataIni(file)
-//    return fmt
-//  }
-//  return &FileFormat{}
-//}
-
-func (f *FileFormat) ConvertTo(kind string) *FileFormat {
-	//  fmt.to = kind
-	switch kind {
-	case "json":
-		f.data = MarshalJson(f)
-	case "ffmeta":
-		fmt.Printf("%+V\n", f.tmpl)
-		f.data = RenderTmpl(f)
-	case "cue":
-		if len(f.meta.Chapters) == 0 {
-			log.Fatal("No chapters")
-		}
-		f.data = RenderTmpl(f)
-		//    return fmt.Render("cue")
-	}
+	f.data = f.render(f)
 	return f
 }
 
@@ -158,12 +142,6 @@ func (f *FileFormat) Print() {
 
 func (f *FileFormat) String() string {
 	return string(f.data)
-}
-
-type metaTemplates struct {
-	cue          *template.Template
-	ffchaps      *template.Template
-	cueToFFchaps *template.Template
 }
 
 var funcs = template.FuncMap{
