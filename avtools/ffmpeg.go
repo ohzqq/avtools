@@ -30,41 +30,40 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 }
 
 func (c *ffmpegCmd) ShowMeta() {
-	c.media.JsonMeta().Unmarshal()
-	c.ParseOptions()
+	//c.media.JsonMeta().Unmarshal()
+	//c.ParseOptions()
 	if meta := c.opts.MetaFile; meta != "" {
-		//NewMedia(c.opts.MetaFile).IsMeta()
-		c.media.SetMeta(LoadFFmetadataIni(meta))
-		c.media.AddFormat(c.media.Path)
-		//c.media.GetFormat("json").Render().Print()
-		//ff := *f
-		//f.render(f) //.Print()
-		//fmt.Printf("cue meta %+V\n", f)
+		c.media.AddFormat(meta)
 	}
+	if cue := c.opts.CueFile; cue != "" {
+		c.media.AddFormat(cue)
+	}
+	fmt.Printf("%+V\n", c.media.ListFormats())
+	fmt.Printf("%+V\n", c.media.Meta())
 	//f, _ := GetFormat("cue")
 	//meta := f.parse(c.opts.CueFile)
-	fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
+	//fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
 }
 
 func (c *ffmpegCmd) getChapters() (Chapters, error) {
-	if len(c.media.json) == 0 {
-		c.media.JsonMeta().Unmarshal()
-	}
+	//if len(c.media.json) == 0 {
+	//  c.media.JsonMeta().Unmarshal()
+	//}
 
 	switch {
 	case c.opts.CueFile != "":
 		return LoadCueSheet(c.opts.CueFile).Chapters, nil
 	case c.opts.MetaFile != "":
 		return LoadFFmetadataIni(c.opts.MetaFile).Chapters, nil
-	case c.media.HasChapters():
-		return c.media.Meta.Chapters, nil
+	//case c.media.HasChapters():
+	//return c.media.Meta().Chapters, nil
 	default:
 		return nil, fmt.Errorf("There are no chapters!")
 	}
 }
 
 func (c *ffmpegCmd) Extract() {
-	c.media.JsonMeta().Unmarshal()
+	//c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
 	switch {
@@ -116,7 +115,7 @@ func (cmd *ffmpegCmd) Join(ext string) {
 }
 
 func (c *ffmpegCmd) Remove() {
-	c.media.JsonMeta().Unmarshal()
+	//c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
 	if c.opts.ChapSwitch {
@@ -148,7 +147,7 @@ func (cmd *ffmpegCmd) Split() error {
 }
 
 func (cmd *ffmpegCmd) Cut(ss, to string, no int) {
-	cmd.media.JsonMeta().Unmarshal()
+	//cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()
 
 	var (
@@ -188,7 +187,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 
 	if meta := cmd.opts.MetaFile; meta != "" {
 		//NewMedia(cmd.opts.MetaFile).IsMeta()
-		cmd.media.SetMeta(LoadFFmetadataIni(meta))
+		//cmd.media.SetMeta(LoadFFmetadataIni(meta))
 	}
 
 	if cover := cmd.opts.CoverFile; cover != "" {
@@ -197,7 +196,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 
 	if cue := cmd.opts.CueFile; cue != "" {
 		//NewMedia(cmd.opts.CueFile).IsPlainText()
-		cmd.media.SetChapters(LoadCueSheet(cue).Chapters)
+		//cmd.media.SetChapters(LoadCueSheet(cue).Chapters)
 	}
 
 	if y := cmd.opts.Overwrite; y {

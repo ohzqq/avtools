@@ -7,18 +7,19 @@ import (
 )
 
 func (cmd *ffmpegCmd) Update() {
-	cmd.media.JsonMeta().Unmarshal()
+	//cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()
 
 	var cmdExec *Cmd
 
 	if cmd.opts.CoverFile != "" {
-		switch codec := cmd.media.AudioCodec(); codec {
-		case "aac":
-			cmdExec = addAacCover(cmd.media.File, cmd.opts.CoverFile, cmd.opts.Verbose)
-		case "mp3":
-			cmdExec = cmd.addMp3Cover()
-		}
+		//switch codec := cmd.media.AudioCodec(); codec {
+		//case "aac":
+		//  cmdExec = addAacCover(cmd.media.File, cmd.opts.CoverFile, cmd.opts.Verbose)
+		//case "mp3":
+		//  cmdExec = cmd.addMp3Cover()
+		//}
+
 	}
 
 	if cmd.opts.MetaFile != "" {

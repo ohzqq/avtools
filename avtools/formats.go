@@ -28,15 +28,26 @@ func (f FileFormats) ListFormats() []string {
 }
 
 func (f FileFormats) GetFormat(format string) *FileFormat {
+	var ext string
+	switch format {
+	case "ffmeta", "ini":
+		ext = ".ini"
+	case "cue", "cuesheet":
+		ext = ".cue"
+	default:
+		ext = format
+	}
 	for _, fmt := range f.formats {
-		if fmt.IsAudio() {
-			return fmt
-		}
-		if format == fmt.Ext {
+		switch ext {
+		case "audio":
+			if fmt.IsAudio() {
+				return fmt
+			}
+		case fmt.Ext:
 			return fmt
 		}
 	}
-	return f.formats[0]
+	return nil
 }
 
 func (f *FileFormats) AddFormat(file string) *FileFormats {
@@ -44,6 +55,14 @@ func (f *FileFormats) AddFormat(file string) *FileFormats {
 	format.Parse()
 	f.formats = append(f.formats, format)
 	return f
+}
+
+func (f FileFormats) HasCue() bool {
+	return f.GetFormat(".cue") != nil
+}
+
+func (f FileFormats) HasFFmeta() bool {
+	return f.GetFormat(".ini") != nil
 }
 
 type FileFormat struct {
@@ -115,7 +134,7 @@ func (f FileFormat) IsAudio() bool {
 	if strings.Contains(f.Mimetype, "audio") {
 		return true
 	} else {
-		log.Fatalln("not an audio file")
+		fmt.Println("not an audio file")
 	}
 	return false
 }

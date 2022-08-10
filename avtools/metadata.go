@@ -25,11 +25,22 @@ type MediaMeta struct {
 	//Tags     map[string]string
 }
 
+func (m *MediaMeta) SetChapters(ch Chapters) {
+	m.Chapters = ch
+}
+
 func (m *MediaMeta) LastChapterEnd() {
 	if m.Format.Duration != "" && len(m.Chapters) > 0 {
 		lastCh := m.Chapters[len(m.Chapters)-1]
 		lastCh.End = m.Format.DurationSecs(lastCh.TimebaseFloat())
 	}
+}
+
+func (m *MediaMeta) HasChapters() bool {
+	if len(m.Chapters) != 0 {
+		return true
+	}
+	return false
 }
 
 type Stream struct {
