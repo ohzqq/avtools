@@ -39,7 +39,7 @@ func (c *ffmpegCmd) ShowMeta() {
 		c.media.AddFormat(cue)
 	}
 	fmt.Printf("%+V\n", c.media.ListFormats())
-	fmt.Printf("%+V\n", c.media.Meta())
+	fmt.Printf("%+V\n", c.media.HasChapters())
 	//f, _ := GetFormat("cue")
 	//meta := f.parse(c.opts.CueFile)
 	//fmt.Printf("%+v\n", c.media.Meta.Format.Tags)
