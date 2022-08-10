@@ -26,9 +26,9 @@ func (f FileFormats) GetFormat(format string) *FileFormat {
 	return f.fmt[2]
 }
 
-func (f *FileFormats) AddFileFormat(format string) *FileFormats {
-	fmt := f.GetFormat(path.Ext(format))
-	fmt.file = format
+func (f *FileFormats) AddFileFormat(file string) *FileFormats {
+	fmt := f.GetFormat(path.Ext(file))
+	fmt.file = file
 	fmt.Parse()
 	return f
 }

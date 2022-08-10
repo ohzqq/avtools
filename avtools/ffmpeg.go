@@ -33,7 +33,7 @@ func (c *ffmpegCmd) ShowMeta() {
 	c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 	if meta := c.opts.MetaFile; meta != "" {
-		NewMedia(c.opts.MetaFile).IsMeta()
+		//NewMedia(c.opts.MetaFile).IsMeta()
 		c.media.SetMeta(LoadFFmetadataIni(meta))
 		c.media.AddFileFormat(c.media.Path)
 		c.media.GetFormat("json").Render().Print()
@@ -187,7 +187,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
-		NewMedia(cmd.opts.MetaFile).IsMeta()
+		//NewMedia(cmd.opts.MetaFile).IsMeta()
 		cmd.media.SetMeta(LoadFFmetadataIni(meta))
 	}
 
@@ -196,7 +196,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	}
 
 	if cue := cmd.opts.CueFile; cue != "" {
-		NewMedia(cmd.opts.CueFile).IsPlainText()
+		//NewMedia(cmd.opts.CueFile).IsPlainText()
 		cmd.media.SetChapters(LoadCueSheet(cue).Chapters)
 	}
 
