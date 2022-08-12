@@ -13,56 +13,6 @@ import (
 	"text/template"
 )
 
-type FileFormats struct {
-	formats []*FileFormat
-	from    *FileFormat
-	to      *FileFormat
-}
-
-func (f FileFormats) ListFormats() []string {
-	var formats []string
-	for _, f := range f.formats {
-		formats = append(formats, f.Ext)
-	}
-	return formats
-}
-
-func (f FileFormats) GetFormat(format string) *FileFormat {
-	var ext string
-	switch format {
-	case "ffmeta", "ini":
-		ext = ".ini"
-	case "cue", "cuesheet":
-		ext = ".cue"
-	default:
-		ext = format
-	}
-	for _, fmt := range f.formats {
-		switch ext {
-		case "cover":
-			if fmt.IsImage() {
-				return fmt
-			}
-		case "audio":
-			if fmt.IsAudio() {
-				return fmt
-			}
-		case fmt.Ext:
-			return fmt
-		}
-	}
-	return nil
-}
-
-func (f *FileFormats) AddFormat(file string) *FileFormats {
-	format := NewFormat(file)
-	if !format.IsImage() {
-		format.Parse()
-	}
-	f.formats = append(f.formats, format)
-	return f
-}
-
 type FileFormat struct {
 	name     string
 	meta     *MediaMeta

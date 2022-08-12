@@ -7,21 +7,16 @@ import (
 )
 
 type Media struct {
-	Input  *FileFormat
-	Cue    *FileFormat
-	FFmeta *FileFormat
-	Json   *FileFormat
-	Cover  *FileFormat
-	//*FileFormats
+	Input    *FileFormat
+	Cue      *FileFormat
+	FFmeta   *FileFormat
+	Json     *FileFormat
+	Cover    *FileFormat
 	CueChaps bool
 	json     []byte
 }
 
 func NewMedia(input string) *Media {
-	//m := Media{FileFormats: &FileFormats{}}
-	//m.Input = NewFormat(input)
-	//m.AddFormat(input)
-	//m.Ext = m.GetFormat("audio").Ext
 	return &Media{
 		Input: NewFormat(input),
 	}
