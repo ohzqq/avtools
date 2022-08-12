@@ -27,7 +27,7 @@ func (cmd *ffmpegCmd) Update() {
 	}
 
 	if cmd.opts.CueFile != "" {
-		meta := cmd.media.GetFormat(cmd.opts.CueFile).Render()
+		meta := cmd.media.Cue.Render()
 		tmp := TmpFile([]byte(meta.data))
 
 		cmd.AppendMapArg("post", "i", tmp)

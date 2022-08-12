@@ -59,7 +59,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
-		cmd.media.AddFormat(meta)
+		//cmd.media.AddFormat(meta)
 		cmd.media.FFmeta = NewFormat(meta)
 	}
 
@@ -70,7 +70,7 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 
 	if cue := cmd.opts.CueFile; cue != "" {
 		cmd.media.Cue = NewFormat(cue)
-		cmd.media.AddFormat(cue)
+		//cmd.media.AddFormat(cue)
 	}
 
 	if y := cmd.opts.Overwrite; y {
@@ -104,7 +104,7 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 
 	// input
 
-	m := cmd.media.GetFormat("audio")
+	m := cmd.media.Input
 	if cmd.media != nil {
 		cmd.args.Append("-i", m.Path)
 	}
@@ -204,7 +204,7 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 		name = name + fmt.Sprintf(p, cmd.num)
 	}
 
-	media := cmd.media.GetFormat("audio")
+	media := cmd.media.Input
 	switch {
 	case cmd.Ext != "":
 		ext = cmd.Ext

@@ -29,7 +29,7 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	fmt.Printf("%+V\n", cmd.media.ListFormats())
+	//fmt.Printf("%+V\n", cmd.media.ListFormats())
 	fmt.Printf("%+V\n", cmd.media.Meta())
 	//fmt.Printf("%+V\n", cmd.media.GetFormat("audio"))
 }
@@ -129,7 +129,7 @@ func (cmd *ffmpegCmd) Split() error {
 		return err
 	}
 
-	m := cmd.media.GetFormat("audio")
+	m := cmd.media.Input
 	for i, ch := range chaps {
 		NewFFmpegCmd(m.Path).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
 	}

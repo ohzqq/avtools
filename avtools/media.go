@@ -12,19 +12,19 @@ type Media struct {
 	FFmeta *FileFormat
 	Json   *FileFormat
 	Cover  *FileFormat
-	*FileFormats
-	*MediaMeta
+	//*FileFormats
 	CueChaps bool
 	json     []byte
 }
 
 func NewMedia(input string) *Media {
-	m := Media{FileFormats: &FileFormats{}}
-	m.Input = NewFormat(input)
-	m.AddFormat(input)
+	//m := Media{FileFormats: &FileFormats{}}
+	//m.Input = NewFormat(input)
+	//m.AddFormat(input)
 	//m.Ext = m.GetFormat("audio").Ext
-	m.MediaMeta = m.GetFormat("audio").meta
-	return &m
+	return &Media{
+		Input: NewFormat(input),
+	}
 }
 
 func (m Media) Meta() *MediaMeta {
@@ -39,24 +39,24 @@ func (m Media) Meta() *MediaMeta {
 	return meta
 }
 
-func (m *Media) ConvertTo(kind string) *FileFormat {
-	f := m.GetFormat(kind)
-	f.render(f)
+//func (m *Media) ConvertTo(kind string) *FileFormat {
+//  f := m.GetFormat(kind)
+//  f.render(f)
 
-	//switch kind {
-	//case "json", ".json":
-	//  f.data = MarshalJson(f)
-	//case "ffmeta", "ini", ".ini":
-	//  f.data = RenderTmpl(f)
-	//case "cue", ".cue":
-	//  if len(f.meta.Chapters) == 0 {
-	//    log.Fatal("No chapters")
-	//  }
-	//  f.data = RenderTmpl(f)
-	//  //    return fmt.Render("cue")
-	//}
-	return f
-}
+//  switch kind {
+//  case "json", ".json":
+//    f.data = MarshalJson(f)
+//  case "ffmeta", "ini", ".ini":
+//    f.data = RenderTmpl(f)
+//  case "cue", ".cue":
+//    if len(f.meta.Chapters) == 0 {
+//      log.Fatal("No chapters")
+//    }
+//    f.data = RenderTmpl(f)
+//        return fmt.Render("cue")
+//  }
+//  return f
+//}
 
 func (m *Media) Print() {
 	fmt.Println(string(m.json))
