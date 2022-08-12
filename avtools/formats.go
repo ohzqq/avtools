@@ -63,14 +63,6 @@ func (f *FileFormats) AddFormat(file string) *FileFormats {
 	return f
 }
 
-func (f FileFormats) HasCue() bool {
-	return f.GetFormat(".cue") != nil
-}
-
-func (f FileFormats) HasFFmeta() bool {
-	return f.GetFormat(".ini") != nil
-}
-
 type FileFormat struct {
 	name     string
 	meta     *MediaMeta
@@ -88,10 +80,6 @@ type FileFormat struct {
 }
 
 func NewFormat(input string) *FileFormat {
-	mime.AddExtensionType(".ini", "text/plain")
-	mime.AddExtensionType(".cue", "text/plain")
-	mime.AddExtensionType(".m4b", "audio/mp4")
-
 	abs, err := filepath.Abs(input)
 	if err != nil {
 		log.Fatal(err)
@@ -110,15 +98,18 @@ func NewFormat(input string) *FileFormat {
 		f.parse = LoadFFmetadataIni
 		f.render = RenderTmpl
 		f.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+		f.Parse()
 	case ".cue", "cue":
 		f.parse = LoadCueSheet
 		f.render = RenderTmpl
 		f.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+		f.Parse()
 	case ".jpg", "jpg", ".png", "png":
 	default:
 		if f.IsAudio() {
 			f.parse = EmbeddedJsonMeta
 			f.render = MarshalJson
+			f.Parse()
 		}
 	}
 	//fmt.Printf("%+V\n", f.Path)

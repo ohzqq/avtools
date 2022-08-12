@@ -7,6 +7,11 @@ import (
 )
 
 type Media struct {
+	Input  *FileFormat
+	Cue    *FileFormat
+	FFmeta *FileFormat
+	Json   *FileFormat
+	Cover  *FileFormat
 	*FileFormats
 	*MediaMeta
 	CueChaps bool
@@ -15,6 +20,7 @@ type Media struct {
 
 func NewMedia(input string) *Media {
 	m := Media{FileFormats: &FileFormats{}}
+	m.Input = NewFormat(input)
 	m.AddFormat(input)
 	//m.Ext = m.GetFormat("audio").Ext
 	m.MediaMeta = m.GetFormat("audio").meta
@@ -22,13 +28,15 @@ func NewMedia(input string) *Media {
 }
 
 func (m Media) Meta() *MediaMeta {
+	meta := m.Input.meta
 	if m.HasFFmeta() {
-		m.MediaMeta = m.GetFormat(".ini").meta
+		meta = m.FFmeta.meta
 	}
+	fmt.Printf("%+V\n", meta)
 	if m.HasCue() {
-		m.MediaMeta.SetChapters(m.GetFormat(".cue").meta.Chapters)
+		meta.SetChapters(m.Cue.meta.Chapters)
 	}
-	return m.MediaMeta
+	return meta
 }
 
 func (m *Media) ConvertTo(kind string) *FileFormat {
@@ -79,14 +87,26 @@ func (m *Media) FFmetaChapsToCue() {
 //  m.Meta.Chapters = ch
 //}
 
-func (m *Media) HasChapters() bool {
+func (m Media) HasCue() bool {
+	return m.Cue != nil
+}
+
+func (m Media) HasCover() bool {
+	return m.Cover != nil
+}
+
+func (m Media) HasFFmeta() bool {
+	return m.FFmeta != nil
+}
+
+func (m Media) HasChapters() bool {
 	if len(m.Meta().Chapters) != 0 {
 		return true
 	}
 	return false
 }
 
-func (m *Media) HasVideo() bool {
+func (m Media) HasVideo() bool {
 	for _, stream := range m.Meta().Streams {
 		if stream.CodecType == "video" {
 			return true
@@ -95,7 +115,7 @@ func (m *Media) HasVideo() bool {
 	return false
 }
 
-func (m *Media) HasAudio() bool {
+func (m Media) HasAudio() bool {
 	for _, stream := range m.Meta().Streams {
 		if stream.CodecType == "audio" {
 			return true
