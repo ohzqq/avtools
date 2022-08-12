@@ -18,9 +18,15 @@ type Media struct {
 }
 
 func NewMedia(input string) *Media {
-	return &Media{
+	media := Media{
 		Input: NewFormat(input),
 	}
+	if media.Input.IsAudio() {
+		media.Input.parse = EmbeddedJsonMeta
+		media.Input.render = MarshalJson
+		media.Input.Parse()
+	}
+	return &media
 }
 
 func (m Media) Meta() *MediaMeta {
