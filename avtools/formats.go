@@ -45,15 +45,15 @@ func NewFormat(input string) *FileFormat {
 
 	switch f.Ext {
 	case ".ini", "ini", "ffmeta":
-		f.parse = LoadFFmetadataIni
-		f.render = RenderTmpl
-		f.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
-		f.Parse()
+		//f.parse = LoadFFmetadataIni
+		//f.render = RenderTmpl
+		//f.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+		//f.Parse()
 	case ".cue", "cue":
-		f.parse = LoadCueSheet
-		f.render = RenderTmpl
-		f.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
-		f.Parse()
+		//f.parse = LoadCueSheet
+		//f.render = RenderTmpl
+		//f.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+		//f.Parse()
 	case ".jpg", "jpg", ".png", "png":
 	default:
 		if f.IsAudio() {

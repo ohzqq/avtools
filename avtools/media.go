@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"text/template"
 )
 
 type Media struct {
@@ -32,6 +33,29 @@ func (m Media) Meta() *MediaMeta {
 		meta.SetChapters(m.Cue.meta.Chapters)
 	}
 	return meta
+}
+
+func (m *Media) AddCover(file string) *Media {
+	m.Cover = NewFormat(file)
+	return m
+}
+
+func (m *Media) AddFFmeta(file string) *Media {
+	m.FFmeta = NewFormat(file)
+	m.FFmeta.parse = LoadFFmetadataIni
+	m.FFmeta.render = RenderTmpl
+	m.FFmeta.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+	m.FFmeta.Parse()
+	return m
+}
+
+func (m *Media) AddCue(file string) *Media {
+	m.Cue = NewFormat(file)
+	m.Cue.parse = LoadCueSheet
+	m.Cue.render = RenderTmpl
+	m.Cue.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+	m.Cue.Parse()
+	return m
 }
 
 //func (m *Media) ConvertTo(kind string) *FileFormat {

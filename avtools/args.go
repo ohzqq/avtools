@@ -59,18 +59,15 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
-		//cmd.media.AddFormat(meta)
-		cmd.media.FFmeta = NewFormat(meta)
+		cmd.media.AddFFmeta(meta)
 	}
 
 	if cover := cmd.opts.CoverFile; cover != "" {
-		cmd.media.Cover = NewFormat(cover)
-		//NewMedia(cmd.opts.CoverFile).IsImage()
+		cmd.media.AddCover(cover)
 	}
 
 	if cue := cmd.opts.CueFile; cue != "" {
-		cmd.media.Cue = NewFormat(cue)
-		//cmd.media.AddFormat(cue)
+		cmd.media.AddCue(cue)
 	}
 
 	if y := cmd.opts.Overwrite; y {
