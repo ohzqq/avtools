@@ -29,8 +29,10 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	//fmt.Printf("%+V\n", cmd.media.ListFormats())
 	fmt.Printf("%+V\n", cmd.media)
+	fmt.Printf("%+V\n", cmd.media.Cue)
+	cmd.media.Meta().MarshalTo("cue").Print()
+	//cmd.media.Cue.Render().Print()
 	//fmt.Printf("%+V\n", cmd.media.GetFormat("audio"))
 }
 

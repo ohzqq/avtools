@@ -25,7 +25,7 @@ type FileFormat struct {
 	Mimetype string
 	tmpl     *template.Template
 	parse    func(file string) *MediaMeta
-	render   func(f *FileFormat) []byte
+	render   func(meta *MediaMeta) []byte
 	data     []byte
 }
 
@@ -49,13 +49,36 @@ func NewFormat(input string) *FileFormat {
 }
 
 func (f *FileFormat) Parse() *FileFormat {
-	f.meta = f.parse(f.Path)
+	f.SetMeta(f.parse(f.Path))
 	return f
 }
 
 func (f *FileFormat) Render() *FileFormat {
-	f.data = f.render(f)
+	f.data = f.render(f.meta)
 	return f
+}
+
+func (f *FileFormat) SetMeta(m *MediaMeta) *FileFormat {
+	f.meta = m
+	return f
+}
+
+func (f *FileFormat) SetFileName(n string) *FileFormat {
+	f.name = n
+	return f
+}
+
+func (f *FileFormat) SetExt(ext string) *FileFormat {
+	f.Ext = ext
+	return f
+}
+
+func (f *FileFormat) Print() {
+	println(f.String())
+}
+
+func (f *FileFormat) String() string {
+	return string(f.data)
 }
 
 func (f FileFormat) IsImage() bool {
@@ -117,17 +140,32 @@ func EmbeddedJsonMeta(file string) *MediaMeta {
 	return &meta
 }
 
-func MarshalJson(f *FileFormat) []byte {
-	data, err := json.Marshal(f.meta)
+func MarshalJson(meta *MediaMeta) []byte {
+	data, err := json.Marshal(meta)
 	if err != nil {
 		fmt.Println("help")
 	}
 	return data
 }
 
-func RenderTmpl(f *FileFormat) []byte {
-	var buf bytes.Buffer
-	err := f.tmpl.Execute(&buf, f.meta)
+func RenderCueTmpl(meta *MediaMeta) []byte {
+	var (
+		buf  bytes.Buffer
+		tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+	)
+	err := tmpl.Execute(&buf, meta)
+	if err != nil {
+		log.Println("executing template:", err)
+	}
+	return buf.Bytes()
+}
+
+func RenderFFmetaTmpl(meta *MediaMeta) []byte {
+	var (
+		buf  bytes.Buffer
+		tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+	)
+	err := tmpl.Execute(&buf, meta)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
@@ -162,29 +200,6 @@ func GetTmpl(name string) (*template.Template, error) {
 		}
 	}
 	return &template.Template{}, fmt.Errorf("%v is not a template", name)
-}
-
-func (f *FileFormat) SetMeta(m *MediaMeta) *FileFormat {
-	f.meta = m
-	return f
-}
-
-func (f *FileFormat) SetFileName(n string) *FileFormat {
-	f.name = n
-	return f
-}
-
-func (f *FileFormat) SetExt(ext string) *FileFormat {
-	f.Ext = ext
-	return f
-}
-
-func (f *FileFormat) Print() {
-	println(f.String())
-}
-
-func (f *FileFormat) String() string {
-	return string(f.data)
 }
 
 var funcs = template.FuncMap{

@@ -18,11 +18,39 @@ import (
 const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
 
 type MediaMeta struct {
+	data     []byte
 	Chapters Chapters
 	Streams  []*Stream
 	Format   *Format
 	Tags     Tags
 	//Tags     map[string]string
+}
+
+func (m *MediaMeta) MarshalTo(format string) *MediaMeta {
+	switch format {
+	case "json", ".json":
+		m.data = MarshalJson(m)
+	case "ffmeta", "ini", ".ini":
+		m.data = RenderFFmetaTmpl(m)
+	case "cue", ".cue":
+		if !m.HasChapters() {
+			log.Fatal("No chapters")
+		}
+		m.data = RenderCueTmpl(m)
+	}
+	return m
+}
+
+func (m *MediaMeta) Print() {
+	fmt.Println(m.String())
+}
+
+func (m *MediaMeta) String() string {
+	return string(m.data)
+}
+
+func (m *MediaMeta) Bytes() []byte {
+	return m.data
 }
 
 func (m *MediaMeta) SetChapters(ch Chapters) {
@@ -37,10 +65,7 @@ func (m *MediaMeta) LastChapterEnd() {
 }
 
 func (m *MediaMeta) HasChapters() bool {
-	if len(m.Chapters) != 0 {
-		return true
-	}
-	return false
+	return len(m.Chapters) > 0
 }
 
 type Stream struct {

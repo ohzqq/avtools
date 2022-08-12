@@ -1,20 +1,19 @@
 package avtools
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"text/template"
 )
 
 type Media struct {
-	Input    *FileFormat
-	Cue      *FileFormat
-	FFmeta   *FileFormat
-	Json     *FileFormat
-	Cover    *FileFormat
-	CueChaps bool
-	json     []byte
+	Input         *FileFormat
+	Cue           *FileFormat
+	FFmeta        *FileFormat
+	Json          *FileFormat
+	Cover         *FileFormat
+	CueChaps      bool
+	convertedData []byte
+	json          []byte
 }
 
 func NewMedia(input string) *Media {
@@ -34,7 +33,6 @@ func (m Media) Meta() *MediaMeta {
 	if m.HasFFmeta() {
 		meta = m.FFmeta.meta
 	}
-	fmt.Printf("%+V\n", meta)
 	if m.HasCue() {
 		meta.SetChapters(m.Cue.meta.Chapters)
 	}
@@ -49,8 +47,7 @@ func (m *Media) AddCover(file string) *Media {
 func (m *Media) AddFFmeta(file string) *Media {
 	m.FFmeta = NewFormat(file)
 	m.FFmeta.parse = LoadFFmetadataIni
-	m.FFmeta.render = RenderTmpl
-	m.FFmeta.tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+	m.FFmeta.render = RenderFFmetaTmpl
 	m.FFmeta.Parse()
 	return m
 }
@@ -58,8 +55,7 @@ func (m *Media) AddFFmeta(file string) *Media {
 func (m *Media) AddCue(file string) *Media {
 	m.Cue = NewFormat(file)
 	m.Cue.parse = LoadCueSheet
-	m.Cue.render = RenderTmpl
-	m.Cue.tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+	m.Cue.render = RenderCueTmpl
 	m.Cue.Parse()
 	return m
 }
@@ -82,10 +78,6 @@ func (m *Media) AddCue(file string) *Media {
 //  }
 //  return f
 //}
-
-func (m *Media) Print() {
-	fmt.Println(string(m.json))
-}
 
 func (m *Media) FFmetaChapsToCue() {
 	if !m.HasChapters() {
