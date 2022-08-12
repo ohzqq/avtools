@@ -57,8 +57,12 @@ func (m *MediaMeta) SetChapters(ch Chapters) {
 	m.Chapters = ch
 }
 
+func (m *MediaMeta) SetTags(tags Tags) {
+	m.Format.Tags = tags
+}
+
 func (m *MediaMeta) LastChapterEnd() {
-	if m.Format.Duration != "" && len(m.Chapters) > 0 {
+	if m.Format.Duration != "" && m.HasChapters() {
 		lastCh := m.Chapters[len(m.Chapters)-1]
 		lastCh.End = m.Format.DurationSecs(lastCh.TimebaseFloat())
 	}

@@ -30,12 +30,16 @@ func NewMedia(input string) *Media {
 
 func (m Media) Meta() *MediaMeta {
 	meta := m.Input.meta
+
 	if m.HasFFmeta() {
-		meta = m.FFmeta.meta
+		meta.SetChapters(m.FFmeta.meta.Chapters)
+		meta.SetTags(m.FFmeta.meta.Format.Tags)
 	}
+
 	if m.HasCue() {
 		meta.SetChapters(m.Cue.meta.Chapters)
 	}
+
 	return meta
 }
 

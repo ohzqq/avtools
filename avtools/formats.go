@@ -161,6 +161,7 @@ func RenderCueTmpl(meta *MediaMeta) []byte {
 }
 
 func RenderFFmetaTmpl(meta *MediaMeta) []byte {
+	meta.LastChapterEnd()
 	var (
 		buf  bytes.Buffer
 		tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
@@ -237,5 +238,5 @@ const ffmetaTmpl = `;FFMETADATA1
 TIMEBASE=1/1000
 START={{$ch.Start}}
 END={{$ch.End}}
-title={{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
+title={{with $ch.Title}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
 {{end}}`
