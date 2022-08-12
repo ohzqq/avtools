@@ -30,19 +30,39 @@ type FileFormat struct {
 }
 
 func NewFormat(input string) *FileFormat {
-	abs, err := filepath.Abs(input)
-	if err != nil {
-		log.Fatal(err)
+	f := FileFormat{}
+	switch input {
+	case "ffmeta":
+	case "cue":
+	default:
+		abs, err := filepath.Abs(input)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		f.Path = abs
+		f.File = filepath.Base(input)
+		f.Dir = filepath.Dir(input)
+		f.Ext = filepath.Ext(input)
+		f.Mimetype = mime.TypeByExtension(f.Ext)
 	}
 
-	f := FileFormat{
-		Path: abs,
-		File: filepath.Base(input),
-		Dir:  filepath.Dir(input),
-		Ext:  filepath.Ext(input),
+	switch f.Ext {
+	case "ini", ".ini":
+		f.parse = LoadFFmetadataIni
+		f.render = RenderFFmetaTmpl
+		f.Parse()
+	case "cue", ".cue":
+		f.parse = LoadCueSheet
+		f.render = RenderCueTmpl
+		f.Parse()
+	default:
+		if f.IsAudio() {
+			f.parse = EmbeddedJsonMeta
+			f.render = MarshalJson
+			f.Parse()
+		}
 	}
-	f.Mimetype = mime.TypeByExtension(f.Ext)
-
 	//fmt.Printf("%+V\n", f.Path)
 	return &f
 
@@ -173,35 +193,21 @@ func RenderFFmetaTmpl(meta *MediaMeta) []byte {
 	return buf.Bytes()
 }
 
-//func (f *FileFormat) Render(name string) *FileFormat {
-//  tmpl, err := GetTmpl(name)
-//  if err != nil {
-//    log.Println("executing template:", err)
+//func GetTmpl(name string) (*template.Template, error) {
+//  var metaTmpl = map[string]*template.Template{
+//    "cue":          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
+//    "ffchaps":      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffmetaTmpl)),
+//    "cueToFFchaps": template.Must(template.New("cueToFFchaps").Funcs(funcs).Parse(ffmetaTmpl)),
+//    "ffmeta":       template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
 //  }
-//  var buf bytes.Buffer
-//  err = tmpl.Execute(&buf, f.meta)
-//  if err != nil {
-//    log.Println("executing template:", err)
+
+//  for n, _ := range metaTmpl {
+//    if n == name {
+//      return metaTmpl[n], nil
+//    }
 //  }
-//  f.data = buf.Bytes()
-//  return f
+//  return &template.Template{}, fmt.Errorf("%v is not a template", name)
 //}
-
-func GetTmpl(name string) (*template.Template, error) {
-	var metaTmpl = map[string]*template.Template{
-		"cue":          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
-		"ffchaps":      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffmetaTmpl)),
-		"cueToFFchaps": template.Must(template.New("cueToFFchaps").Funcs(funcs).Parse(ffmetaTmpl)),
-		"ffmeta":       template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
-	}
-
-	for n, _ := range metaTmpl {
-		if n == name {
-			return metaTmpl[n], nil
-		}
-	}
-	return &template.Template{}, fmt.Errorf("%v is not a template", name)
-}
 
 var funcs = template.FuncMap{
 	"cueStamp": secsToCueStamp,

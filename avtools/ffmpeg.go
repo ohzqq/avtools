@@ -29,8 +29,8 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	//fmt.Printf("%+V\n", cmd.media)
-	cmd.media.Meta().LastChapterEnd()
+	//fmt.Printf("%+V\n", cmd.media.MarshalMetaTo("ffmeta"))
+	//cmd.media.Meta().LastChapterEnd()
 	cmd.media.Meta().MarshalTo("ffmeta").Print()
 	//cmd.media.Cue.Render().Print()
 	//fmt.Printf("%+V\n", cmd.media.GetFormat("audio"))
@@ -59,7 +59,7 @@ func (c *ffmpegCmd) Extract() {
 
 	switch {
 	case c.opts.CueSwitch:
-		c.media.FFmetaChapsToCue()
+		c.media.Meta().MarshalTo("cue")
 		return
 	case c.opts.CoverSwitch:
 		c.AudioCodec = "an"
@@ -126,12 +126,9 @@ func (c *ffmpegCmd) Remove() {
 }
 
 func (cmd *ffmpegCmd) Split() error {
-	chaps, err := cmd.getChapters()
-	if err != nil {
-		return err
-	}
+	chaps := cmd.media.Meta().Chapters
 
-	m := cmd.media.Input
+	m := cmd.media.GetFile("input")
 	for i, ch := range chaps {
 		NewFFmpegCmd(m.Path).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
 	}
@@ -149,10 +146,7 @@ func (cmd *ffmpegCmd) Cut(ss, to string, no int) {
 	)
 
 	if cmd.opts.ChapNo != 0 {
-		chaps, err := cmd.getChapters()
-		if err != nil {
-			log.Fatal(err)
-		}
+		chaps := cmd.media.Meta().Chapters
 		ch := chaps[cmd.opts.ChapNo-1]
 		count = cmd.opts.ChapNo
 		start = ch.StartToSeconds()

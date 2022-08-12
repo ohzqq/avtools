@@ -1,68 +1,88 @@
 package avtools
 
-import (
-	"log"
-	"os"
-)
-
 type Media struct {
-	Input         *FileFormat
-	Cue           *FileFormat
-	FFmeta        *FileFormat
-	Json          *FileFormat
-	Cover         *FileFormat
-	CueChaps      bool
-	convertedData []byte
-	json          []byte
+	files map[string]*FileFormat
+	//Input         *FileFormat
+	Cue      *FileFormat
+	FFmeta   *FileFormat
+	Json     *FileFormat
+	Cover    *FileFormat
+	CueChaps bool
+	outMeta  *FileFormat
+	json     []byte
 }
 
 func NewMedia(input string) *Media {
 	media := Media{
-		Input: NewFormat(input),
+		files: make(map[string]*FileFormat),
+		//Input: NewFormat(input),
 	}
-	if media.Input.IsAudio() {
-		media.Input.parse = EmbeddedJsonMeta
-		media.Input.render = MarshalJson
-		media.Input.Parse()
-	}
+	media.SetFile("input", input)
+	//media.files["input"] = NewFormat(input)
 	return &media
 }
 
 func (m Media) Meta() *MediaMeta {
-	meta := m.Input.meta
+	meta := m.GetFile("input").meta
 
 	if m.HasFFmeta() {
-		meta.SetChapters(m.FFmeta.meta.Chapters)
-		meta.SetTags(m.FFmeta.meta.Format.Tags)
+		ff := m.GetFile("ffmeta")
+		meta.SetChapters(ff.meta.Chapters)
+		meta.SetTags(ff.meta.Format.Tags)
 	}
 
 	if m.HasCue() {
-		meta.SetChapters(m.Cue.meta.Chapters)
+		meta.SetChapters(m.GetFile("cue").meta.Chapters)
 	}
 
 	return meta
 }
 
-func (m *Media) AddCover(file string) *Media {
-	m.Cover = NewFormat(file)
+func (m *Media) GetFile(file string) *FileFormat {
+	return m.files[file]
+}
+
+func (m *Media) SetFile(name, f string) *Media {
+	//file := NewFormat(f)
+	m.files[name] = NewFormat(f)
 	return m
 }
 
-func (m *Media) AddFFmeta(file string) *Media {
-	m.FFmeta = NewFormat(file)
-	m.FFmeta.parse = LoadFFmetadataIni
-	m.FFmeta.render = RenderFFmetaTmpl
-	m.FFmeta.Parse()
-	return m
-}
+//func (m *Media) MarshalMetaTo(format string) *Media {
+//  f := NewFormat(format)
+//  m.outMeta = f.render(m.Meta())
+//  return m
+//  //f.SetMeta(f.Meta())
+//}
 
-func (m *Media) AddCue(file string) *Media {
-	m.Cue = NewFormat(file)
-	m.Cue.parse = LoadCueSheet
-	m.Cue.render = RenderCueTmpl
-	m.Cue.Parse()
-	return m
-}
+//func (m Media) StringMeta() string {
+//  if len(m.convertedData) > 0 {
+//    return string(m.convertedData)
+//  }
+//  return ""
+//}
+
+//func (m Media) PrintMeta() {
+//  println(m.StringMeta())
+//}
+
+//func (m Media) WriteMeta() {
+//}
+
+//func (m *Media) MarshalTo(format string) *Media {
+//  switch format {
+//  case "json", ".json":
+//    m.data = MarshalJson(m)
+//  case "ffmeta", "ini", ".ini":
+//    m.data = RenderFFmetaTmpl(m)
+//  case "cue", ".cue":
+//    if !m.HasChapters() {
+//      log.Fatal("No chapters")
+//    }
+//    m.data = RenderCueTmpl(m)
+//  }
+//  return m
+//}
 
 //func (m *Media) ConvertTo(kind string) *FileFormat {
 //  f := m.GetFormat(kind)
@@ -83,26 +103,26 @@ func (m *Media) AddCue(file string) *Media {
 //  return f
 //}
 
-func (m *Media) FFmetaChapsToCue() {
-	if !m.HasChapters() {
-		log.Fatal("No chapters")
-	}
+//func (m *Media) FFmetaChapsToCue() {
+//  if !m.HasChapters() {
+//    log.Fatal("No chapters")
+//  }
 
-	f, err := os.Create("chapters.cue")
-	if err != nil {
-		log.Fatal(err)
-	}
+//  f, err := os.Create("chapters.cue")
+//  if err != nil {
+//    log.Fatal(err)
+//  }
 
-	tmpl, err := GetTmpl("cue")
-	if err != nil {
-		log.Println(err)
-	}
+//  tmpl, err := GetTmpl("cue")
+//  if err != nil {
+//    log.Println(err)
+//  }
 
-	err = tmpl.Execute(f, m.Meta)
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-}
+//  err = tmpl.Execute(f, m.Meta)
+//  if err != nil {
+//    log.Println("executing template:", err)
+//  }
+//}
 
 //func (m *Media) SetChapters(ch Chapters) {
 //  m.Meta.Chapters = ch

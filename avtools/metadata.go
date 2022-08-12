@@ -2,7 +2,6 @@ package avtools
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -26,23 +25,15 @@ type MediaMeta struct {
 	//Tags     map[string]string
 }
 
-func (m *MediaMeta) MarshalTo(format string) *MediaMeta {
-	switch format {
-	case "json", ".json":
-		m.data = MarshalJson(m)
-	case "ffmeta", "ini", ".ini":
-		m.data = RenderFFmetaTmpl(m)
-	case "cue", ".cue":
-		if !m.HasChapters() {
-			log.Fatal("No chapters")
-		}
-		m.data = RenderCueTmpl(m)
-	}
-	return m
+func (m *MediaMeta) MarshalTo(format string) *FileFormat {
+	return NewFormat(format).SetMeta(m)
 }
 
 func (m *MediaMeta) Print() {
 	fmt.Println(m.String())
+}
+
+func (m *MediaMeta) Write() {
 }
 
 func (m *MediaMeta) String() string {
@@ -157,22 +148,6 @@ func (c Chapter) TimebaseFloat() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(base, 64)
 	return baseFloat
-}
-
-func (m *MediaMeta) ToFFmeta() {
-	m.LastChapterEnd()
-	tmpl, err := GetTmpl("ffmeta")
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, m)
-	if err != nil {
-		log.Println("executing template:", err)
-	}
-	println(buf.String())
-	//if len(m.Chapters) != 0 {
-	//}
 }
 
 func LoadFFmetadataIni(input string) *MediaMeta {
