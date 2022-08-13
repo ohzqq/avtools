@@ -30,42 +30,37 @@ type FileFormat struct {
 }
 
 func NewFormat(input string) *FileFormat {
-	f := FileFormat{}
 	switch input {
 	case "ffmeta":
+		return NewFFmeta()
 	case "cue":
+		return NewCueSheet()
+	case "audio":
+		return NewMediaFile()
 	default:
-		abs, err := filepath.Abs(input)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		f.Path = abs
-		f.File = filepath.Base(input)
-		f.Dir = filepath.Dir(input)
-		f.Ext = filepath.Ext(input)
-		f.Mimetype = mime.TypeByExtension(f.Ext)
+		return &FileFormat{}
 	}
+}
 
-	switch f.Ext {
-	case "ini", ".ini":
-		f.parse = LoadFFmetadataIni
-		f.render = RenderFFmetaTmpl
-		f.Parse()
-	case "cue", ".cue":
-		f.parse = LoadCueSheet
-		f.render = RenderCueTmpl
-		f.Parse()
-	default:
-		if f.IsAudio() {
-			f.parse = EmbeddedJsonMeta
-			f.render = MarshalJson
-			f.Parse()
-		}
+func NewMediaFile() *FileFormat {
+	return &FileFormat{
+		parse:  EmbeddedJsonMeta,
+		render: MarshalJson,
 	}
-	//fmt.Printf("%+V\n", f.Path)
-	return &f
+}
 
+func NewCueSheet() *FileFormat {
+	return &FileFormat{
+		parse:  LoadCueSheet,
+		render: RenderCueTmpl,
+	}
+}
+
+func NewFFmeta() *FileFormat {
+	return &FileFormat{
+		parse:  LoadFFmetadataIni,
+		render: RenderFFmetaTmpl,
+	}
 }
 
 func (f *FileFormat) Parse() *FileFormat {
@@ -83,13 +78,19 @@ func (f *FileFormat) SetMeta(m *MediaMeta) *FileFormat {
 	return f
 }
 
-func (f *FileFormat) SetFileName(n string) *FileFormat {
-	f.name = n
-	return f
-}
+func (f *FileFormat) SetFile(input string) *FileFormat {
+	abs, err := filepath.Abs(input)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func (f *FileFormat) SetExt(ext string) *FileFormat {
-	f.Ext = ext
+	f.Path = abs
+	f.File = filepath.Base(input)
+	f.Dir = filepath.Dir(input)
+	f.Ext = filepath.Ext(input)
+	f.Mimetype = mime.TypeByExtension(f.Ext)
+
+	f.name = input
 	return f
 }
 
