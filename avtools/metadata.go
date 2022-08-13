@@ -21,7 +21,6 @@ type MediaMeta struct {
 	Chapters Chapters
 	Streams  []*Stream
 	Format   *Format
-	Tags     Tags
 	//Tags     map[string]string
 }
 
@@ -31,9 +30,6 @@ func (m *MediaMeta) MarshalTo(format string) *FileFormat {
 
 func (m *MediaMeta) Print() {
 	fmt.Println(m.String())
-}
-
-func (m *MediaMeta) Write() {
 }
 
 func (m *MediaMeta) String() string {
@@ -50,6 +46,10 @@ func (m *MediaMeta) SetChapters(ch Chapters) {
 
 func (m *MediaMeta) SetTags(tags Tags) {
 	m.Format.Tags = tags
+}
+
+func (m MediaMeta) Tags() Tags {
+	return m.Format.Tags
 }
 
 func (m *MediaMeta) LastChapterEnd() {

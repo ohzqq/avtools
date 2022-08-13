@@ -1,5 +1,7 @@
 package avtools
 
+import "fmt"
+
 type Media struct {
 	files map[string]*FileFormat
 	//Input         *FileFormat
@@ -25,6 +27,7 @@ func NewMedia(input string) *Media {
 func (m Media) Meta() *MediaMeta {
 	meta := m.GetFile("input").meta
 
+	fmt.Printf("%+V\n", meta.Format.Tags)
 	if m.HasFFmeta() {
 		ff := m.GetFile("ffmeta")
 		meta.SetChapters(ff.meta.Chapters)
@@ -43,8 +46,14 @@ func (m *Media) GetFile(file string) *FileFormat {
 }
 
 func (m *Media) SetFile(name, f string) *Media {
-	//file := NewFormat(f)
-	m.files[name] = NewFormat(f)
+	file := NewFormat(name)
+	if f != "" {
+		file.SetFile(f)
+		if name != "cover" {
+			file.Parse()
+		}
+	}
+	m.files[name] = file
 	return m
 }
 

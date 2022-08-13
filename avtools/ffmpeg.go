@@ -29,11 +29,10 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	//fmt.Printf("%+V\n", cmd.media.MarshalMetaTo("ffmeta"))
-	//cmd.media.Meta().LastChapterEnd()
-	cmd.media.Meta().MarshalTo("ffmeta").Print()
-	//cmd.media.Cue.Render().Print()
-	//fmt.Printf("%+V\n", cmd.media.GetFormat("audio"))
+	fmt.Printf("%+V\n", cmd.media.Meta().Format.Tags)
+	cmd.media.Meta().MarshalTo("ffmeta").Render().Write()
+
+	//fmt.Printf("%+V\n", f)
 }
 
 func (c *ffmpegCmd) getChapters() (Chapters, error) {
@@ -130,7 +129,7 @@ func (cmd *ffmpegCmd) Split() error {
 
 	m := cmd.media.GetFile("input")
 	for i, ch := range chaps {
-		NewFFmpegCmd(m.Path).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
+		NewFFmpegCmd(m.Path()).Options(cmd.opts).Cut(ch.StartToSeconds(), ch.EndToSeconds(), i)
 	}
 	return nil
 }

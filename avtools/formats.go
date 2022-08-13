@@ -14,28 +14,24 @@ import (
 )
 
 type FileFormat struct {
-	name     string
-	meta     *MediaMeta
-	from     string
-	to       string
-	File     string
-	Path     string
-	Dir      string
-	Ext      string
-	Mimetype string
-	tmpl     *template.Template
-	parse    func(file string) *MediaMeta
-	render   func(meta *MediaMeta) []byte
-	data     []byte
+	name   string
+	file   string
+	meta   *MediaMeta
+	from   string
+	to     string
+	tmpl   *template.Template
+	parse  func(file string) *MediaMeta
+	render func(meta *MediaMeta) []byte
+	data   []byte
 }
 
-func NewFormat(input string) *FileFormat {
-	switch input {
+func NewFormat(kind string) *FileFormat {
+	switch kind {
 	case "ffmeta":
 		return NewFFmeta()
 	case "cue":
 		return NewCueSheet()
-	case "audio":
+	case "audio", "input":
 		return NewMediaFile()
 	default:
 		return &FileFormat{}
@@ -63,8 +59,41 @@ func NewFFmeta() *FileFormat {
 	}
 }
 
+func (f *FileFormat) Ext() string {
+	return filepath.Ext(f.file)
+}
+
+func (f *FileFormat) Name() string {
+	if f.file != "" {
+		return strings.TrimSuffix(filepath.Base(f.file), filepath.Ext(f.file))
+	}
+	if f.meta != nil && f.meta.Tags().Title != "" {
+		return f.meta.Tags().Title
+	}
+	if f.name != "" {
+		return f.name
+	}
+	return "tmp"
+}
+
+func (f *FileFormat) Path() string {
+	abs, err := filepath.Abs(f.file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return abs
+}
+
+func (f *FileFormat) Mimetype() string {
+	return mime.TypeByExtension(f.Ext())
+}
+
+func (f *FileFormat) Dir() string {
+	return filepath.Dir(f.file)
+}
+
 func (f *FileFormat) Parse() *FileFormat {
-	f.SetMeta(f.parse(f.Path))
+	f.SetMeta(f.parse(f.Path()))
 	return f
 }
 
@@ -78,19 +107,13 @@ func (f *FileFormat) SetMeta(m *MediaMeta) *FileFormat {
 	return f
 }
 
+func (f *FileFormat) SetName(n string) *FileFormat {
+	f.name = n
+	return f
+}
+
 func (f *FileFormat) SetFile(input string) *FileFormat {
-	abs, err := filepath.Abs(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	f.Path = abs
-	f.File = filepath.Base(input)
-	f.Dir = filepath.Dir(input)
-	f.Ext = filepath.Ext(input)
-	f.Mimetype = mime.TypeByExtension(f.Ext)
-
-	f.name = input
+	f.file = input
 	return f
 }
 
@@ -98,19 +121,27 @@ func (f *FileFormat) Print() {
 	println(f.String())
 }
 
+func (f *FileFormat) Write() {
+	WriteFile(f.Name(), f.Ext(), f.Bytes())
+}
+
 func (f *FileFormat) String() string {
-	return string(f.data)
+	return string(f.Bytes())
+}
+
+func (f *FileFormat) Bytes() []byte {
+	return f.render(f.meta)
 }
 
 func (f FileFormat) IsImage() bool {
-	if strings.Contains(f.Mimetype, "image") {
+	if strings.Contains(f.Mimetype(), "image") {
 		return true
 	}
 	return false
 }
 
 func (f FileFormat) IsAudio() bool {
-	if strings.Contains(f.Mimetype, "audio") {
+	if strings.Contains(f.Mimetype(), "audio") {
 		return true
 	} else {
 		fmt.Println("not an audio file")
@@ -119,7 +150,7 @@ func (f FileFormat) IsAudio() bool {
 }
 
 func (f FileFormat) IsPlainText() bool {
-	if strings.Contains(f.Mimetype, "text/plain") {
+	if strings.Contains(f.Mimetype(), "text/plain") {
 		return true
 	} else {
 		log.Fatalln("needs to be plain text file")
@@ -129,7 +160,7 @@ func (f FileFormat) IsPlainText() bool {
 
 func (f FileFormat) IsFFmeta() bool {
 	if f.IsPlainText() {
-		contents, err := os.Open(f.Path)
+		contents, err := os.Open(f.Path())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -156,7 +187,6 @@ func EmbeddedJsonMeta(file string) *MediaMeta {
 	if err != nil {
 		fmt.Println("help")
 	}
-	meta.Tags = meta.Format.Tags
 
 	return &meta
 }

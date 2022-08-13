@@ -106,7 +106,7 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 
 	m := cmd.media.GetFile("input")
 	if cmd.media != nil {
-		cmd.args.Append("-i", m.Path)
+		cmd.args.Append("-i", m.Path())
 	}
 
 	if cmd.Input != "" {
@@ -209,7 +209,7 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 	case cmd.Ext != "":
 		ext = cmd.Ext
 	default:
-		ext = media.Ext
+		ext = media.Ext()
 	}
 	cmd.args.Append(name + ext)
 
