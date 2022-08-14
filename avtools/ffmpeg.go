@@ -1,6 +1,7 @@
 package avtools
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -28,6 +29,11 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
+	args := cmd.Args
+	args.Input = cmd.media.GetFile("input").Path()
+	args.Name = cmd.media.SafeName()
+	args.Options = *cmd.opts
+	fmt.Printf("%+V\n", args.Parse())
 	if cmd.opts.CueSwitch {
 		cmd.media.Meta().MarshalTo("cue").Render().Print()
 	}
