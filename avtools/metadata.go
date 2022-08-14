@@ -21,7 +21,6 @@ type MediaMeta struct {
 	Chapters Chapters
 	Streams  []*Stream
 	Format   *Format
-	//Tags     map[string]string
 }
 
 func (m *MediaMeta) MarshalTo(format string) *FileFormat {
@@ -83,15 +82,6 @@ func (f Format) DurationSecs(timebase float64) int {
 	return int(seconds)
 }
 
-type Tags struct {
-	Title    string `json:"title",ini:"title"`
-	Artist   string `json:"artist",ini:"artist"`
-	Composer string `json:"composer",ini:"composer"`
-	Album    string `json:"album",ini:"album"`
-	Comment  string `json:"comment",ini:"comment"`
-	Genre    string `json:"genre",ini:"genre"`
-}
-
 type Chapters []*Chapter
 
 type Chapter struct {
@@ -112,7 +102,6 @@ func (c *Chapter) CueStamp() string {
 	m := int(sec) / 60
 	s := int(sec) % 60
 	return fmt.Sprintf("%02d:%02d:00", m, s)
-	//return s
 }
 
 func (c *Chapter) StartToSeconds() string {

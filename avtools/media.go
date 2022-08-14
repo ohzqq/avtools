@@ -48,31 +48,6 @@ func (m *Media) SetFile(name, f string) *Media {
 	return m
 }
 
-//func (m *Media) FFmetaChapsToCue() {
-//  if !m.HasChapters() {
-//    log.Fatal("No chapters")
-//  }
-
-//  f, err := os.Create("chapters.cue")
-//  if err != nil {
-//    log.Fatal(err)
-//  }
-
-//  tmpl, err := GetTmpl("cue")
-//  if err != nil {
-//    log.Println(err)
-//  }
-
-//  err = tmpl.Execute(f, m.Meta)
-//  if err != nil {
-//    log.Println("executing template:", err)
-//  }
-//}
-
-//func (m *Media) SetChapters(ch Chapters) {
-//  m.Meta.Chapters = ch
-//}
-
 func (m Media) HasCue() bool {
 	return m.files["cue"] != nil
 }

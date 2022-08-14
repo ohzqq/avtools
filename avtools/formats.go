@@ -32,7 +32,7 @@ func NewFormat(kind string) *FileFormat {
 		return NewFFmeta()
 	case "cue":
 		return NewCueSheet()
-	case "audio", "input":
+	case "audio", "input", "json":
 		return NewMediaFile()
 	default:
 		return &FileFormat{}
@@ -218,41 +218,30 @@ func RenderCueTmpl(meta *MediaMeta) []byte {
 		buf  bytes.Buffer
 		tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
 	)
+
 	err := tmpl.Execute(&buf, meta)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
+
 	return buf.Bytes()
 }
 
 func RenderFFmetaTmpl(meta *MediaMeta) []byte {
-	meta.LastChapterEnd()
 	var (
 		buf  bytes.Buffer
 		tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
 	)
+
+	meta.LastChapterEnd()
+
 	err := tmpl.Execute(&buf, meta)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
+
 	return buf.Bytes()
 }
-
-//func GetTmpl(name string) (*template.Template, error) {
-//  var metaTmpl = map[string]*template.Template{
-//    "cue":          template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl)),
-//    "ffchaps":      template.Must(template.New("ffchaps").Funcs(funcs).Parse(ffmetaTmpl)),
-//    "cueToFFchaps": template.Must(template.New("cueToFFchaps").Funcs(funcs).Parse(ffmetaTmpl)),
-//    "ffmeta":       template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl)),
-//  }
-
-//  for n, _ := range metaTmpl {
-//    if n == name {
-//      return metaTmpl[n], nil
-//    }
-//  }
-//  return &template.Template{}, fmt.Errorf("%v is not a template", name)
-//}
 
 var funcs = template.FuncMap{
 	"cueStamp": secsToCueStamp,
