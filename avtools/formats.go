@@ -266,23 +266,8 @@ TRACK {{$index}} AUDIO
 {{- end}}`
 
 const ffmetaTmpl = `;FFMETADATA1
-{{with .Format.Tags.Title -}}
-	title={{.}}
-{{end -}}
-{{with .Format.Tags.Album -}}
-	album={{.}}
-{{end -}}
-{{with .Format.Tags.Artist -}}
-	artist={{.}}
-{{end -}}
-{{with .Format.Tags.Composer -}}
-	composer={{.}}
-{{end -}}
-{{with .Format.Tags.Genre -}}
-	genre={{.}}
-{{end -}}
-{{with .Format.Tags.Comment -}}
-	comment={{.}}
+{{range $key, $val := .Format.Tags -}}
+	{{$key}}={{$val}}
 {{end -}}
 {{range $index, $ch := .Chapters -}}
 [CHAPTER]
