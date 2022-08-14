@@ -73,7 +73,7 @@ type Format struct {
 	Duration string
 	Size     string
 	BitRate  string `json:"bit_rate"`
-	Tags            //map[string]string
+	Tags     Tags   //map[string]string
 }
 
 func (f Format) Ext() string {

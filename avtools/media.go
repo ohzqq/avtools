@@ -1,7 +1,5 @@
 package avtools
 
-import "fmt"
-
 type Media struct {
 	files map[string]*FileFormat
 	//Input         *FileFormat
@@ -27,8 +25,8 @@ func NewMedia(input string) *Media {
 func (m Media) Meta() *MediaMeta {
 	meta := m.GetFile("input").meta
 
-	fmt.Printf("%+V\n", meta.Format.Tags)
 	if m.HasFFmeta() {
+		println("ffmeta")
 		ff := m.GetFile("ffmeta")
 		meta.SetChapters(ff.meta.Chapters)
 		meta.SetTags(ff.meta.Format.Tags)
@@ -56,61 +54,6 @@ func (m *Media) SetFile(name, f string) *Media {
 	m.files[name] = file
 	return m
 }
-
-//func (m *Media) MarshalMetaTo(format string) *Media {
-//  f := NewFormat(format)
-//  m.outMeta = f.render(m.Meta())
-//  return m
-//  //f.SetMeta(f.Meta())
-//}
-
-//func (m Media) StringMeta() string {
-//  if len(m.convertedData) > 0 {
-//    return string(m.convertedData)
-//  }
-//  return ""
-//}
-
-//func (m Media) PrintMeta() {
-//  println(m.StringMeta())
-//}
-
-//func (m Media) WriteMeta() {
-//}
-
-//func (m *Media) MarshalTo(format string) *Media {
-//  switch format {
-//  case "json", ".json":
-//    m.data = MarshalJson(m)
-//  case "ffmeta", "ini", ".ini":
-//    m.data = RenderFFmetaTmpl(m)
-//  case "cue", ".cue":
-//    if !m.HasChapters() {
-//      log.Fatal("No chapters")
-//    }
-//    m.data = RenderCueTmpl(m)
-//  }
-//  return m
-//}
-
-//func (m *Media) ConvertTo(kind string) *FileFormat {
-//  f := m.GetFormat(kind)
-//  f.render(f)
-
-//  switch kind {
-//  case "json", ".json":
-//    f.data = MarshalJson(f)
-//  case "ffmeta", "ini", ".ini":
-//    f.data = RenderTmpl(f)
-//  case "cue", ".cue":
-//    if len(f.meta.Chapters) == 0 {
-//      log.Fatal("No chapters")
-//    }
-//    f.data = RenderTmpl(f)
-//        return fmt.Render("cue")
-//  }
-//  return f
-//}
 
 //func (m *Media) FFmetaChapsToCue() {
 //  if !m.HasChapters() {
