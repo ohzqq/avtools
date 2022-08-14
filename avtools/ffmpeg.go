@@ -1,9 +1,9 @@
 package avtools
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"os/exec"
 )
 
 type ffmpegCmd struct {
@@ -27,13 +27,76 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 	return cmd
 }
 
+func (cmd *ffmpegCmd) ParseOpts() *ffmpegCmd {
+	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
+
+	if meta := cmd.opts.MetaFile; meta != "" {
+		cmd.media.SetFile("ffmeta", meta)
+	}
+
+	if cover := cmd.opts.CoverFile; cover != "" {
+		cmd.media.SetFile("cover", cover)
+	}
+
+	if cue := cmd.opts.CueFile; cue != "" {
+		cmd.media.SetFile("cue", cue)
+	}
+
+	if y := cmd.Args.Overwrite; y {
+		cmd.opts.Overwrite = y
+	}
+
+	if o := cmd.Args.Output; o != "" {
+		cmd.Name = o
+	}
+
+	if c := cmd.Args.ChapNo; c != 0 {
+		cmd.num = c
+	}
+
+	return cmd
+}
+
+func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
+	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
+
+	if meta := cmd.opts.MetaFile; meta != "" {
+		cmd.media.SetFile("ffmeta", meta)
+	}
+
+	if cover := cmd.opts.CoverFile; cover != "" {
+		cmd.media.SetFile("cover", cover)
+	}
+
+	if cue := cmd.opts.CueFile; cue != "" {
+		cmd.media.SetFile("cue", cue)
+	}
+
+	if y := cmd.Args.Overwrite; y {
+		cmd.Overwrite = y
+	}
+
+	if o := cmd.opts.Output; o != "" {
+		cmd.Name = o
+	}
+
+	if c := cmd.opts.ChapNo; c != 0 {
+		cmd.num = c
+	}
+
+	return cmd
+}
+
+func (cmd *ffmpegCmd) ParseArgs() *Cmd {
+	cmd.Args.Input = cmd.media.GetFile("input").Path()
+	cmd.Args.Name = cmd.media.SafeName()
+	//fmt.Printf("%+V\n", cmd.Overwrite)
+	cmd.Args.Options = *cmd.ParseOpts().opts
+	return NewCmd(exec.Command("ffmpeg", cmd.Parse()...), cmd.opts.Verbose)
+}
+
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	args := cmd.Args
-	args.Input = cmd.media.GetFile("input").Path()
-	args.Name = cmd.media.SafeName()
-	args.Options = *cmd.opts
-	fmt.Printf("%+V\n", args.Parse())
 	if cmd.opts.CueSwitch {
 		cmd.media.Meta().MarshalTo("cue").Render().Print()
 	}
