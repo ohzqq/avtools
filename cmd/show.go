@@ -23,9 +23,12 @@ var showCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-	showCmd.PersistentFlags().StringVarP(&flags.MetaFile, "metaFile", "m", "", "update ffmetadata")
-	showCmd.PersistentFlags().StringVarP(&flags.CoverFile, "artFile", "a", "", "update album art")
-	showCmd.PersistentFlags().StringVarP(&flags.CueFile, "cue", "c", "", "update chapter metadata")
+	showCmd.PersistentFlags().StringVarP(&flags.MetaFile, "ffmeta", "f", "", "update ffmetadata")
+	showCmd.PersistentFlags().StringVarP(&flags.CoverFile, "album-art", "a", "", "update album art")
+	showCmd.PersistentFlags().StringVarP(&flags.CueFile, "cue-sheet", "c", "", "update chapter metadata")
+	showCmd.PersistentFlags().BoolVarP(&flags.MetaSwitch, "meta", "M", false, "print ffmeta")
+	showCmd.PersistentFlags().BoolVarP(&flags.CueSwitch, "cue", "C", false, "print cue sheet")
+	showCmd.PersistentFlags().BoolVarP(&flags.JsonSwitch, "json", "J", false, "print json")
 
 	// Here you will define your flags and configuration settings.
 

@@ -43,6 +43,7 @@ type Options struct {
 	CoverSwitch bool
 	CueSwitch   bool
 	ChapSwitch  bool
+	JsonSwitch  bool
 	Verbose     bool
 	CoverFile   string
 	MetaFile    string

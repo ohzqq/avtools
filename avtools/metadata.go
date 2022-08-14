@@ -78,11 +78,11 @@ func (f Format) DurationSecs(timebase float64) int {
 type Chapters []*Chapter
 
 type Chapter struct {
-	Timebase string `json:"time_base",ini:"timebase"`
-	Start    int    `json:"start",ini:"start"`
-	End      int    `json:"end",ini:"end"`
-	Tags     map[string]string
-	Title    string `ini:"title"`
+	Timebase string            `json:"time_base",ini:"timebase"`
+	Start    int               `json:"start",ini:"start"`
+	End      int               `json:"end",ini:"end"`
+	Tags     map[string]string `json:"tags"`
+	Title    string            `ini:"title"`
 }
 
 func (c *Chapter) TimeBase() string {

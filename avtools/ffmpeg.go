@@ -28,10 +28,15 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	cue := cmd.media.Meta().MarshalTo("cue")
-	//fmt.Printf("%+V\n", cue.Ext())
-	cue.Render().Print()
-
+	if cmd.opts.CueSwitch {
+		cmd.media.Meta().MarshalTo("cue").Render().Print()
+	}
+	if cmd.opts.JsonSwitch {
+		cmd.media.Meta().MarshalTo("json").Render().Print()
+	}
+	if cmd.opts.MetaSwitch {
+		cmd.media.Meta().MarshalTo("ffmeta").Render().Print()
+	}
 }
 
 func (c *ffmpegCmd) Extract() {

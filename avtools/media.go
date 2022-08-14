@@ -21,7 +21,9 @@ func (m Media) Meta() *MediaMeta {
 
 	if m.HasFFmeta() {
 		ff := m.GetFile("ffmeta")
-		meta.SetChapters(ff.meta.Chapters)
+		if ff.Meta().HasChapters() {
+			meta.SetChapters(ff.meta.Chapters)
+		}
 		meta.SetTags(ff.meta.Format.Tags)
 	}
 
