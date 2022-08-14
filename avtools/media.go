@@ -1,5 +1,12 @@
 package avtools
 
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/gosimple/slug"
+)
+
 type Media struct {
 	files map[string]*FileFormat
 	//Input         *FileFormat
@@ -32,6 +39,18 @@ func (m Media) Meta() *MediaMeta {
 	}
 
 	return meta
+}
+
+func (m *Media) SafeName() string {
+	var filename string
+	if f := m.Meta().Format.Filename; f != "" {
+		filename = f
+	}
+	if f := m.GetFile("input"); f != nil {
+		filename = f.Name()
+	}
+	filename = strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
+	return slug.Make(filename)
 }
 
 func (m *Media) GetFile(file string) *FileFormat {

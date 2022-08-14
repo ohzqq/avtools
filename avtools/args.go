@@ -32,59 +32,15 @@ type Args struct {
 	format        string
 }
 
-type Options struct {
-	Overwrite   bool
-	Profile     string
-	Start       string
-	End         string
-	Output      string
-	ChapNo      int
-	MetaSwitch  bool
-	CoverSwitch bool
-	CueSwitch   bool
-	ChapSwitch  bool
-	JsonSwitch  bool
-	Verbose     bool
-	CoverFile   string
-	MetaFile    string
-	CueFile     string
-}
-
 func NewArgs() *Args {
 	return &Args{
 		Options: Options{Profile: "default"},
 	}
 }
 
-func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
-	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
-
-	if meta := cmd.opts.MetaFile; meta != "" {
-		cmd.media.SetFile("ffmeta", meta)
-	}
-
-	if cover := cmd.opts.CoverFile; cover != "" {
-		cmd.media.SetFile("cover", cover)
-	}
-
-	if cue := cmd.opts.CueFile; cue != "" {
-		cmd.media.SetFile("cue", cue)
-	}
-
-	if y := cmd.opts.Overwrite; y {
-		cmd.Overwrite = y
-	}
-
-	if o := cmd.opts.Output; o != "" {
-		cmd.Name = o
-	}
-
-	if c := cmd.opts.ChapNo; c != 0 {
-		cmd.num = c
-	}
-
-	return cmd
-}
+//func (args *Args) Output() *Args {
+//  return args
+//}
 
 func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 	if log := cmd.LogLevel; log != "" {
@@ -256,4 +212,52 @@ type stringArgs []string
 
 func (s stringArgs) Join() string {
 	return strings.Join(s, ",")
+}
+
+type Options struct {
+	Overwrite   bool
+	Profile     string
+	Start       string
+	End         string
+	Output      string
+	ChapNo      int
+	MetaSwitch  bool
+	CoverSwitch bool
+	CueSwitch   bool
+	ChapSwitch  bool
+	JsonSwitch  bool
+	Verbose     bool
+	CoverFile   string
+	MetaFile    string
+	CueFile     string
+}
+
+func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
+	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
+
+	if meta := cmd.opts.MetaFile; meta != "" {
+		cmd.media.SetFile("ffmeta", meta)
+	}
+
+	if cover := cmd.opts.CoverFile; cover != "" {
+		cmd.media.SetFile("cover", cover)
+	}
+
+	if cue := cmd.opts.CueFile; cue != "" {
+		cmd.media.SetFile("cue", cue)
+	}
+
+	if y := cmd.opts.Overwrite; y {
+		cmd.Overwrite = y
+	}
+
+	if o := cmd.opts.Output; o != "" {
+		cmd.Name = o
+	}
+
+	if c := cmd.opts.ChapNo; c != 0 {
+		cmd.num = c
+	}
+
+	return cmd
 }

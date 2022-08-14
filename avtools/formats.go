@@ -198,7 +198,6 @@ func (f FileFormat) IsFFmeta() bool {
 
 func EmbeddedJsonMeta(file string) *MediaMeta {
 	data := NewFFprobeCmd(file).EmbeddedMeta()
-	println(string(data))
 
 	meta := MediaMeta{}
 	err := json.Unmarshal(data, &meta)

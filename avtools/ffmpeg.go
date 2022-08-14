@@ -39,28 +39,29 @@ func (cmd *ffmpegCmd) ShowMeta() {
 	}
 }
 
-func (c *ffmpegCmd) Extract() {
-	c.ParseOptions()
+func (cmd *ffmpegCmd) Extract() {
+	cmd.ParseOptions()
 
 	switch {
-	case c.opts.CueSwitch:
-		c.media.Meta().MarshalTo("cue")
+	case cmd.opts.CueSwitch:
+		cmd.media.Meta().MarshalTo("cue").Render().Write()
 		return
-	case c.opts.CoverSwitch:
-		c.AudioCodec = "an"
-		c.VideoCodec = "copy"
-		c.Output = "cover"
-		c.Ext = ".jpg"
-	case c.opts.MetaSwitch:
-		c.AppendMapArg("post", "f", "ffmetadata")
-		c.AudioCodec = "none"
-		c.VideoCodec = "none"
-		c.Output = "ffmeta"
-		c.Ext = ".ini"
+	case cmd.opts.CoverSwitch:
+		cmd.AudioCodec = "an"
+		cmd.VideoCodec = "copy"
+		cmd.Ext = ".jpg"
+	case cmd.opts.MetaSwitch:
+		cmd.AppendMapArg("post", "f", "ffmetadata")
+		cmd.AudioCodec = "none"
+		cmd.VideoCodec = "none"
+		cmd.Ext = ".ini"
 	}
 
-	cmd := c.ParseArgs()
-	cmd.Run()
+	cmd.Output = cmd.media.SafeName()
+	cmd.Padding = ""
+
+	command := cmd.ParseArgs()
+	command.Run()
 }
 
 func (cmd *ffmpegCmd) Join(ext string) {
