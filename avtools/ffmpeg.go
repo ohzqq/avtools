@@ -81,7 +81,7 @@ func (cmd *ffmpegCmd) ShowMeta() {
 }
 
 func (cmd *ffmpegCmd) Extract() {
-	//cmd.ParseOptions()
+	cmd.ParseOptions()
 
 	switch {
 	case cmd.opts.CueSwitch:
