@@ -1,17 +1,10 @@
 package avtools
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
 	"path"
-	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/go-ini/ini"
 )
 
 const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
@@ -92,6 +85,13 @@ type Chapter struct {
 	Title    string `ini:"title"`
 }
 
+func (c *Chapter) TimeBase() string {
+	if c.Timebase == "" {
+		return "1/1000"
+	}
+	return c.Timebase
+}
+
 func (c *Chapter) StartToIntString() string {
 	result := float64(c.Start) * c.TimebaseFloat()
 	return strconv.FormatFloat(result, 'f', 0, 64)
@@ -132,85 +132,4 @@ func (c Chapter) TimebaseFloat() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(base, 64)
 	return baseFloat
-}
-
-func LoadFFmetadataIni(input string) *MediaMeta {
-	opts := ini.LoadOptions{}
-	opts.Insensitive = true
-	opts.InsensitiveSections = true
-	opts.IgnoreInlineComment = true
-	opts.AllowNonUniqueSections = true
-
-	abs, _ := filepath.Abs(input)
-	f, err := ini.LoadSources(opts, abs)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	media := MediaMeta{
-		Format: &Format{
-			Tags: f.Section("").KeysHash(),
-		},
-	}
-
-	if f.HasSection("chapter") {
-		sec, _ := f.SectionsByName("chapter")
-		for _, chap := range sec {
-			c := Chapter{}
-			err := chap.MapTo(&c)
-			if err != nil {
-				log.Fatal(err)
-			}
-			media.Chapters = append(media.Chapters, &c)
-		}
-	}
-	return &media
-}
-
-func LoadCueSheet(file string) *MediaMeta {
-	contents, err := os.Open(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer contents.Close()
-
-	var (
-		titles     []string
-		startTimes []int
-		meta       = MediaMeta{Format: &Format{}}
-		fileRegexp = regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
-	)
-
-	scanner := bufio.NewScanner(contents)
-	for scanner.Scan() {
-		s := strings.TrimSpace(scanner.Text())
-		if strings.Contains(s, "FILE") {
-			matches := fileRegexp.FindStringSubmatch(s)
-			meta.Format.Filename = matches[fileRegexp.SubexpIndex("title")]
-		}
-		if strings.Contains(s, "TITLE") {
-			t := strings.TrimPrefix(s, "TITLE ")
-			t = strings.Trim(t, "'")
-			t = strings.Trim(t, `"`)
-			titles = append(titles, t)
-		} else if strings.Contains(s, "INDEX") {
-			start := cueStampToFFmpegTime(strings.TrimPrefix(s, "INDEX 01 "))
-			startTimes = append(startTimes, start)
-		}
-	}
-
-	e := 1
-	for i := 0; i < len(titles); i++ {
-		t := Chapter{}
-		//t := new(Chapter)
-		t.Title = titles[i]
-		t.Start = startTimes[i]
-		if e < len(titles) {
-			t.End = startTimes[e]
-		}
-		e++
-		meta.Chapters = append(meta.Chapters, &t)
-	}
-
-	return &meta
 }

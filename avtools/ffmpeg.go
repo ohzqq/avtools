@@ -29,7 +29,7 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	cue := cmd.media.Meta().MarshalTo("json")
+	cue := cmd.media.Meta().MarshalTo("cue")
 	//fmt.Printf("%+V\n", cue.Ext())
 	cue.Render().Print()
 

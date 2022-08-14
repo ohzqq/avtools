@@ -9,8 +9,11 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
+
+	"gopkg.in/ini.v1"
 )
 
 type FileFormat struct {
@@ -81,8 +84,8 @@ func (f *FileFormat) Name() string {
 	if f.HasFile() {
 		return strings.TrimSuffix(filepath.Base(f.file), filepath.Ext(f.file))
 	}
-	if f.meta != nil && f.meta.GetTag("title") != "" {
-		return f.meta.GetTag("title")
+	if title := f.meta.GetTag("title"); f.meta != nil && title != "" {
+		return title
 	}
 	if f.name != "" {
 		return f.name
@@ -206,6 +209,12 @@ func EmbeddedJsonMeta(file string) *MediaMeta {
 }
 
 func MarshalJson(meta *MediaMeta) []byte {
+	for _, ch := range meta.Chapters {
+		if ch.Timebase == "" {
+			ch.Timebase = "1/1000"
+		}
+	}
+
 	data, err := json.Marshal(meta)
 	if err != nil {
 		fmt.Println("help")
@@ -213,10 +222,64 @@ func MarshalJson(meta *MediaMeta) []byte {
 	return data
 }
 
+func LoadCueSheet(file string) *MediaMeta {
+	contents, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer contents.Close()
+
+	var (
+		titles     []string
+		startTimes []int
+		meta       = MediaMeta{Format: &Format{}}
+		fileRegexp = regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
+	)
+
+	scanner := bufio.NewScanner(contents)
+	for scanner.Scan() {
+		s := strings.TrimSpace(scanner.Text())
+		if strings.Contains(s, "FILE") {
+			matches := fileRegexp.FindStringSubmatch(s)
+			meta.Format.Filename = matches[fileRegexp.SubexpIndex("title")]
+		}
+		if strings.Contains(s, "TITLE") {
+			t := strings.TrimPrefix(s, "TITLE ")
+			t = strings.Trim(t, "'")
+			t = strings.Trim(t, `"`)
+			titles = append(titles, t)
+		} else if strings.Contains(s, "INDEX") {
+			start := cueStampToFFmpegTime(strings.TrimPrefix(s, "INDEX 01 "))
+			startTimes = append(startTimes, start)
+		}
+	}
+
+	e := 1
+	for i := 0; i < len(titles); i++ {
+		t := Chapter{}
+		//t := new(Chapter)
+		t.Title = titles[i]
+		t.Start = startTimes[i]
+		if e < len(titles) {
+			t.End = startTimes[e]
+		}
+		e++
+		meta.Chapters = append(meta.Chapters, &t)
+	}
+
+	return &meta
+}
 func RenderCueTmpl(meta *MediaMeta) []byte {
+	const cueTmpl = `FILE "{{.Format.Filename}}" {{.Format.Ext}}
+{{- range $index, $ch := .Chapters}}
+TRACK {{$index}} AUDIO
+  TITLE {{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
+  INDEX 01 {{$ch.CueStamp}}
+{{- end}}`
+
 	var (
 		buf  bytes.Buffer
-		tmpl = template.Must(template.New("cue").Funcs(funcs).Parse(cueTmpl))
+		tmpl = template.Must(template.New("cue").Parse(cueTmpl))
 	)
 
 	err := tmpl.Execute(&buf, meta)
@@ -227,10 +290,55 @@ func RenderCueTmpl(meta *MediaMeta) []byte {
 	return buf.Bytes()
 }
 
+func LoadFFmetadataIni(input string) *MediaMeta {
+	opts := ini.LoadOptions{}
+	opts.Insensitive = true
+	opts.InsensitiveSections = true
+	opts.IgnoreInlineComment = true
+	opts.AllowNonUniqueSections = true
+
+	abs, _ := filepath.Abs(input)
+	f, err := ini.LoadSources(opts, abs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	media := MediaMeta{
+		Format: &Format{
+			Tags: f.Section("").KeysHash(),
+		},
+	}
+
+	if f.HasSection("chapter") {
+		sec, _ := f.SectionsByName("chapter")
+		for _, chap := range sec {
+			c := Chapter{}
+			err := chap.MapTo(&c)
+			if err != nil {
+				log.Fatal(err)
+			}
+			media.Chapters = append(media.Chapters, &c)
+		}
+	}
+	return &media
+}
+
 func RenderFFmetaTmpl(meta *MediaMeta) []byte {
+	const ffmetaTmpl = `;FFMETADATA1
+{{range $key, $val := .Format.Tags -}}
+	{{$key}}={{$val}}
+{{end -}}
+{{range $index, $ch := .Chapters -}}
+[CHAPTER]
+TIMEBASE={{$ch.TimeBase}}
+START={{$ch.Start}}
+END={{$ch.End}}
+title={{with $ch.Title}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
+{{end}}`
+
 	var (
 		buf  bytes.Buffer
-		tmpl = template.Must(template.New("ffmeta").Funcs(funcs).Parse(ffmetaTmpl))
+		tmpl = template.Must(template.New("ffmeta").Parse(ffmetaTmpl))
 	)
 
 	meta.LastChapterEnd()
@@ -242,26 +350,3 @@ func RenderFFmetaTmpl(meta *MediaMeta) []byte {
 
 	return buf.Bytes()
 }
-
-var funcs = template.FuncMap{
-	"cueStamp": secsToCueStamp,
-}
-
-const cueTmpl = `FILE "{{.Format.Filename}}" {{.Format.Ext}}
-{{- range $index, $ch := .Chapters}}
-TRACK {{$index}} AUDIO
-  TITLE {{if ne $ch.Title ""}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
-  INDEX 01 {{$ch.CueStamp}}
-{{- end}}`
-
-const ffmetaTmpl = `;FFMETADATA1
-{{range $key, $val := .Format.Tags -}}
-	{{$key}}={{$val}}
-{{end -}}
-{{range $index, $ch := .Chapters -}}
-[CHAPTER]
-TIMEBASE=1/1000
-START={{$ch.Start}}
-END={{$ch.End}}
-title={{with $ch.Title}}{{$ch.Title}}{{else}}Chapter {{$index}}{{end}}
-{{end}}`
