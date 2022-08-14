@@ -29,12 +29,10 @@ func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
 
 func (cmd *ffmpegCmd) ShowMeta() {
 	cmd.ParseOptions()
-	fmt.Printf("%+V\n", cmd.media.Meta().Format.Tags)
-	cue := cmd.media.Meta().MarshalTo("cue")
-	fmt.Printf("%+V\n", cue.Ext())
+	cue := cmd.media.Meta().MarshalTo("ffmeta")
+	//fmt.Printf("%+V\n", cue.Ext())
 	cue.Render().Print()
 
-	//fmt.Printf("%+V\n", f)
 }
 
 func (c *ffmpegCmd) getChapters() (Chapters, error) {

@@ -73,12 +73,16 @@ func (f *FileFormat) Ext() string {
 	return f.ext
 }
 
+func (f *FileFormat) Meta() *MediaMeta {
+	return f.meta
+}
+
 func (f *FileFormat) Name() string {
 	if f.HasFile() {
 		return strings.TrimSuffix(filepath.Base(f.file), filepath.Ext(f.file))
 	}
-	if f.meta != nil && f.meta.Tags().Title != "" {
-		return f.meta.Tags().Title
+	if f.meta != nil && f.meta.GetTag("title") != "" {
+		return f.meta.GetTag("title")
 	}
 	if f.name != "" {
 		return f.name

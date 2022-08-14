@@ -11,15 +11,13 @@ type Media struct {
 func NewMedia(input string) *Media {
 	media := Media{
 		files: make(map[string]*FileFormat),
-		//Input: NewFormat(input),
 	}
 	media.SetFile("input", input)
-	//media.files["input"] = NewFormat(input)
 	return &media
 }
 
 func (m Media) Meta() *MediaMeta {
-	meta := m.GetFile("input").meta
+	meta := m.GetFile("input").Meta()
 
 	if m.HasFFmeta() {
 		ff := m.GetFile("ffmeta")
