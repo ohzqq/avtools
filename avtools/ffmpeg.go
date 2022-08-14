@@ -1,7 +1,6 @@
 package avtools
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -35,25 +34,7 @@ func (cmd *ffmpegCmd) ShowMeta() {
 
 }
 
-func (c *ffmpegCmd) getChapters() (Chapters, error) {
-	//if len(c.media.json) == 0 {
-	//  c.media.JsonMeta().Unmarshal()
-	//}
-
-	switch {
-	case c.opts.CueFile != "":
-		return LoadCueSheet(c.opts.CueFile).Chapters, nil
-	case c.opts.MetaFile != "":
-		return LoadFFmetadataIni(c.opts.MetaFile).Chapters, nil
-	//case c.media.HasChapters():
-	//return c.media.Meta().Chapters, nil
-	default:
-		return nil, fmt.Errorf("There are no chapters!")
-	}
-}
-
 func (c *ffmpegCmd) Extract() {
-	//c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
 	switch {
@@ -105,7 +86,6 @@ func (cmd *ffmpegCmd) Join(ext string) {
 }
 
 func (c *ffmpegCmd) Remove() {
-	//c.media.JsonMeta().Unmarshal()
 	c.ParseOptions()
 
 	if c.opts.ChapSwitch {
@@ -135,7 +115,6 @@ func (cmd *ffmpegCmd) Split() error {
 }
 
 func (cmd *ffmpegCmd) Cut(ss, to string, no int) {
-	//cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()
 
 	var (

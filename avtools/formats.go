@@ -257,7 +257,6 @@ func LoadCueSheet(file string) *MediaMeta {
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		t := Chapter{}
-		//t := new(Chapter)
 		t.Title = titles[i]
 		t.Start = startTimes[i]
 		if e < len(titles) {
