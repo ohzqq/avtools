@@ -19,7 +19,7 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(updateCmd)
-	updateCmd.PersistentFlags().StringVarP(&flags.CoverFile, "artFile", "a", "", "update album art")
-	updateCmd.PersistentFlags().StringVarP(&flags.MetaFile, "metaFile", "m", "", "update ffmetadata")
-	updateCmd.PersistentFlags().StringVarP(&flags.CueFile, "cue", "c", "", "update chapter metadata")
+	updateCmd.PersistentFlags().StringVarP(&flags.CoverFile, "album-art", "a", "", "update album art")
+	updateCmd.PersistentFlags().StringVarP(&flags.MetaFile, "ffmeta", "f", "", "update ffmetadata")
+	updateCmd.PersistentFlags().StringVarP(&flags.CueFile, "cuesheet", "c", "", "update chapter metadata")
 }

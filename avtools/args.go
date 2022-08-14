@@ -21,20 +21,6 @@ func newMapArg(k, v string) map[string]string {
 	return map[string]string{k: v}
 }
 
-func (a *Args) AppendMapArg(key, flag, value string) {
-	mapArg := newMapArg(flag, value)
-	switch key {
-	case "pre":
-		a.PreInput = append(a.PreInput, mapArg)
-	case "post":
-		a.PostInput = append(a.PostInput, mapArg)
-	case "videoParams":
-		a.VideoParams = append(a.VideoParams, mapArg)
-	case "audioParams":
-		a.AudioParams = append(a.AudioParams, mapArg)
-	}
-}
-
 func (m mapArgs) Split() []string {
 	var args []string
 	for _, flArg := range m {
@@ -90,8 +76,58 @@ type Options struct {
 	CueFile     string
 }
 
+func (opts Options) parseInput() []string {
+	var input []string
+
+	if opts.Input != "" {
+		input = append(input, "-i", opts.Input)
+	}
+
+	meta := opts.MetaFile
+	if meta != "" {
+		input = append(input, "-i", meta)
+	}
+
+	cover := opts.CoverFile
+	if cover != "" {
+		input = append(input, "-i", cover)
+	}
+
+	idx := 0
+	if cover != "" || meta != "" {
+		input = append(input, "-map", strconv.Itoa(idx)+":0")
+		idx++
+	}
+
+	if cover != "" {
+		input = append(input, "-map", strconv.Itoa(idx)+":0")
+		idx++
+	}
+
+	if meta != "" {
+		input = append(input, "-map_metadata", strconv.Itoa(idx))
+		idx++
+	}
+
+	return input
+}
+
 func NewArgs() *Args {
 	return &Args{}
+}
+
+func (a *Args) AppendMapArg(key, flag, value string) {
+	mapArg := newMapArg(flag, value)
+	switch key {
+	case "pre":
+		a.PreInput = append(a.PreInput, mapArg)
+	case "post":
+		a.PostInput = append(a.PostInput, mapArg)
+	case "videoParams":
+		a.VideoParams = append(a.VideoParams, mapArg)
+	case "audioParams":
+		a.AudioParams = append(a.AudioParams, mapArg)
+	}
 }
 
 func (args *Args) Parse(opts Options) []string {
@@ -130,46 +166,6 @@ func (args *Args) Parse(opts Options) []string {
 	args.output(&cmdArgs)
 
 	return cmdArgs.args
-}
-
-//func (args *Args) Output() *Args {
-//  return args
-//}
-
-func (opts Options) parseInput() []string {
-	var input []string
-
-	if opts.Input != "" {
-		input = append(input, "-i", opts.Input)
-	}
-
-	meta := opts.MetaFile
-	if meta != "" {
-		input = append(input, "-i", meta)
-	}
-
-	cover := opts.CoverFile
-	if cover != "" {
-		input = append(input, "-i", cover)
-	}
-
-	idx := 0
-	if cover != "" || meta != "" {
-		input = append(input, "-map", strconv.Itoa(idx)+":0")
-		idx++
-	}
-
-	if cover != "" {
-		input = append(input, "-map", strconv.Itoa(idx)+":0")
-		idx++
-	}
-
-	if meta != "" {
-		input = append(input, "-map_metadata", strconv.Itoa(idx))
-		idx++
-	}
-
-	return input
 }
 
 func (args *Args) videoArgs(a *cmdArgs) {
