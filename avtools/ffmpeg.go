@@ -58,8 +58,10 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 }
 
 func (cmd *ffmpegCmd) ParseArgs() *Cmd {
-	cmd.Args.Name = cmd.media.SafeName()
-	cmd.opts.Input = cmd.media.GetFile("input").Path()
+	if cmd.media != nil {
+		cmd.Args.Name = cmd.media.SafeName()
+		cmd.opts.Input = cmd.media.GetFile("input").Path()
+	}
 	cmd.args = cmd.Parse(cmd.opts)
 	return NewCmd(exec.Command("ffmpeg", cmd.args...), cmd.opts.Verbose)
 }
@@ -120,7 +122,7 @@ func (cmd *ffmpegCmd) Join(ext string) {
 
 	cmd.AppendMapArg("pre", "f", "concat")
 	cmd.AppendMapArg("pre", "safe", "0")
-	cmd.Input = tmp.Name()
+	cmd.opts.Input = tmp.Name()
 	cmd.VideoCodec = "vn"
 	cmd.Ext = ext
 

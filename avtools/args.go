@@ -106,13 +106,13 @@ func (args *Args) Parse(opts Options) []string {
 		cmdArgs.Append("-y")
 	}
 
-	for _, i := range opts.parseInput() {
-		cmdArgs.Append(i)
-	}
-
 	// pre input
 	if pre := args.PreInput; len(pre) > 0 {
 		cmdArgs.Append(pre.Split()...)
+	}
+
+	for _, i := range opts.parseInput() {
+		cmdArgs.Append(i)
 	}
 
 	// post input
