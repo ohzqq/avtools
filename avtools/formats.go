@@ -16,6 +16,7 @@ import (
 type FileFormat struct {
 	name   string
 	file   string
+	ext    string
 	meta   *MediaMeta
 	from   string
 	to     string
@@ -47,6 +48,7 @@ func NewMediaFile() *FileFormat {
 
 func NewCueSheet() *FileFormat {
 	return &FileFormat{
+		ext:    ".cue",
 		parse:  LoadCueSheet,
 		render: RenderCueTmpl,
 	}
@@ -54,17 +56,25 @@ func NewCueSheet() *FileFormat {
 
 func NewFFmeta() *FileFormat {
 	return &FileFormat{
+		ext:    ".ini",
 		parse:  LoadFFmetadataIni,
 		render: RenderFFmetaTmpl,
 	}
 }
 
+func (f *FileFormat) HasFile() bool {
+	return f.file != ""
+}
+
 func (f *FileFormat) Ext() string {
-	return filepath.Ext(f.file)
+	if f.HasFile() {
+		return filepath.Ext(f.file)
+	}
+	return f.ext
 }
 
 func (f *FileFormat) Name() string {
-	if f.file != "" {
+	if f.HasFile() {
 		return strings.TrimSuffix(filepath.Base(f.file), filepath.Ext(f.file))
 	}
 	if f.meta != nil && f.meta.Tags().Title != "" {

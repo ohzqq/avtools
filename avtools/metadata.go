@@ -28,18 +28,6 @@ func (m *MediaMeta) MarshalTo(format string) *FileFormat {
 	return NewFormat(format).SetMeta(m)
 }
 
-func (m *MediaMeta) Print() {
-	fmt.Println(m.String())
-}
-
-func (m *MediaMeta) String() string {
-	return string(m.data)
-}
-
-func (m *MediaMeta) Bytes() []byte {
-	return m.data
-}
-
 func (m *MediaMeta) SetChapters(ch Chapters) {
 	m.Chapters = ch
 }

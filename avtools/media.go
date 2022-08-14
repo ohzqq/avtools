@@ -3,10 +3,6 @@ package avtools
 type Media struct {
 	files map[string]*FileFormat
 	//Input         *FileFormat
-	Cue      *FileFormat
-	FFmeta   *FileFormat
-	Json     *FileFormat
-	Cover    *FileFormat
 	CueChaps bool
 	outMeta  *FileFormat
 	json     []byte
@@ -26,7 +22,6 @@ func (m Media) Meta() *MediaMeta {
 	meta := m.GetFile("input").meta
 
 	if m.HasFFmeta() {
-		println("ffmeta")
 		ff := m.GetFile("ffmeta")
 		meta.SetChapters(ff.meta.Chapters)
 		meta.SetTags(ff.meta.Format.Tags)
@@ -81,15 +76,15 @@ func (m *Media) SetFile(name, f string) *Media {
 //}
 
 func (m Media) HasCue() bool {
-	return m.Cue != nil
+	return m.files["cue"] != nil
 }
 
 func (m Media) HasCover() bool {
-	return m.Cover != nil
+	return m.files["cover"] != nil
 }
 
 func (m Media) HasFFmeta() bool {
-	return m.FFmeta != nil
+	return m.files["ffmeta"] != nil
 }
 
 func (m Media) HasChapters() bool {
