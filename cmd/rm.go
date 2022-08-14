@@ -13,7 +13,7 @@ var rmCmd = &cobra.Command{
 	Long:  `Use this to remove metadata, art, or chapters from a/v files`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		avtools.NewFFmpegCmd(args[0]).Options(&flags).Remove()
+		avtools.NewFFmpegCmd(args[0]).Options(flags).Remove()
 	},
 }
 

@@ -96,94 +96,123 @@ func NewArgs() *Args {
 	}
 }
 
+func (args *Args) Parse() []string {
+	cmdArgs := cmdArgs{}
+	if log := args.LogLevel; log != "" {
+		cmdArgs.Append("-v", log)
+	}
+
+	if args.Overwrite {
+		cmdArgs.Append("-y")
+	}
+
+	args.parseInput(&cmdArgs)
+
+	// pre input
+	if pre := args.PreInput; len(pre) > 0 {
+		cmdArgs.Append(pre.Split()...)
+	}
+
+	// post input
+	if post := args.PostInput; len(post) > 0 {
+		cmdArgs.Append(post.Split()...)
+	}
+
+	//filter complex
+	if filters := args.FilterComplex.Join(); len(filters) > 0 {
+		cmdArgs.Append("-vf", filters)
+	}
+
+	args.videoArgs(&cmdArgs)
+	args.audioArgs(&cmdArgs)
+	args.output(&cmdArgs)
+
+	return cmdArgs.args
+}
+
 //func (args *Args) Output() *Args {
 //  return args
 //}
 
-func (args *Args) parseInput() *Args {
+func (args *Args) parseInput(a *cmdArgs) {
 	if args.Input != "" {
-		args.Append("-i", args.Input)
+		a.Append("-i", args.Input)
 	}
 
 	meta := args.MetaFile
 	if meta != "" {
-		args.Append("-i", meta)
+		a.Append("-i", meta)
 	}
 
 	cover := args.CoverFile
 	if cover != "" {
-		args.Append("-i", cover)
+		a.Append("-i", cover)
 	}
 
 	//map input
 	idx := 0
 	if cover != "" || meta != "" {
-		args.Append("-map", strconv.Itoa(idx)+":0")
+		a.Append("-map", strconv.Itoa(idx)+":0")
 		idx++
 	}
 
 	if cover != "" {
-		args.Append("-map", strconv.Itoa(idx)+":0")
+		a.Append("-map", strconv.Itoa(idx)+":0")
 		idx++
 	}
 
 	if meta != "" {
-		args.Append("-map_metadata", strconv.Itoa(idx))
+		a.Append("-map_metadata", strconv.Itoa(idx))
 		idx++
 	}
 
-	return args
 }
 
-func (args *Args) videoArgs() *Args {
+func (args *Args) videoArgs(a *cmdArgs) {
 	//video codec
 	if codec := args.VideoCodec; codec != "" {
 		switch codec {
 		case "":
 		case "none", "vn":
-			args.Append("-vn")
+			a.Append("-vn")
 		default:
-			args.Append("-c:v", codec)
+			a.Append("-c:v", codec)
 			//video params
 			if params := args.VideoParams.Split(); len(params) > 0 {
-				args.Append(params...)
+				a.Append(params...)
 			}
 
 			//video filters
 			if filters := args.VideoFilters.Join(); len(filters) > 0 {
-				args.Append("-vf", filters)
+				a.Append("-vf", filters)
 			}
 		}
 	}
-
-	return args
 }
 
-func (args *Args) audioArgs() *Args {
+func (args *Args) audioArgs(a *cmdArgs) {
 	//audio codec
 	if codec := args.AudioCodec; codec != "" {
 		switch codec {
 		case "":
 		case "none", "an":
-			args.Append("-an")
+			a.Append("-an")
 		default:
-			args.Append("-c:a", codec)
+			a.Append("-c:a", codec)
 			//audio params
 			if params := args.AudioParams.Split(); len(params) > 0 {
-				args.Append(params...)
+				a.Append(params...)
 			}
 
 			//audio filters
 			if filters := args.AudioFilters.Join(); len(filters) > 0 {
-				args.Append("-af", filters)
+				a.Append("-af", filters)
 			}
 		}
 	}
-
-	return args
 }
 
-func (args *Args) output() *Args {
+func (args *Args) output(a *cmdArgs) {
 	//output
 	var (
 		name = args.Name
@@ -202,40 +231,7 @@ func (args *Args) output() *Args {
 		ext = e
 	}
 
-	args.Append(name + ext)
+	a.Append(name + ext)
 
-	return args
-}
-
-func (args *Args) Parse() []string {
-	if log := args.LogLevel; log != "" {
-		args.Append("-v", log)
-	}
-
-	if args.Overwrite {
-		args.Append("-y")
-	}
-
-	args.parseInput()
-
-	// pre input
-	if pre := args.PreInput; len(pre) > 0 {
-		args.Append(pre.Split()...)
-	}
-
-	// post input
-	if post := args.PostInput; len(post) > 0 {
-		args.Append(post.Split()...)
-	}
-
-	//filter complex
-	if filters := args.FilterComplex.Join(); len(filters) > 0 {
-		args.Append("-vf", filters)
-	}
-
-	args.videoArgs()
-	args.audioArgs()
-	args.output()
-
-	return args.cmdArgs.args
+	//return a
 }

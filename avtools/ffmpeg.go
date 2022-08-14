@@ -8,8 +8,8 @@ import (
 
 type ffmpegCmd struct {
 	media *Media
-	args  cmdArgs
-	opts  *Options
+	args  []string
+	opts  Options
 	*Args
 }
 
@@ -22,7 +22,7 @@ func NewFFmpegCmd(i string) *ffmpegCmd {
 	return &ff
 }
 
-func (cmd *ffmpegCmd) Options(f *Options) *ffmpegCmd {
+func (cmd *ffmpegCmd) Options(f Options) *ffmpegCmd {
 	cmd.opts = f
 	return cmd
 }
@@ -91,8 +91,9 @@ func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 	cmd.Args.Input = cmd.media.GetFile("input").Path()
 	cmd.Args.Name = cmd.media.SafeName()
 	//fmt.Printf("%+V\n", cmd.Overwrite)
-	cmd.Args.Options = *cmd.ParseOpts().opts
-	return NewCmd(exec.Command("ffmpeg", cmd.Parse()...), cmd.opts.Verbose)
+	cmd.Args.Options = cmd.ParseOpts().opts
+	cmd.args = cmd.Parse()
+	return NewCmd(exec.Command("ffmpeg", cmd.args...), cmd.opts.Verbose)
 }
 
 func (cmd *ffmpegCmd) ShowMeta() {
