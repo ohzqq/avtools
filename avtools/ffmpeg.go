@@ -58,11 +58,9 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 }
 
 func (cmd *ffmpegCmd) ParseArgs() *Cmd {
-	cmd.Args.Input = cmd.media.GetFile("input").Path()
 	cmd.Args.Name = cmd.media.SafeName()
-	//fmt.Printf("%+V\n", cmd.Overwrite)
-	cmd.Args.Options = cmd.opts
-	cmd.args = cmd.Parse()
+	cmd.opts.Input = cmd.media.GetFile("input").Path()
+	cmd.args = cmd.Parse(cmd.opts)
 	return NewCmd(exec.Command("ffmpeg", cmd.args...), cmd.opts.Verbose)
 }
 
@@ -77,6 +75,7 @@ func (cmd *ffmpegCmd) ShowMeta() {
 	if cmd.opts.MetaSwitch {
 		cmd.media.Meta().MarshalTo("ffmeta").Render().Print()
 	}
+	cmd.ParseArgs()
 }
 
 func (cmd *ffmpegCmd) Extract() {

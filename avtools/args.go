@@ -53,7 +53,7 @@ func (s stringArgs) Join() string {
 
 type Args struct {
 	Options
-	Input         string
+	input         []string
 	PreInput      mapArgs
 	PostInput     mapArgs
 	VideoCodec    string
@@ -84,28 +84,31 @@ type Options struct {
 	ChapSwitch  bool
 	JsonSwitch  bool
 	Verbose     bool
+	Input       string
 	CoverFile   string
 	MetaFile    string
 	CueFile     string
 }
 
 func NewArgs() *Args {
-	return &Args{
-		Options: Options{Profile: "default"},
-	}
+	return &Args{}
 }
 
-func (args *Args) Parse() []string {
+func (args *Args) Parse(opts Options) []string {
+	args.Options = opts
+
 	cmdArgs := cmdArgs{}
 	if log := args.LogLevel; log != "" {
 		cmdArgs.Append("-v", log)
 	}
 
-	if args.Overwrite {
+	if opts.Overwrite {
 		cmdArgs.Append("-y")
 	}
 
-	args.parseInput(&cmdArgs)
+	for _, i := range opts.parseInput() {
+		cmdArgs.Append(i)
+	}
 
 	// pre input
 	if pre := args.PreInput; len(pre) > 0 {
@@ -133,38 +136,40 @@ func (args *Args) Parse() []string {
 //  return args
 //}
 
-func (args *Args) parseInput(a *cmdArgs) {
-	if args.Input != "" {
-		a.Append("-i", args.Input)
+func (opts Options) parseInput() []string {
+	var input []string
+
+	if opts.Input != "" {
+		input = append(input, "-i", opts.Input)
 	}
 
-	meta := args.MetaFile
+	meta := opts.MetaFile
 	if meta != "" {
-		a.Append("-i", meta)
+		input = append(input, "-i", meta)
 	}
 
-	cover := args.CoverFile
+	cover := opts.CoverFile
 	if cover != "" {
-		a.Append("-i", cover)
+		input = append(input, "-i", cover)
 	}
 
-	//map input
 	idx := 0
 	if cover != "" || meta != "" {
-		a.Append("-map", strconv.Itoa(idx)+":0")
+		input = append(input, "-map", strconv.Itoa(idx)+":0")
 		idx++
 	}
 
 	if cover != "" {
-		a.Append("-map", strconv.Itoa(idx)+":0")
+		input = append(input, "-map", strconv.Itoa(idx)+":0")
 		idx++
 	}
 
 	if meta != "" {
-		a.Append("-map_metadata", strconv.Itoa(idx))
+		input = append(input, "-map_metadata", strconv.Itoa(idx))
 		idx++
 	}
 
+	return input
 }
 
 func (args *Args) videoArgs(a *cmdArgs) {
