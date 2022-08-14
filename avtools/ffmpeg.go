@@ -27,7 +27,7 @@ func (cmd *ffmpegCmd) Options(f Options) *ffmpegCmd {
 	return cmd
 }
 
-func (cmd *ffmpegCmd) ParseOpts() *ffmpegCmd {
+func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
 
 	if meta := cmd.opts.MetaFile; meta != "" {
@@ -57,41 +57,11 @@ func (cmd *ffmpegCmd) ParseOpts() *ffmpegCmd {
 	return cmd
 }
 
-func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
-	cmd.Args = Cfg().GetProfile(cmd.opts.Profile)
-
-	if meta := cmd.opts.MetaFile; meta != "" {
-		cmd.media.SetFile("ffmeta", meta)
-	}
-
-	if cover := cmd.opts.CoverFile; cover != "" {
-		cmd.media.SetFile("cover", cover)
-	}
-
-	if cue := cmd.opts.CueFile; cue != "" {
-		cmd.media.SetFile("cue", cue)
-	}
-
-	if y := cmd.Args.Overwrite; y {
-		cmd.Overwrite = y
-	}
-
-	if o := cmd.opts.Output; o != "" {
-		cmd.Name = o
-	}
-
-	if c := cmd.opts.ChapNo; c != 0 {
-		cmd.num = c
-	}
-
-	return cmd
-}
-
 func (cmd *ffmpegCmd) ParseArgs() *Cmd {
 	cmd.Args.Input = cmd.media.GetFile("input").Path()
 	cmd.Args.Name = cmd.media.SafeName()
 	//fmt.Printf("%+V\n", cmd.Overwrite)
-	cmd.Args.Options = cmd.ParseOpts().opts
+	cmd.Args.Options = cmd.opts
 	cmd.args = cmd.Parse()
 	return NewCmd(exec.Command("ffmpeg", cmd.args...), cmd.opts.Verbose)
 }
@@ -110,7 +80,7 @@ func (cmd *ffmpegCmd) ShowMeta() {
 }
 
 func (cmd *ffmpegCmd) Extract() {
-	cmd.ParseOptions()
+	//cmd.ParseOptions()
 
 	switch {
 	case cmd.opts.CueSwitch:

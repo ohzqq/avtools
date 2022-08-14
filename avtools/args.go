@@ -53,7 +53,6 @@ func (s stringArgs) Join() string {
 
 type Args struct {
 	Options
-	cmdArgs
 	Input         string
 	PreInput      mapArgs
 	PostInput     mapArgs
