@@ -61,17 +61,14 @@ func (cmd *ffmpegCmd) ParseOptions() *ffmpegCmd {
 
 	if meta := cmd.opts.MetaFile; meta != "" {
 		cmd.media.SetFile("ffmeta", meta)
-		//cmd.media.AddFFmeta(meta)
 	}
 
 	if cover := cmd.opts.CoverFile; cover != "" {
 		cmd.media.SetFile("cover", cover)
-		//cmd.media.AddCover(cover)
 	}
 
 	if cue := cmd.opts.CueFile; cue != "" {
 		cmd.media.SetFile("cue", cue)
-		//cmd.media.AddCue(cue)
 	}
 
 	if y := cmd.opts.Overwrite; y {
