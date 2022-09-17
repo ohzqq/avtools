@@ -41,10 +41,10 @@ func (c *Chapters) SetExt(ext string) *Chapters {
 
 func (c Chapters) Ext() string {
 	var ext string
+	ext = strings.TrimPrefix(filepath.Ext(c.File), ".")
 	if c.ext != "" {
 		ext = c.ext
 	}
-	ext = strings.TrimPrefix(filepath.Ext(c.File), ".")
 	return strings.ToUpper(ext)
 }
 
