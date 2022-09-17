@@ -75,8 +75,8 @@ func (c Chapters) Each() []*Chapter {
 }
 
 type Chapter struct {
-	start    ChTime
-	end      ChTime
+	start    Time
+	end      Time
 	Timebase float64
 	Title    string
 }
@@ -85,26 +85,26 @@ func NewChapter() *Chapter {
 	return &Chapter{Timebase: 1}
 }
 
-func (ch Chapter) Start() ChTime {
+func (ch Chapter) Start() Time {
 	if t := ch.Timebase; t != 1 {
 		ch.start.base = t
 	}
 	return ch.start
 }
 
-func (ch Chapter) End() ChTime {
+func (ch Chapter) End() Time {
 	if t := ch.Timebase; t != 1 {
 		ch.start.base = t
 	}
 	return ch.end
 }
 
-func (ch Chapter) Dur() (ChTime, error) {
+func (ch Chapter) Dur() (Time, error) {
 	if ch.end.time == 0 {
 		return ch.end, fmt.Errorf("end time is needed to calculate duration")
 	}
 	t := ch.end.time - ch.start.time
-	return ChTime{time: t, base: ch.Timebase}, nil
+	return Time{time: t, base: ch.Timebase}, nil
 }
 
 func (ch *Chapter) SetTitle(t string) *Chapter {
@@ -112,12 +112,12 @@ func (ch *Chapter) SetTitle(t string) *Chapter {
 	return ch
 }
 
-func (ch *Chapter) SetStart(t ChTime) *Chapter {
+func (ch *Chapter) SetStart(t Time) *Chapter {
 	ch.start = t
 	return ch
 }
 
-func (ch *Chapter) SetEnd(t ChTime) *Chapter {
+func (ch *Chapter) SetEnd(t Time) *Chapter {
 	ch.end = t
 	return ch
 }

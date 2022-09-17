@@ -7,36 +7,40 @@ import (
 	"strconv"
 )
 
-func ParseStr(t string) ChTime {
-	i, err := strconv.ParseFloat(t, 64)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return ChTime{time: i}
+type Number interface {
+	int | int32 | int64 | float32 | float64
 }
 
-type ChTime struct {
+type Time struct {
 	time float64
 	base float64
 }
 
-func NewChapterTime[N Number](num N) ChTime {
-	return ChTime{
+func NewChapterTime[N Number](num N) Time {
+	return Time{
 		time: float64(num),
 		base: 1,
 	}
+}
+
+func ParseStr(t string) Time {
+	i, err := strconv.ParseFloat(t, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return Time{time: i}
 }
 
 func ParseNum[N Number](num N) string {
 	return strconv.FormatFloat(float64(num), 'f', 0, 64)
 }
 
-func (ch ChTime) Secs() int {
+func (ch Time) Secs() int {
 	secs := ch.time / ch.base
 	return int(math.Round(secs))
 }
 
-func (c ChTime) HHMMSS() string {
+func (c Time) HHMMSS() string {
 	secs := c.Secs()
 	hh := secs / 3600
 	mm := secs % 3600 / 60
@@ -44,7 +48,7 @@ func (c ChTime) HHMMSS() string {
 	return fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss)
 }
 
-func (c ChTime) MMSS() string {
+func (c Time) MMSS() string {
 	secs := c.Secs()
 	mm := secs / 60
 	ss := secs % 60
