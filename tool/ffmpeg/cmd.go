@@ -1,136 +1,75 @@
 package ffmpeg
 
 type Cmd struct {
-	Input         Input
-	PreInput      []string
-	PostInput     []string
-	VideoCodec    []string
-	VideoParams   []string
-	VideoFilters  Filters
-	AudioCodec    []string
-	AudioParams   []string
-	AudioFilters  Filters
-	FilterComplex Filters
-	MiscParams    []string
-	LogLevel      []string
-	Output        string
-	Name          string
-	Padding       string
-	Ext           string
+	*Args
+	args []string
 }
 
 func New() *Cmd {
 	return &Cmd{
-		VideoCodec:    []string{"-c:v"},
-		AudioCodec:    []string{"-c:a"},
-		VideoFilters:  []string{"-vf"},
-		AudioFilters:  []string{"-af"},
-		FilterComplex: []string{"-filter_complex"},
-		LogLevel:      []string{"-loglevel"},
+		Args: &Args{
+			VideoCodec:    []string{"-c:v"},
+			AudioCodec:    []string{"-c:a"},
+			VideoFilters:  []string{"-vf"},
+			AudioFilters:  []string{"-af"},
+			FilterComplex: []string{"-filter_complex"},
+			LogLevel:      []string{"-loglevel"},
+		},
 	}
 }
 
-func (c *Cmd) AppendPreInput(flag, val string) *Cmd {
-	c.PreInput = append(c.PreInput, flag, val)
-	return c
-}
+func (c *Cmd) ParseArgs() *Cmd {
+	if c.HasLogLevel() {
+		c.args = append(c.args, c.LogLevel...)
+	}
 
-func (c Cmd) HasPreInput() bool {
-	return len(c.PreInput) > 0
-}
+	if c.HasPreInput() {
+		c.args = append(c.args, c.PreInput...)
+	}
 
-func (c Cmd) HasPostInput() bool {
-	return len(c.PreInput) > 0
-}
+	if c.HasInput() {
+		c.args = append(c.args, c.Input.Map()...)
+	}
 
-func (c Cmd) HasMiscParams() bool {
-	return len(c.MiscParams) > 0
-}
+	if c.HasPostInput() {
+		c.args = append(c.args, c.PostInput...)
+	}
 
-func (c Cmd) HasAudioParams() bool {
-	return len(c.AudioParams) > 0
-}
+	if c.HasVideoCodec() {
+		c.args = append(c.args, c.VideoCodec...)
+	}
 
-func (c Cmd) HasVideoParams() bool {
-	return len(c.VideoParams) > 0
-}
+	if c.HasVideoParams() {
+		c.args = append(c.args, c.VideoParams...)
+	}
 
-func (c Cmd) HasAudioFilters() bool {
-	return len(c.AudioFilters) > 1
-}
+	if c.HasVideoFilters() && !c.HasFilterComplex() {
+		c.args = append(c.args, c.VideoFilters.String())
+	}
 
-func (c Cmd) HasVideoFilters() bool {
-	return len(c.VideoFilters) > 1
-}
+	if c.HasAudioCodec() {
+		c.args = append(c.args, c.AudioCodec...)
+	}
 
-func (c Cmd) HasFilters() bool {
-	return len(c.Filters) > 1
-}
+	if c.HasAudioFilters() && !c.HasFilterComplex() {
+		c.args = append(c.args, c.AudioFilters.String())
+	}
 
-func (c Cmd) HasAudioCodec() bool {
-	return len(c.AudioCodec) > 1
-}
+	if c.HasAudioParams() {
+		c.args = append(c.args, c.AudioParams...)
+	}
 
-func (c Cmd) HasVideoCodec() bool {
-	return len(c.VideoCodec) > 1
-}
+	if c.HasFilterComplex() {
+		c.args = append(c.args, c.FilterComplex.String())
+	}
 
-func (c *Cmd) AppendPostInput(flag, val string) *Cmd {
-	c.PostInput = append(c.PostInput, flag, val)
-	return c
-}
+	if c.HasMiscParams() {
+		c.args = append(c.args, c.MiscParams...)
+	}
 
-func (c *Cmd) AppendVideoParam(flag, val string) *Cmd {
-	c.VideoParams = append(c.VideoParams, flag, val)
-	return c
-}
+	if c.Output != "" {
+		c.args = append(c.args, c.Output)
+	}
 
-func (c *Cmd) AppendAudioParam(flag, val string) *Cmd {
-	c.AudioParams = append(c.AudioParams, flag, val)
-	return c
-}
-
-func (c *cmd) AppendVideoFilter(f Filter) *cmd {
-	c.VideoFilters = append(c.VideoFilters, f)
-	return c
-}
-
-func (c *Cmd) AppendAudioFilter(f Filter) *Cmd {
-	c.AudioFilters = append(c.AudioFilters, f)
-	return c
-}
-
-func (c *Cmd) AppendFilter(f Filter) *Cmd {
-	c.FilterComplex = append(c.FilterComplex, f)
-	return c
-}
-
-func (c *Cmd) SetVideoCodec(codec string) *Cmd {
-	c.VideoCodec = append(c.VideoCodec, codec)
-	return c
-}
-
-func (c *Cmd) SetVideoCodec(codec string) *Cmd {
-	c.AudioCodec = append(c.AudioCodec, codec)
-	return c
-}
-
-func (c *Cmd) AppendVideoParam(flag, val string) *Cmd {
-	c.VideoParams = append(c.VideoParams, flag, val)
-	return c
-}
-
-func (c *Cmd) AppendAudioParam(flag, val string) *Cmd {
-	c.AudioParams = append(c.AudioParams, flag, val)
-	return c
-}
-
-func (c *Cmd) SetLogLevel(l string) *Cmd {
-	c.LogLevel = append(c.LogLevel, l)
-	return c
-}
-
-func (c *Cmd) SetOutput(o string) *Cmd {
-	c.Output = o
 	return c
 }
