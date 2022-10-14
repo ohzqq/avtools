@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"github.com/ohzqq/avtools/avtools"
-
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +12,7 @@ var splitCmd = &cobra.Command{
 	Long:  `split files by embedded chapters markers, an ffmpeg metadata file, or a cue sheet`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		avtools.NewFFmpegCmd(args[0]).Options(flags).Split()
+		tool.NewFFmpegCmd(args[0]).Options(flags).Split()
 	},
 }
 

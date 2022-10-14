@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"github.com/ohzqq/avtools/avtools"
-
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +12,7 @@ var extractCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		avtools.NewFFmpegCmd(args[0]).Options(flags).Extract()
+		tool.NewFFmpegCmd(args[0]).Options(flags).Extract()
 	},
 }
 

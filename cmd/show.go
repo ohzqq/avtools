@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ohzqq/avtools/avtools"
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +12,7 @@ var showCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		avtools.NewFFmpegCmd(input).Options(flags).ShowMeta()
+		tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//f := avtools.NewMedia(input)
 		//f.AddFormat(flags.MetaFile)
 		//f.AddFormat(flags.CueFile)

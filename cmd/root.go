@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ohzqq/avtools/avtools"
+	"github.com/ohzqq/avtools/tool"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,7 +13,7 @@ import (
 
 var (
 	cfgFile string
-	flags   avtools.Options
+	flags   tool.Options
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -66,11 +66,11 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-	avtools.InitCfg()
+	tool.InitCfg()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		avtools.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
+		tool.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
 	}
 }
