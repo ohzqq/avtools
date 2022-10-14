@@ -1,4 +1,4 @@
-package avtools
+package tool
 
 import (
 	"log"

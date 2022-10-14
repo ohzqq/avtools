@@ -1,4 +1,4 @@
-package avtools
+package tool
 
 //func (m *Media) HasStreams() bool {
 //  if m.HasMeta() && m.Meta.Streams != nil {
