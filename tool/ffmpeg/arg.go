@@ -14,6 +14,7 @@ type Args struct {
 	FilterComplex Filters
 	MiscParams    []string
 	Output        string
+	Filters       string
 }
 
 func (c Args) HasLogLevel() bool {
@@ -112,6 +113,15 @@ func (c Args) HasFilters() bool {
 
 func (c *Args) AppendFilter(f Filter) *Args {
 	c.FilterComplex = append(c.FilterComplex, f)
+	return c
+}
+
+func (c Args) HasFilterGraph() bool {
+	return c.Filters != ""
+}
+
+func (c *Args) SetFilters(f string) *Args {
+	c.Filters = f
 	return c
 }
 

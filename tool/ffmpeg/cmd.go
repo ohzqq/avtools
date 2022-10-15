@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const ffmpegBin = `ffmpeg`
+
 type Cmd struct {
 	*Args
 	args []string
@@ -57,7 +59,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, c.VideoParams...)
 	}
 
-	if c.HasVideoFilters() && !c.HasFilters() {
+	if c.HasVideoFilters() && !c.HasFilters() && !c.HasFilterGraph() {
 		args = append(args, "-vf", c.VideoFilters.String())
 	}
 
@@ -65,7 +67,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, c.AudioCodec...)
 	}
 
-	if c.HasAudioFilters() && !c.HasFilters() {
+	if c.HasAudioFilters() && !c.HasFilters() && !c.HasFilterGraph() {
 		args = append(args, "-af", c.AudioFilters.String())
 	}
 
@@ -73,12 +75,16 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, c.AudioParams...)
 	}
 
-	if c.HasFilters() {
+	if c.HasFilters() && !c.HasFilterGraph() {
 		args = append(args, "-filter_complex", c.FilterComplex.String())
 	}
 
 	if c.HasMiscParams() {
 		args = append(args, c.MiscParams...)
+	}
+
+	if c.HasFilterGraph() {
+		args = append(args, "-filter_complex", c.Filters)
 	}
 
 	if c.Output != "" {
