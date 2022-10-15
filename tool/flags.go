@@ -1,6 +1,8 @@
 package tool
 
-import "github.com/ohzqq/avtools/tool/ffmpeg"
+import (
+	"github.com/ohzqq/avtools/tool/ffmpeg"
+)
 
 type Flag struct {
 	Args ArgFlag
@@ -29,11 +31,19 @@ type ArgFlag struct {
 	Cue     string
 }
 
-func (f Flag) FFmpegArgs() *ffmpeg.Cmd {
+func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
 	cmd := ffmpeg.New()
 
 	if f.Bool.Overwrite {
 		cmd.AppendPreInput("y")
+	}
+
+	if f.Args.HasStart() {
+		cmd.AppendPreInput("ss", f.Args.Start)
+	}
+
+	if f.Args.HasEnd() {
+		cmd.AppendPreInput("to", f.Args.End)
 	}
 
 	if f.Args.HasInput() {
@@ -43,6 +53,10 @@ func (f Flag) FFmpegArgs() *ffmpeg.Cmd {
 	if f.Args.HasMeta() {
 		cmd.AppendPostInput("i", f.Args.Meta)
 		cmd.AppendPostInput("map_metadata", "1")
+	}
+
+	if f.Args.HasOutput() {
+		cmd.Output(f.Args.Output)
 	}
 
 	return cmd
@@ -62,6 +76,14 @@ func (f ArgFlag) HasMeta() bool {
 
 func (f ArgFlag) HasProfile() bool {
 	return f.Profile != ""
+}
+
+func (f ArgFlag) HasStart() bool {
+	return f.Start != ""
+}
+
+func (f ArgFlag) HasEnd() bool {
+	return f.End != ""
 }
 
 func (f ArgFlag) HasInput() bool {

@@ -4,14 +4,34 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/ohzqq/avtools/tool/ffmpeg"
 )
 
 type Update struct {
 	Flag
+	*ffmpeg.Cmd
 }
 
 func NewUpdateCmd() *Update {
 	return &Update{}
+}
+
+func (u *Update) SetFlags(f Flag) *Update {
+	u.Flag = f
+	return u
+}
+
+func (u *Update) ParseArgs() {
+	u.Cmd = u.FFmpegCmd()
+
+	if u.Flag.Args.HasCover() {
+		u.AppendPostInput("i", u.Flag.Args.Cover)
+		u.AppendPostInput("map", "2")
+		u.AppendAudioParam("id3v2_version", "3")
+		u.AppendAudioParam("metadata:s:v", "title='Album cover'")
+		u.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
+	}
 }
 
 func (cmd *ffmpegCmd) Update() {

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +17,8 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
+		u := tool.NewUpdateCmd().SetFlags(flag)
+		u.ParseArgs()
 		//c.Input(input).CA("libfdk_aac").AppendPreInput("y")
 		//eq := ffmpeg.NewFilter("eq")
 		//eq.Set("brightness", "1.0")
@@ -30,7 +33,7 @@ var showCmd = &cobra.Command{
 		//if err != nil {
 		//log.Fatal(err)
 		//}
-		fmt.Printf("%+V\n", flag.FFmpegArgs().String())
+		fmt.Printf("%+V\n", u.String())
 		//fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }

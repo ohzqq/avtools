@@ -56,7 +56,7 @@ func (c *Args) Input(i string) *Args {
 }
 
 func (c Args) HasPostInput() bool {
-	return len(c.PreInput) > 0
+	return len(c.PostInput) > 0
 }
 
 func (c *Args) AppendPostInput(flag string, val ...string) *Args {
