@@ -25,7 +25,7 @@ var showCmd = &cobra.Command{
 		eq.Set("saturation", "1.0")
 		fps := ffmpeg.NewFilter("fps")
 		fps.Set("60")
-		c.AppendVideoFilter(eq)
+		c.AppendFilter(eq)
 		c.AppendVideoFilter(fps)
 		c.AppendAudioParam("id3v2_version", "3")
 		//f := avtools.NewMedia(input)
