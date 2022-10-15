@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ohzqq/avtools/tool"
+	"github.com/ohzqq/avtools/tool/ffmpeg"
 	"github.com/spf13/cobra"
 )
 
@@ -13,10 +16,22 @@ var showCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
+		c := ffmpeg.New()
+		c.SetInput(input)
+		//c.AddCover(flags.CoverFile)
+		//c.AddMeta(flags.MetaFile)
+		eq := ffmpeg.NewFilter("eq")
+		eq.Set("brightness", "1.0")
+		eq.Set("saturation", "1.0")
+		fps := ffmpeg.NewFilter("fps")
+		fps.Set("60")
+		c.AppendVideoFilter(eq)
+		c.AppendVideoFilter(fps)
+		c.AppendAudioParam("id3v2_version", "3")
 		//f := avtools.NewMedia(input)
 		//f.AddFormat(flags.MetaFile)
 		//f.AddFormat(flags.CueFile)
-		//fmt.Printf("%+V\n", f.ListFormats())
+		fmt.Printf("%+V\n", c.String())
 		//fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }

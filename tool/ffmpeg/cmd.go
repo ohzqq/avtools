@@ -1,5 +1,11 @@
 package ffmpeg
 
+import (
+	"fmt"
+	"log"
+	"strings"
+)
+
 type Cmd struct {
 	*Args
 	args []string
@@ -8,68 +14,79 @@ type Cmd struct {
 func New() *Cmd {
 	return &Cmd{
 		Args: &Args{
-			VideoCodec:    []string{"-c:v"},
-			AudioCodec:    []string{"-c:a"},
-			VideoFilters:  []string{"-vf"},
-			AudioFilters:  []string{"-af"},
-			FilterComplex: []string{"-filter_complex"},
-			LogLevel:      []string{"-loglevel"},
+			VideoCodec: []string{"-c:v"},
+			AudioCodec: []string{"-c:a"},
+			//VideoFilters:  []string{"-vf"},
+			//AudioFilters:  []string{"-af"},
+			//FilterComplex: []string{"-filter_complex"},
+			LogLevel: []string{"-loglevel"},
 		},
 	}
 }
 
-func (c *Cmd) ParseArgs() *Cmd {
+func (c Cmd) String() string {
+	args, err := c.ParseArgs()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return strings.Join(args, " ")
+}
+
+func (c *Cmd) ParseArgs() ([]string, error) {
+	var args []string
 	if c.HasLogLevel() {
-		c.args = append(c.args, c.LogLevel...)
+		args = append(args, c.LogLevel...)
 	}
 
 	if c.HasPreInput() {
-		c.args = append(c.args, c.PreInput...)
+		args = append(args, c.PreInput...)
 	}
 
 	if c.HasInput() {
-		c.args = append(c.args, c.Input.Map()...)
+		args = append(args, "-i", c.Input)
+	} else {
+		return args, fmt.Errorf("no input file specified")
 	}
 
 	if c.HasPostInput() {
-		c.args = append(c.args, c.PostInput...)
+		args = append(args, c.PostInput...)
 	}
 
 	if c.HasVideoCodec() {
-		c.args = append(c.args, c.VideoCodec...)
+		args = append(args, c.VideoCodec...)
 	}
 
 	if c.HasVideoParams() {
-		c.args = append(c.args, c.VideoParams...)
+		args = append(args, c.VideoParams...)
 	}
 
-	if c.HasVideoFilters() && !c.HasFilterComplex() {
-		c.args = append(c.args, c.VideoFilters.String())
+	if c.HasVideoFilters() && !c.HasFilters() {
+		args = append(args, "-vf", c.VideoFilters.String())
 	}
 
 	if c.HasAudioCodec() {
-		c.args = append(c.args, c.AudioCodec...)
+		args = append(args, c.AudioCodec...)
 	}
 
-	if c.HasAudioFilters() && !c.HasFilterComplex() {
-		c.args = append(c.args, c.AudioFilters.String())
+	if c.HasAudioFilters() && !c.HasFilters() {
+		args = append(args, "-af", c.AudioFilters.String())
 	}
 
 	if c.HasAudioParams() {
-		c.args = append(c.args, c.AudioParams...)
+		args = append(args, c.AudioParams...)
 	}
 
-	if c.HasFilterComplex() {
-		c.args = append(c.args, c.FilterComplex.String())
+	if c.HasFilters() {
+		args = append(args, "-filter_complex", c.FilterComplex.String())
 	}
 
 	if c.HasMiscParams() {
-		c.args = append(c.args, c.MiscParams...)
+		args = append(args, c.MiscParams...)
 	}
 
 	if c.Output != "" {
-		c.args = append(c.args, c.Output)
+		args = append(args, c.Output)
 	}
 
-	return c
+	return args, nil
 }

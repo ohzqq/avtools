@@ -3,7 +3,7 @@ package ffmpeg
 type Args struct {
 	LogLevel      []string
 	PreInput      []string
-	Input         Input
+	Input         string
 	PostInput     []string
 	VideoCodec    []string
 	VideoParams   []string
@@ -14,13 +14,15 @@ type Args struct {
 	FilterComplex Filters
 	MiscParams    []string
 	Output        string
-	Name          string
-	Padding       string
-	Ext           string
 }
 
 func (c *Args) AppendPreInput(flag, val string) *Args {
-	c.PreInput = append(c.PreInput, flag, val)
+	c.PreInput = append(c.PreInput, "-"+flag, val)
+	return c
+}
+
+func (c *Args) SetInput(i string) *Args {
+	c.Input = i
 	return c
 }
 
@@ -49,15 +51,15 @@ func (c Args) HasAudioFilters() bool {
 }
 
 func (c Args) HasVideoFilters() bool {
-	return len(c.VideoFilters) > 1
+	return len(c.VideoFilters) > 0
 }
 
 func (c Args) HasInput() bool {
-	return len(c.Input.input) > 1
+	return c.Input != ""
 }
 
 func (c Args) HasFilters() bool {
-	return len(c.Filters) > 1
+	return len(c.FilterComplex) > 1
 }
 
 func (c Args) HasAudioCodec() bool {
@@ -73,21 +75,21 @@ func (c Args) HasLogLevel() bool {
 }
 
 func (c *Args) AppendPostInput(flag, val string) *Args {
-	c.PostInput = append(c.PostInput, flag, val)
+	c.PostInput = append(c.PostInput, "-"+flag, val)
 	return c
 }
 
 func (c *Args) AppendVideoParam(flag, val string) *Args {
-	c.VideoParams = append(c.VideoParams, flag, val)
+	c.VideoParams = append(c.VideoParams, "-"+flag, val)
 	return c
 }
 
 func (c *Args) AppendAudioParam(flag, val string) *Args {
-	c.AudioParams = append(c.AudioParams, flag, val)
+	c.AudioParams = append(c.AudioParams, "-"+flag, val)
 	return c
 }
 
-func (c *cmd) AppendVideoFilter(f Filter) *cmd {
+func (c *Args) AppendVideoFilter(f Filter) *Args {
 	c.VideoFilters = append(c.VideoFilters, f)
 	return c
 }
@@ -107,18 +109,8 @@ func (c *Args) SetVideoCodec(codec string) *Args {
 	return c
 }
 
-func (c *Args) SetVideoCodec(codec string) *Args {
+func (c *Args) SetAudioCodec(codec string) *Args {
 	c.AudioCodec = append(c.AudioCodec, codec)
-	return c
-}
-
-func (c *Args) AppendVideoParam(flag, val string) *Args {
-	c.VideoParams = append(c.VideoParams, flag, val)
-	return c
-}
-
-func (c *Args) AppendAudioParam(flag, val string) *Args {
-	c.AudioParams = append(c.AudioParams, flag, val)
 	return c
 }
 
