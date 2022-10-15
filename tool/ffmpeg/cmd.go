@@ -3,6 +3,7 @@ package ffmpeg
 import (
 	"fmt"
 	"log"
+	"os/exec"
 	"strings"
 )
 
@@ -16,11 +17,20 @@ type Cmd struct {
 func New() *Cmd {
 	return &Cmd{
 		Args: &Args{
-			VideoCodec: []string{"-c:v"},
-			AudioCodec: []string{"-c:a"},
-			LogLevel:   []string{"-loglevel"},
+			videoCodec: []string{"-c:v"},
+			audioCodec: []string{"-c:a"},
+			logLevel:   []string{"-loglevel"},
+			Metadata:   make(map[string]string),
 		},
 	}
+}
+
+func (c Cmd) Build() (*exec.Cmd, error) {
+	args, err := c.ParseArgs()
+	if err != nil {
+		return nil, err
+	}
+	return exec.Command(ffmpegBin, args...), nil
 }
 
 func (c Cmd) String() string {
@@ -34,7 +44,7 @@ func (c Cmd) String() string {
 func (c *Cmd) ParseArgs() ([]string, error) {
 	var args []string
 	if c.HasLogLevel() {
-		args = append(args, c.LogLevel...)
+		args = append(args, c.logLevel...)
 	}
 
 	if c.HasPreInput() {
@@ -42,7 +52,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasInput() {
-		args = append(args, "-i", c.Input)
+		args = append(args, "-i", c.input)
 	} else {
 		return args, fmt.Errorf("no input file specified")
 	}
@@ -52,7 +62,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasVideoCodec() {
-		args = append(args, c.VideoCodec...)
+		args = append(args, c.videoCodec...)
 	}
 
 	if c.HasVideoParams() {
@@ -64,7 +74,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasAudioCodec() {
-		args = append(args, c.AudioCodec...)
+		args = append(args, c.audioCodec...)
 	}
 
 	if c.HasAudioFilters() && !c.HasFilters() && !c.HasFilterGraph() {
@@ -79,16 +89,24 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, "-filter_complex", c.FilterComplex.String())
 	}
 
+	if c.HasMetadata() {
+		for key, val := range c.Metadata {
+			args = append(args, "-metadata", key+"="+val)
+		}
+	}
+
 	if c.HasMiscParams() {
 		args = append(args, c.MiscParams...)
 	}
 
 	if c.HasFilterGraph() {
-		args = append(args, "-filter_complex", c.Filters)
+		args = append(args, "-filter_complex", c.filters)
 	}
 
-	if c.Output != "" {
-		args = append(args, c.Output)
+	if c.output != "" {
+		args = append(args, c.output)
+	} else {
+		return args, fmt.Errorf("no output file specified")
 	}
 
 	return args, nil

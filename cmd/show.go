@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/ohzqq/avtools/tool"
 	"github.com/ohzqq/avtools/tool/ffmpeg"
@@ -17,7 +18,7 @@ var showCmd = &cobra.Command{
 		input := args[0]
 		tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		c := ffmpeg.New()
-		c.SetInput(input)
+		c.Input(input).CA("libfdk_aac")
 		//c.AddCover(flags.CoverFile)
 		//c.AddMeta(flags.MetaFile)
 		eq := ffmpeg.NewFilter("eq")
@@ -25,13 +26,15 @@ var showCmd = &cobra.Command{
 		eq.Set("saturation", "1.0")
 		fps := ffmpeg.NewFilter("fps")
 		fps.Set("60")
-		c.AppendFilter(eq)
-		c.AppendVideoFilter(fps)
-		c.AppendAudioParam("id3v2_version", "3")
+		c.Filter(eq).VF(fps).AppendAudioParam("id3v2_version", "3").Output("tep.m4b")
 		//f := avtools.NewMedia(input)
 		//f.AddFormat(flags.MetaFile)
 		//f.AddFormat(flags.CueFile)
-		fmt.Printf("%+V\n", c.String())
+		ff, err := c.Build()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%+V\n", ff.String())
 		//fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }

@@ -1,28 +1,29 @@
 package ffmpeg
 
 type Args struct {
-	LogLevel      []string
+	logLevel      []string
 	PreInput      []string
-	Input         string
+	input         string
 	PostInput     []string
-	VideoCodec    []string
+	videoCodec    []string
 	VideoParams   []string
 	VideoFilters  Filters
-	AudioCodec    []string
+	audioCodec    []string
 	AudioParams   []string
 	AudioFilters  Filters
 	FilterComplex Filters
 	MiscParams    []string
-	Output        string
-	Filters       string
+	Metadata      map[string]string
+	output        string
+	filters       string
 }
 
 func (c Args) HasLogLevel() bool {
-	return len(c.LogLevel) > 1
+	return len(c.logLevel) > 1
 }
 
-func (c *Args) SetLogLevel(l string) *Args {
-	c.LogLevel = append(c.LogLevel, l)
+func (c *Args) LogLevel(l string) *Args {
+	c.logLevel = append(c.logLevel, l)
 	return c
 }
 
@@ -36,11 +37,11 @@ func (c *Args) AppendPreInput(flag, val string) *Args {
 }
 
 func (c Args) HasInput() bool {
-	return c.Input != ""
+	return c.input != ""
 }
 
-func (c *Args) SetInput(i string) *Args {
-	c.Input = i
+func (c *Args) Input(i string) *Args {
+	c.input = i
 	return c
 }
 
@@ -54,11 +55,16 @@ func (c *Args) AppendPostInput(flag, val string) *Args {
 }
 
 func (c Args) HasVideoCodec() bool {
-	return len(c.VideoCodec) > 1
+	return len(c.videoCodec) > 1
 }
 
 func (c *Args) SetVideoCodec(codec string) *Args {
-	c.VideoCodec = append(c.VideoCodec, codec)
+	c.videoCodec = append(c.videoCodec, codec)
+	return c
+}
+
+func (c *Args) CV(codec string) *Args {
+	c.videoCodec = append(c.videoCodec, codec)
 	return c
 }
 
@@ -80,12 +86,22 @@ func (c *Args) AppendVideoFilter(f Filter) *Args {
 	return c
 }
 
+func (c *Args) VF(f Filter) *Args {
+	c.VideoFilters = append(c.VideoFilters, f)
+	return c
+}
+
 func (c Args) HasAudioCodec() bool {
-	return len(c.AudioCodec) > 1
+	return len(c.audioCodec) > 1
 }
 
 func (c *Args) SetAudioCodec(codec string) *Args {
-	c.AudioCodec = append(c.AudioCodec, codec)
+	c.audioCodec = append(c.audioCodec, codec)
+	return c
+}
+
+func (c *Args) CA(codec string) *Args {
+	c.audioCodec = append(c.audioCodec, codec)
 	return c
 }
 
@@ -107,6 +123,11 @@ func (c *Args) AppendAudioFilter(f Filter) *Args {
 	return c
 }
 
+func (c *Args) AF(f Filter) *Args {
+	c.AudioFilters = append(c.AudioFilters, f)
+	return c
+}
+
 func (c Args) HasFilters() bool {
 	return len(c.FilterComplex) > 0
 }
@@ -116,12 +137,26 @@ func (c *Args) AppendFilter(f Filter) *Args {
 	return c
 }
 
-func (c Args) HasFilterGraph() bool {
-	return c.Filters != ""
+func (c *Args) Filter(f Filter) *Args {
+	c.FilterComplex = append(c.FilterComplex, f)
+	return c
 }
 
-func (c *Args) SetFilters(f string) *Args {
-	c.Filters = f
+func (c Args) HasFilterGraph() bool {
+	return c.filters != ""
+}
+
+func (c *Args) SetFilterGraph(f string) *Args {
+	c.filters = f
+	return c
+}
+
+func (c Args) HasMetadata() bool {
+	return len(c.Metadata) > 0
+}
+
+func (c *Args) SetMetadata(key, val string) *Args {
+	c.Metadata[key] = val
 	return c
 }
 
@@ -135,10 +170,10 @@ func (c *Args) AppendMiscParam(flag, val string) *Args {
 }
 
 func (c Args) HasOutput() bool {
-	return c.Output != ""
+	return c.output != ""
 }
 
-func (c *Args) SetOutput(o string) *Args {
-	c.Output = o
+func (c *Args) Output(o string) *Args {
+	c.output = o
 	return c
 }
