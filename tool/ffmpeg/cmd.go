@@ -16,10 +16,7 @@ func New() *Cmd {
 		Args: &Args{
 			VideoCodec: []string{"-c:v"},
 			AudioCodec: []string{"-c:a"},
-			//VideoFilters:  []string{"-vf"},
-			//AudioFilters:  []string{"-af"},
-			//FilterComplex: []string{"-filter_complex"},
-			LogLevel: []string{"-loglevel"},
+			LogLevel:   []string{"-loglevel"},
 		},
 	}
 }
