@@ -16,12 +16,7 @@ type Cmd struct {
 
 func New() *Cmd {
 	return &Cmd{
-		Args: &Args{
-			videoCodec: []string{"-c:v"},
-			audioCodec: []string{"-c:a"},
-			logLevel:   []string{"-loglevel"},
-			Metadata:   make(map[string]string),
-		},
+		Args: NewArgs(),
 	}
 }
 

@@ -18,6 +18,15 @@ type Args struct {
 	filters       string
 }
 
+func NewArgs() *Args {
+	return &Args{
+		videoCodec: []string{"-c:v"},
+		audioCodec: []string{"-c:a"},
+		logLevel:   []string{"-loglevel"},
+		Metadata:   make(map[string]string),
+	}
+}
+
 func (c Args) HasLogLevel() bool {
 	return len(c.logLevel) > 1
 }
@@ -31,8 +40,9 @@ func (c Args) HasPreInput() bool {
 	return len(c.PreInput) > 0
 }
 
-func (c *Args) AppendPreInput(flag, val string) *Args {
-	c.PreInput = append(c.PreInput, "-"+flag, val)
+func (c *Args) AppendPreInput(flag string, val ...string) *Args {
+	c.PreInput = append(c.PreInput, "-"+flag)
+	c.PreInput = append(c.PreInput, val...)
 	return c
 }
 
@@ -49,8 +59,9 @@ func (c Args) HasPostInput() bool {
 	return len(c.PreInput) > 0
 }
 
-func (c *Args) AppendPostInput(flag, val string) *Args {
-	c.PostInput = append(c.PostInput, "-"+flag, val)
+func (c *Args) AppendPostInput(flag string, val ...string) *Args {
+	c.PostInput = append(c.PostInput, "-"+flag)
+	c.PostInput = append(c.PostInput, val...)
 	return c
 }
 
@@ -72,8 +83,9 @@ func (c Args) HasVideoParams() bool {
 	return len(c.VideoParams) > 0
 }
 
-func (c *Args) AppendVideoParam(flag, val string) *Args {
-	c.VideoParams = append(c.VideoParams, "-"+flag, val)
+func (c *Args) AppendVideoParam(flag string, val ...string) *Args {
+	c.VideoParams = append(c.VideoParams, "-"+flag)
+	c.VideoParams = append(c.VideoParams, val...)
 	return c
 }
 
@@ -109,8 +121,9 @@ func (c Args) HasAudioParams() bool {
 	return len(c.AudioParams) > 0
 }
 
-func (c *Args) AppendAudioParam(flag, val string) *Args {
-	c.AudioParams = append(c.AudioParams, "-"+flag, val)
+func (c *Args) AppendAudioParam(flag string, val ...string) *Args {
+	c.AudioParams = append(c.AudioParams, "-"+flag)
+	c.AudioParams = append(c.AudioParams, val...)
 	return c
 }
 
@@ -164,8 +177,9 @@ func (c Args) HasMiscParams() bool {
 	return len(c.MiscParams) > 0
 }
 
-func (c *Args) AppendMiscParam(flag, val string) *Args {
-	c.MiscParams = append(c.MiscParams, "-"+flag, val)
+func (c *Args) AppendMiscParam(flag string, val ...string) *Args {
+	c.MiscParams = append(c.MiscParams, "-"+flag)
+	c.MiscParams = append(c.MiscParams, val...)
 	return c
 }
 

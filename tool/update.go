@@ -6,6 +6,14 @@ import (
 	"path/filepath"
 )
 
+type Update struct {
+	Flag
+}
+
+func NewUpdateCmd() *Update {
+	return &Update{}
+}
+
 func (cmd *ffmpegCmd) Update() {
 	//cmd.media.JsonMeta().Unmarshal()
 	cmd.ParseOptions()

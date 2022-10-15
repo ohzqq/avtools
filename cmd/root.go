@@ -14,6 +14,7 @@ import (
 var (
 	cfgFile string
 	flags   tool.Options
+	flag    tool.Flag
 )
 
 // rootCmd represents the base command when called without any subcommands
