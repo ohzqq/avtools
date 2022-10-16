@@ -17,7 +17,7 @@ type Cmd struct {
 	cwd     string
 	exec    *exec.Cmd
 	Batch   []*exec.Cmd
-	tmpFile *os.File
+	tmpFile string
 }
 
 func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
@@ -65,14 +65,14 @@ func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
 	return c.Flag.FFmpegCmd()
 }
 
-func (cmd *Cmd) tmp(f *os.File) *Cmd {
+func (cmd *Cmd) Tmp(f string) *Cmd {
 	cmd.tmpFile = f
 	return cmd
 }
 
 func (cmd Cmd) Run() []byte {
-	if cmd.tmpFile != nil {
-		defer os.Remove(cmd.tmpFile.Name())
+	if cmd.tmpFile != "" {
+		defer os.Remove(cmd.tmpFile)
 	}
 
 	var (

@@ -34,6 +34,7 @@ var showCmd = &cobra.Command{
 		//if err != nil {
 		//log.Fatal(err)
 		//}
+		//u.Cmd.Media.Meta().MarshalTo("ffmeta").Print()
 		for _, c := range u.Cmd.Batch {
 			c.Run()
 			fmt.Printf("%+V\n", c.String())

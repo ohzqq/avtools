@@ -61,6 +61,11 @@ func (c *Args) FFmeta(i string) *Args {
 	return c
 }
 
+func (c *Args) SetHasChapters() *Args {
+	c.input.HasChapters = true
+	return c
+}
+
 func (c Args) HasPostInput() bool {
 	return len(c.PostInput) > 0
 }

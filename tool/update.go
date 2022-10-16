@@ -41,6 +41,13 @@ func (u *Update) ParseArgs() *Update {
 		}
 	}
 
+	if u.Flag.Args.HasCue() {
+		u.FFmpeg.SetHasChapters()
+		meta := u.Cmd.Media.Meta().MarshalTo("ffmeta").Bytes()
+		u.Cmd.tmpFile = TmpFile(meta)
+		u.FFmpeg.FFmeta(u.Cmd.tmpFile)
+	}
+
 	args, err := u.FFmpeg.ParseArgs()
 	if err != nil {
 		log.Fatal(err)

@@ -112,6 +112,7 @@ func (cmd *ffmpegCmd) Join(ext string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer tmp.Close()
 
 	files := find(ext)
 	for _, f := range files {
@@ -127,7 +128,7 @@ func (cmd *ffmpegCmd) Join(ext string) {
 	cmd.Ext = ext
 
 	c := cmd.ParseArgs()
-	c.tmpFile = tmp
+	c.tmpFile = tmp.Name()
 
 	c.Run()
 }

@@ -71,10 +71,10 @@ func (f Flag) Media() *Media {
 			media.SetFile("ffmeta", f.Args.Meta)
 		}
 		if f.Args.HasCue() {
-			media.SetFile("cue", f.Args.Meta)
+			media.SetFile("cue", f.Args.Cue)
 		}
 		if f.Args.HasCover() {
-			media.SetFile("cover", f.Args.Meta)
+			media.SetFile("cover", f.Args.Cover)
 		}
 	}
 	return media
