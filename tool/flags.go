@@ -51,8 +51,9 @@ func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
 	}
 
 	if f.Args.HasMeta() {
-		cmd.AppendPostInput("i", f.Args.Meta)
-		cmd.AppendPostInput("map_metadata", "1")
+		cmd.FFmeta(f.Args.Meta)
+		//cmd.AppendPostInput("i", f.Args.Meta)
+		//cmd.AppendPostInput("map_metadata", "1")
 	}
 
 	if f.Args.HasOutput() {

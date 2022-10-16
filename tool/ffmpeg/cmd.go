@@ -47,7 +47,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasInput() {
-		args = append(args, "-i", c.input)
+		args = append(args, c.input.Parse()...)
 	} else {
 		return args, fmt.Errorf("no input file specified")
 	}
@@ -56,7 +56,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, c.PostInput...)
 	}
 
-	if c.HasVideoCodec() {
+	if c.HasVideoCodec() && !c.streamCopy {
 		args = append(args, c.videoCodec...)
 	}
 
@@ -68,8 +68,12 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, "-vf", c.VideoFilters.String())
 	}
 
-	if c.HasAudioCodec() {
+	if c.HasAudioCodec() && !c.streamCopy {
 		args = append(args, c.audioCodec...)
+	}
+
+	if c.streamCopy {
+		args = append(args, "-c", "copy")
 	}
 
 	if c.HasAudioFilters() && !c.HasFilters() && !c.HasFilterGraph() {

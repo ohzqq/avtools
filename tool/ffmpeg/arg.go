@@ -3,8 +3,9 @@ package ffmpeg
 type Args struct {
 	logLevel      []string
 	PreInput      []string
-	input         string
+	input         Input
 	PostInput     []string
+	streamCopy    bool
 	videoCodec    []string
 	VideoParams   []string
 	VideoFilters  Filters
@@ -47,11 +48,16 @@ func (c *Args) AppendPreInput(flag string, val ...string) *Args {
 }
 
 func (c Args) HasInput() bool {
-	return c.input != ""
+	return len(c.input.files) > 0
 }
 
 func (c *Args) Input(i string) *Args {
-	c.input = i
+	c.input.Add(i)
+	return c
+}
+
+func (c *Args) FFmeta(i string) *Args {
+	c.input.FFmetadata = i
 	return c
 }
 
@@ -71,6 +77,11 @@ func (c Args) HasVideoCodec() bool {
 
 func (c *Args) SetVideoCodec(codec string) *Args {
 	c.videoCodec = append(c.videoCodec, codec)
+	return c
+}
+
+func (c *Args) Stream() *Args {
+	c.streamCopy = true
 	return c
 }
 

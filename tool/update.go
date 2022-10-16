@@ -25,12 +25,19 @@ func (u *Update) SetFlags(f Flag) *Update {
 func (u *Update) ParseArgs() {
 	u.Cmd = u.FFmpegCmd()
 
+	media := NewMedia(u.Flag.Args.Input)
+
+	u.Stream()
+
 	if u.Flag.Args.HasCover() {
-		u.AppendPostInput("i", u.Flag.Args.Cover)
-		u.AppendPostInput("map", "2")
-		u.AppendAudioParam("id3v2_version", "3")
-		u.AppendAudioParam("metadata:s:v", "title='Album cover'")
-		u.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
+		switch media.AudioCodec() {
+		case "aac":
+		case "mp3":
+			u.Input(u.Flag.Args.Cover)
+			u.AppendAudioParam("id3v2_version", "3")
+			u.AppendAudioParam("metadata:s:v", "title='Album cover'")
+			u.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
+		}
 	}
 }
 
