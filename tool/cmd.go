@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/ohzqq/avtools/tool/ffmpeg"
 )
@@ -18,6 +19,14 @@ type Cmd struct {
 	exec    *exec.Cmd
 	Batch   []*exec.Cmd
 	tmpFile string
+	num     int
+}
+
+type output struct {
+	num     int
+	name    string
+	ext     string
+	padding string
 }
 
 func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
@@ -68,6 +77,31 @@ func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
 func (cmd *Cmd) Tmp(f string) *Cmd {
 	cmd.tmpFile = f
 	return cmd
+}
+
+func (c *Cmd) output() string {
+	//output
+	var (
+		output string
+		name   = c.Flag.Args.Input
+		ext    = filepath.Ext(name)
+	)
+
+	if out := c.Flag.Args.Output; out != "" {
+		return out
+	}
+
+	if p := c.Padding; p != "" {
+		name = name + fmt.Sprintf(p, c.num)
+	}
+
+	if e := c.Ext; e != "" {
+		ext = e
+	}
+
+	a.Append(name + ext)
+
+	return output
 }
 
 func (cmd Cmd) Run() []byte {
