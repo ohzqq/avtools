@@ -17,7 +17,8 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
-		u := tool.NewUpdateCmd().SetFlags(flag)
+		u := tool.NewUpdateCmd() //.SetFlags(flag)
+		u.Cmd = tool.NewerCmd().SetFlags(flag)
 		u.ParseArgs()
 		//c.Input(input).CA("libfdk_aac").AppendPreInput("y")
 		//eq := ffmpeg.NewFilter("eq")
@@ -33,7 +34,10 @@ var showCmd = &cobra.Command{
 		//if err != nil {
 		//log.Fatal(err)
 		//}
-		fmt.Printf("%+V\n", u.String())
+		for _, c := range u.Cmd.Batch {
+			c.Run()
+			fmt.Printf("%+V\n", c.String())
+		}
 		//fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }

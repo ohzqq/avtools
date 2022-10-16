@@ -6,12 +6,17 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/ohzqq/avtools/tool/ffmpeg"
 )
 
 type Cmd struct {
+	Flag
+	Media   *Media
 	verbose bool
 	cwd     string
 	exec    *exec.Cmd
+	Batch   []*exec.Cmd
 	tmpFile *os.File
 }
 
@@ -26,6 +31,38 @@ func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
 		exec:    cmd,
 		verbose: verbose,
 	}
+}
+
+func NewerCmd() *Cmd {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &Cmd{
+		cwd: cwd,
+	}
+}
+
+func (c *Cmd) New(bin string, args []string) *Cmd {
+	cmd := exec.Command(bin, args...)
+	c.Batch = append(c.Batch, cmd)
+	return c
+}
+
+func (c *Cmd) AddCmd(cmd *exec.Cmd) *Cmd {
+	c.Batch = append(c.Batch, cmd)
+	return c
+}
+
+func (c *Cmd) SetFlags(f Flag) *Cmd {
+	c.Flag = f
+	c.Media = f.Media()
+	return c
+}
+
+func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
+	return c.Flag.FFmpegCmd()
 }
 
 func (cmd *Cmd) tmp(f *os.File) *Cmd {

@@ -9,36 +9,49 @@ import (
 )
 
 type Update struct {
-	Flag
-	*ffmpeg.Cmd
+	*Cmd
+	FFmpeg *ffmpeg.Cmd
 }
 
 func NewUpdateCmd() *Update {
-	return &Update{}
+	return &Update{Cmd: NewerCmd()}
 }
 
-func (u *Update) SetFlags(f Flag) *Update {
-	u.Flag = f
-	return u
-}
+//func (u *Update) SetFlags(f Flag) *Update {
+//  u.Flag = f
+//  return u
+//}
 
-func (u *Update) ParseArgs() {
-	u.Cmd = u.FFmpegCmd()
+func (u *Update) ParseArgs() *Update {
+	u.Cmd.SetFlags(u.Flag)
+	u.FFmpeg = u.FFmpegCmd()
 
-	media := NewMedia(u.Flag.Args.Input)
+	u.FFmpeg.Stream()
 
-	u.Stream()
-
+	var coverCmd *exec.Cmd
 	if u.Flag.Args.HasCover() {
-		switch media.AudioCodec() {
+		switch u.Cmd.Media.AudioCodec() {
 		case "aac":
+			coverCmd = AacCover(u.Flag.Args.Input, u.Flag.Args.Cover)
 		case "mp3":
-			u.Input(u.Flag.Args.Cover)
-			u.AppendAudioParam("id3v2_version", "3")
-			u.AppendAudioParam("metadata:s:v", "title='Album cover'")
-			u.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
+			u.FFmpeg.Input(u.Flag.Args.Cover)
+			u.FFmpeg.AppendAudioParam("id3v2_version", "3")
+			u.FFmpeg.AppendAudioParam("metadata:s:v", "title='Album cover'")
+			u.FFmpeg.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
 		}
 	}
+
+	args, err := u.FFmpeg.ParseArgs()
+	if err != nil {
+		log.Fatal(err)
+	}
+	u.Cmd.New("ffmpeg", args)
+
+	if coverCmd != nil {
+		u.AddCmd(coverCmd)
+	}
+
+	return u
 }
 
 func (cmd *ffmpegCmd) Update() {
@@ -75,6 +88,14 @@ func (cmd *ffmpegCmd) Update() {
 	}
 
 	cmdExec.Run()
+}
+
+func AacCover(file, cover string) *exec.Cmd {
+	cpath, err := filepath.Abs(cover)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return exec.Command("AtomicParsley", file, "--artwork", cpath, "--overWrite")
 }
 
 func addAacCover(file, cover string, verbose bool) *Cmd {

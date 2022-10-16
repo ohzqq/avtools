@@ -63,6 +63,23 @@ func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
 	return cmd
 }
 
+func (f Flag) Media() *Media {
+	var media *Media
+	if f.Args.HasInput() {
+		media = NewMedia(f.Args.Input)
+		if f.Args.HasMeta() {
+			media.SetFile("ffmeta", f.Args.Meta)
+		}
+		if f.Args.HasCue() {
+			media.SetFile("cue", f.Args.Meta)
+		}
+		if f.Args.HasCover() {
+			media.SetFile("cover", f.Args.Meta)
+		}
+	}
+	return media
+}
+
 func (f ArgFlag) HasCover() bool {
 	return f.Cover != ""
 }
