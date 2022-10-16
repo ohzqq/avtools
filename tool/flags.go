@@ -58,6 +58,8 @@ func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
 
 	if f.Args.HasOutput() {
 		cmd.Output(f.Args.Output)
+	} else {
+		cmd.Output(OutputFromInput(f.Args.Input).String())
 	}
 
 	return cmd
