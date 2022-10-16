@@ -11,8 +11,22 @@ type Chapter struct {
 	Title    string
 }
 
+type ChapMeta interface {
+	Start() int
+	End() int
+	Title() string
+	Timebase() float64
+}
+
 func NewChapter() *Chapter {
 	return &Chapter{Timebase: 1}
+}
+
+func (ch *Chapter) SetMeta(c ChapMeta) *Chapter {
+	ch.start = NewChapterTime(c.Start())
+	ch.end = NewChapterTime(c.End())
+	ch.Title = c.Title()
+	ch.Timebase = c.Timebase()
 }
 
 func (ch Chapter) Start() Time {

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +19,6 @@ var updateCmd = &cobra.Command{
 		u.ParseArgs()
 		for _, c := range u.Cmd.Batch {
 			c.Run()
-			fmt.Printf("%+V\n", c.String())
 		}
 	},
 }

@@ -5,6 +5,8 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/ohzqq/avtools/chap"
 )
 
 const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=codec_type,codec_name:format_tags`
@@ -12,6 +14,7 @@ const ffProbeMeta = `format=filename,start_time,duration,size,bit_rate:stream=co
 type MediaMeta struct {
 	data     []byte
 	Chapters Chapters
+	Ch       chap.Chapters
 	Streams  []*Stream
 	Format   *Format
 }

@@ -13,6 +13,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ohzqq/avtools/chap"
 	"gopkg.in/ini.v1"
 )
 
@@ -232,7 +233,10 @@ func LoadCueSheet(file string) *MediaMeta {
 	var (
 		titles     []string
 		startTimes []int
-		meta       = MediaMeta{Format: &Format{}}
+		meta       = MediaMeta{
+			Format: &Format{},
+			Ch:     chap.NewChapters(),
+		}
 		fileRegexp = regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
 	)
 
@@ -257,12 +261,19 @@ func LoadCueSheet(file string) *MediaMeta {
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		t := Chapter{}
+		ch := chap.NewChapter().SetTimebase(1000)
 		t.Title = titles[i]
+		ch.Title = titles[i]
+		ss := chap.NewChapterTime(startTimes[i])
+		ch.SetStart(ss)
 		t.Start = startTimes[i]
 		if e < len(titles) {
 			t.End = startTimes[e]
+			to := chap.NewChapterTime(startTimes[e])
+			ch.SetEnd(to)
 		}
 		e++
+		meta.Ch.Chapters = append(meta.Ch.Chapters, ch)
 		meta.Chapters = append(meta.Chapters, &t)
 	}
 

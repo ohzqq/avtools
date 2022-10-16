@@ -17,29 +17,13 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
-		u := tool.NewUpdateCmd() //.SetFlags(flag)
-		u.Cmd = tool.NewerCmd().SetFlags(flag)
-		u.ParseArgs()
-		//c.Input(input).CA("libfdk_aac").AppendPreInput("y")
-		//eq := ffmpeg.NewFilter("eq")
-		//eq.Set("brightness", "1.0")
-		//eq.Set("saturation", "1.0")
-		//fps := ffmpeg.NewFilter("fps")
-		//fps.Set("60")
-		//c.Filter(eq).VF(fps).AppendAudioParam("id3v2_version", "3").Output("tep.m4b")
-		//f := avtools.NewMedia(input)
-		//f.AddFormat(flags.MetaFile)
-		//f.AddFormat(flags.CueFile)
-		//ff, err := c.Build()
-		//if err != nil {
-		//log.Fatal(err)
+		c := tool.NewerCmd().SetFlags(flag)
+		cue := c.Media.GetFile("cue")
+
+		//for _, c := range u.Cmd.Batch {
+		//c.Run()
+		fmt.Printf("%+V\n", cue.Meta().Ch)
 		//}
-		//u.Cmd.Media.Meta().MarshalTo("ffmeta").Print()
-		for _, c := range u.Cmd.Batch {
-			c.Run()
-			fmt.Printf("%+V\n", c.String())
-		}
-		//fmt.Printf("%+V\n", f.GetFormat("ini"))
 	},
 }
 
