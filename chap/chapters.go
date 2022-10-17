@@ -1,14 +1,13 @@
 package chap
 
 import (
-	"bytes"
-	"html/template"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gosimple/slug"
+	"github.com/ohzqq/avtools/tool/cue"
 )
 
 type Chapters struct {
@@ -22,16 +21,26 @@ func NewChapters() Chapters {
 }
 
 func (c Chapters) ToCue() []byte {
-	var (
-		tmpl = template.Must(template.New("cue").Parse(cueTmpl))
-		buf  bytes.Buffer
-	)
-	err := tmpl.Execute(&buf, c)
-	if err != nil {
-		log.Fatal(err)
+	//var (
+	//  tmpl = template.Must(template.New("cue").Parse(cueTmpl))
+	//  buf  bytes.Buffer
+	//)
+
+	//err := tmpl.Execute(&buf, c)
+	//if err != nil {
+	//  log.Fatal(err)
+	//}
+
+	sheet := cue.NewCueSheet(c.File)
+	for _, ch := range c.Each() {
+		track := cue.NewTrack()
+		track.SetTitle(ch.Title)
+		track.SetStart(ch.Start().Secs())
+		sheet.Tracks = append(sheet.Tracks, track)
 	}
 
-	return buf.Bytes()
+	//return buf.Bytes()
+	return sheet.Dump()
 }
 
 func (c *Chapters) SetExt(ext string) *Chapters {

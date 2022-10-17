@@ -14,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/ohzqq/avtools/chap"
+	"github.com/ohzqq/avtools/tool/cue"
 	"gopkg.in/ini.v1"
 )
 
@@ -221,6 +222,19 @@ func MarshalJson(meta *MediaMeta) []byte {
 		fmt.Println("help")
 	}
 	return data
+}
+
+func LoadCue(file string) *MediaMeta {
+	cue := cue.Load(file)
+	var chapters chap.Chapters
+	for _, track := range cue.Tracks {
+		ch := chap.NewChapter().SetMeta(track)
+		chapters.Chapters = append(chapters.Chapters, ch)
+	}
+
+	return &MediaMeta{
+		Ch: chapters,
+	}
 }
 
 func LoadCueSheet(file string) *MediaMeta {

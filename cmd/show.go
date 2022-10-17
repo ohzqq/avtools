@@ -17,12 +17,13 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
-		c := tool.NewerCmd().SetFlags(flag)
-		cue := c.Media.GetFile("cue")
+		//c := tool.NewerCmd().SetFlags(flag)
+		//cue := c.Media.GetFile("cue")
+		cue := tool.LoadCue(flag.Args.Cue)
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
-		fmt.Printf("%+V\n", cue.Meta().Ch)
+		fmt.Printf("%+V\n", string(cue.Ch.ToCue()))
 		//}
 	},
 }
