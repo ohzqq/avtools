@@ -27,6 +27,7 @@ func (ch *Chapter) SetMeta(c ChapMeta) *Chapter {
 	ch.end = NewChapterTime(c.End())
 	ch.Title = c.Title()
 	ch.Timebase = c.Timebase()
+	return ch
 }
 
 func (ch Chapter) Start() Time {
