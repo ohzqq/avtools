@@ -1,8 +1,13 @@
 package ffmeta
 
 import (
+	"bytes"
+	"html/template"
+	"log"
 	"strconv"
 	"strings"
+
+	"github.com/ohzqq/avtools/chap"
 )
 
 type Chapter struct {
@@ -32,3 +37,42 @@ func (c Chapter) Timebase() float64 {
 	baseFloat, _ := strconv.ParseFloat(c.Base, 64)
 	return baseFloat
 }
+
+func (ff *FFmeta) SetChapters(c chap.Chapters) *FFmeta {
+	ff.Chapters = c
+	return ff
+}
+
+func (ff FFmeta) LastChapterEnd() *chap.Chapter {
+	ch := ff.LastChapter()
+	if ch.End().Secs() == 0 && ff.Duration().Int() != 0 {
+		ch.SetEnd(chap.NewChapterTime(ff.Duration().Float() * 1000))
+	}
+	return ch
+}
+
+func (ff FFmeta) IniChaps() []byte {
+	var (
+		tmpl = template.Must(template.New("ffmeta").Parse(ffmetaTmpl))
+		buf  bytes.Buffer
+	)
+
+	ff.LastChapterEnd()
+
+	err := tmpl.Execute(&buf, ff.Chapters)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.Bytes()
+}
+
+const ffmetaTmpl = `
+{{- range .Each}}
+[CHAPTER]
+TIMEBASE={{.Timebase.String}}
+START={{.Start.String}}
+END={{.End.String}}
+title={{.Title}}
+{{- end -}}
+`
