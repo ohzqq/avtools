@@ -7,8 +7,6 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-const ffmetaComment = `;FFMETADATA1`
-
 func (ff FFmeta) Dump() []byte {
 	ini.PrettyFormat = false
 	opts := ini.LoadOptions{

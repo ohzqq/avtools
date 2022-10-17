@@ -20,6 +20,7 @@ var showCmd = &cobra.Command{
 		//c := tool.NewerCmd().SetFlags(flag)
 		//cue := c.Media.GetFile("cue")
 		ffmeta := ffmeta.Load(flag.Args.Meta)
+		ffmeta.Save()
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
