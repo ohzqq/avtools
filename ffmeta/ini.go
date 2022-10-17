@@ -44,6 +44,7 @@ func LoadIni(input string) *FFmeta {
 
 	return ffmeta
 }
+
 func (ff FFmeta) Dump() []byte {
 	ini.PrettyFormat = false
 	opts := ini.LoadOptions{

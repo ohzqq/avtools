@@ -25,3 +25,11 @@ func LoadJson(d []byte) FFmeta {
 
 	return meta
 }
+
+func (ff FFmeta) DumpJson() []byte {
+	data, err := json.Marshal(ff)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
+}

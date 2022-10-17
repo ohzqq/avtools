@@ -2,7 +2,6 @@ package ffmeta
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 
@@ -12,7 +11,6 @@ import (
 type FFmeta struct {
 	chap.Chapters
 	name    string
-	Tags    map[string]string
 	Streams []*Stream
 	Format  `json:"format"`
 	Chaps   []Chapter `json:"chapters"`
@@ -66,7 +64,7 @@ func (d duration) Int() int {
 func (d duration) Float() float64 {
 	f, err := strconv.ParseFloat(d.String(), 65)
 	if err != nil {
-		log.Fatal(err)
+		return 0
 	}
 	return f
 }

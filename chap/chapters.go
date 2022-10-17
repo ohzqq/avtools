@@ -46,8 +46,10 @@ func (c Chapters) ToCue() *cue.CueSheet {
 
 func (c Chapters) LastChapter() *Chapter {
 	t := len(c.Chapters)
-	last := c.Chapters[t-1]
-	return last
+	if t > 0 {
+		return c.Chapters[t-1]
+	}
+	return NewChapter()
 }
 
 func (c *Chapters) SetExt(ext string) *Chapters {
