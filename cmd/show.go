@@ -5,6 +5,7 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +21,18 @@ var showCmd = &cobra.Command{
 		flag.Args.Input = input
 		//c := tool.NewerCmd().SetFlags(flag)
 		//cue := c.Media.GetFile("cue")
-		ffmeta := ffmeta.LoadIni(flag.Args.Meta)
-		//data := tool.EmbeddedMeta(input)
+		//ff := ffmeta.LoadIni(flag.Args.Meta)
+		data := tool.EmbeddedMeta(input)
+		ff := ffmeta.LoadJson(data)
 		//ffmeta := ffmeta.LoadJson(data)
 		ch := chap.NewChapters().FromCue(flag.Args.Cue)
-		ffmeta.SetChapters(ch)
+		ff.SetChapters(ch)
+		ff.Save()
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
-		fmt.Printf("%+V\n", ffmeta.LastChapterEnd().String())
-		fmt.Printf("dur %+V\n", ffmeta.Duration().String())
+		fmt.Printf("%+V\n", string(ff.Dump()))
+		fmt.Printf("dur %+V\n", ff.Duration().String())
 		//}
 	},
 }

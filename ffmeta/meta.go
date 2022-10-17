@@ -1,7 +1,6 @@
 package ffmeta
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 
@@ -40,13 +39,12 @@ func (ff *FFmeta) SetChapters(c chap.Chapters) *FFmeta {
 	return ff
 }
 
-func (ff FFmeta) LastChapterEnd() chap.Time {
+func (ff FFmeta) LastChapterEnd() *chap.Chapter {
 	ch := ff.LastChapter()
-	fmt.Println(ch.End().Secs())
 	if ch.End().Secs() == 0 && ff.Duration().Int() != 0 {
-		return chap.NewChapterTime(ff.Duration().Float())
+		ch.SetEnd(chap.NewChapterTime(ff.Duration().Float() * 1000))
 	}
-	return ch.End()
+	return ch
 }
 
 func (ff FFmeta) Duration() duration {
@@ -62,7 +60,7 @@ func (d duration) Int() int {
 }
 
 func (d duration) Float() float64 {
-	f, err := strconv.ParseFloat(d.String(), 65)
+	f, err := strconv.ParseFloat(d.String(), 64)
 	if err != nil {
 		return 0
 	}

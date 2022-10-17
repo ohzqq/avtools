@@ -2,6 +2,7 @@ package ffmeta
 
 import (
 	"bytes"
+	"html/template"
 	"io"
 	"log"
 	"os"
@@ -45,6 +46,22 @@ func LoadIni(input string) *FFmeta {
 	return ffmeta
 }
 
+func (ff FFmeta) IniChaps() []byte {
+	var (
+		tmpl = template.Must(template.New("ffmeta").Parse(ffmetaTmpl))
+		buf  bytes.Buffer
+	)
+
+	ff.LastChapterEnd()
+
+	err := tmpl.Execute(&buf, ff.Chapters)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.Bytes()
+}
+
 func (ff FFmeta) Dump() []byte {
 	ini.PrettyFormat = false
 	opts := ini.LoadOptions{
@@ -59,43 +76,20 @@ func (ff FFmeta) Dump() []byte {
 		}
 	}
 
-	if len(ff.Chapters.Each()) > 0 {
-		for _, c := range ff.Chapters.Each() {
-			sec, err := ffmeta.NewSection("CHAPTER")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = sec.NewKey("title", c.Title)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = sec.NewKey("START", c.Start().String())
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = sec.NewKey("END", c.End().String())
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = sec.NewKey("TIMEBASE", c.Timebase().String())
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
 	var buf bytes.Buffer
 	_, err := ffmeta.WriteTo(&buf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	_, err = buf.Write(ff.IniChaps())
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return buf.Bytes()
 }
+
 func (ff FFmeta) Write(wr io.Writer) error {
 	_, err := io.WriteString(wr, ffmetaComment)
 	_, err = wr.Write(ff.Dump())
@@ -127,3 +121,13 @@ func (ff FFmeta) SaveAs(name string) error {
 
 	return nil
 }
+
+const ffmetaTmpl = `
+{{- range .Each}}
+[CHAPTER]
+TIMEBASE={{.Timebase.String}}
+START={{.Start.String}}
+END={{.End.String}}
+title={{.Title}}
+{{- end -}}
+`

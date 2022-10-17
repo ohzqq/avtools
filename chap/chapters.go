@@ -22,7 +22,11 @@ func NewChapters() Chapters {
 func (c Chapters) FromCue(name string) Chapters {
 	sheet := cue.Load(name)
 	for _, t := range sheet.Tracks {
-		ch := NewChapter().SetMeta(t)
+		ch := NewChapter() //.SetMeta(t)
+		ch.SetTimebase(1000)
+		ch.SetStart(NewChapterTime(t.Start() * 1000))
+		ch.SetEnd(NewChapterTime(t.End() * 1000))
+		ch.SetTitle(t.Title())
 		c.Chapters = append(c.Chapters, ch)
 	}
 	return c
