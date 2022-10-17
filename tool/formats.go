@@ -14,7 +14,7 @@ import (
 	"text/template"
 
 	"github.com/ohzqq/avtools/chap"
-	"github.com/ohzqq/avtools/tool/cue"
+	"github.com/ohzqq/avtools/cue"
 	"gopkg.in/ini.v1"
 )
 

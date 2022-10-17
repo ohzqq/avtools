@@ -2,12 +2,11 @@ package chap
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gosimple/slug"
-	"github.com/ohzqq/avtools/tool/cue"
+	"github.com/ohzqq/avtools/cue"
 )
 
 type Chapters struct {
@@ -20,18 +19,12 @@ func NewChapters() Chapters {
 	return Chapters{}
 }
 
-func (c Chapters) ToCue() []byte {
-	//var (
-	//  tmpl = template.Must(template.New("cue").Parse(cueTmpl))
-	//  buf  bytes.Buffer
-	//)
-
-	//err := tmpl.Execute(&buf, c)
-	//if err != nil {
-	//  log.Fatal(err)
-	//}
-
-	sheet := cue.NewCueSheet(c.File)
+func (c Chapters) ToCue() *cue.CueSheet {
+	name := c.File
+	if c.File == "" {
+		name = "tmp"
+	}
+	sheet := cue.NewCueSheet(name)
 	for _, ch := range c.Each() {
 		track := cue.NewTrack()
 		track.SetTitle(ch.Title)
@@ -39,8 +32,7 @@ func (c Chapters) ToCue() []byte {
 		sheet.Tracks = append(sheet.Tracks, track)
 	}
 
-	//return buf.Bytes()
-	return sheet.Dump()
+	return sheet
 }
 
 func (c *Chapters) SetExt(ext string) *Chapters {
@@ -58,17 +50,13 @@ func (c Chapters) Ext() string {
 }
 
 func (c Chapters) Print() {
-	println(string(c.ToCue()))
+	println(string(c.ToCue().Dump()))
 }
 
 func (c Chapters) Write() {
-	file, err := os.Create(slug.Make(c.File) + ".cue")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	_, err = file.Write(c.ToCue())
+	sheet := c.ToCue()
+	name := slug.Make(c.File)
+	err := sheet.SaveAs(name)
 	if err != nil {
 		log.Fatal(err)
 	}

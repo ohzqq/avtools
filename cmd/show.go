@@ -20,10 +20,11 @@ var showCmd = &cobra.Command{
 		//c := tool.NewerCmd().SetFlags(flag)
 		//cue := c.Media.GetFile("cue")
 		cue := tool.LoadCue(flag.Args.Cue)
+		cue.Ch.Write()
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
-		fmt.Printf("%+V\n", string(cue.Ch.ToCue()))
+		fmt.Printf("%+V\n", string(cue.Ch.ToCue().Dump()))
 		//}
 	},
 }
