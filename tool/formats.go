@@ -279,6 +279,7 @@ func LoadCueSheet(file string) *MediaMeta {
 
 	return &meta
 }
+
 func RenderCueTmpl(meta *MediaMeta) []byte {
 	const cueTmpl = `FILE "{{.Format.Filename}}" {{.Format.Ext}}
 {{- range $index, $ch := .Chapters}}
