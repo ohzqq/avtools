@@ -2,7 +2,7 @@
 tmp/
 *m4b
 *ini
-*cue
+*.cue
 *m4a
 *mp3
 # Binaries for programs and plugins

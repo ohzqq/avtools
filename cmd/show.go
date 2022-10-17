@@ -23,7 +23,7 @@ var showCmd = &cobra.Command{
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
-		fmt.Printf("%+V\n", ffmeta)
+		fmt.Printf("%+V\n", string(ffmeta.Dump()))
 		//}
 	},
 }
