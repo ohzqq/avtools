@@ -6,10 +6,11 @@ import (
 )
 
 type Chapter struct {
-	Base         string `ini:"timebase"`
-	StartTime    int    `ini:"start"`
-	EndTime      int    `ini:"end"`
-	ChapterTitle string `ini:"title"`
+	Base         string            `json:"time_base",ini:"timebase"`
+	StartTime    int               `json:"start",ini:"start"`
+	EndTime      int               `json:"end",ini:"end"`
+	ChapterTitle string            `ini:"title"`
+	Tags         map[string]string `json:"tags"`
 }
 
 func (c Chapter) Title() string {

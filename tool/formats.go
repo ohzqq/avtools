@@ -210,6 +210,10 @@ func EmbeddedJsonMeta(file string) *MediaMeta {
 	return &meta
 }
 
+func EmbeddedMeta(file string) []byte {
+	return NewFFprobeCmd(file).EmbeddedMeta()
+}
+
 func MarshalJson(meta *MediaMeta) []byte {
 	for _, ch := range meta.Chapters {
 		if ch.Timebase == "" {

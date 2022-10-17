@@ -19,6 +19,15 @@ func NewChapters() Chapters {
 	return Chapters{}
 }
 
+func (c Chapters) FromCue(name string) Chapters {
+	sheet := cue.Load(name)
+	for _, t := range sheet.Tracks {
+		ch := NewChapter().SetMeta(t)
+		c.Chapters = append(c.Chapters, ch)
+	}
+	return c
+}
+
 func (c Chapters) ToCue() *cue.CueSheet {
 	name := c.File
 	if c.File == "" {
@@ -33,6 +42,12 @@ func (c Chapters) ToCue() *cue.CueSheet {
 	}
 
 	return sheet
+}
+
+func (c Chapters) LastChapter() *Chapter {
+	t := len(c.Chapters)
+	last := c.Chapters[t-1]
+	return last
 }
 
 func (c *Chapters) SetExt(ext string) *Chapters {
