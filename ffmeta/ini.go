@@ -13,17 +13,7 @@ import (
 
 const ffmetaComment = ";FFMETADATA1\n"
 
-type FFmeta struct {
-	chap.Chapters
-	name string
-	Tags map[string]string
-}
-
-func NewFFmeta() *FFmeta {
-	return &FFmeta{Chapters: chap.NewChapters()}
-}
-
-func Load(input string) *FFmeta {
+func LoadIni(input string) *FFmeta {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
 	opts.InsensitiveSections = true
