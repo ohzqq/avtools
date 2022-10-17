@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/ohzqq/avtools/tool/ffmpeg"
+	"github.com/ohzqq/avtools/ffmpeg"
 )
 
 type Update struct {

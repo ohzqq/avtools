@@ -1,7 +1,7 @@
 package tool
 
 import (
-	"github.com/ohzqq/avtools/tool/ffmpeg"
+	"github.com/ohzqq/avtools/ffmpeg"
 )
 
 type Flag struct {

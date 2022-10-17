@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/ohzqq/avtools/tool/ffmpeg"
+	"github.com/ohzqq/avtools/ffmpeg"
 )
 
 type Cmd struct {
