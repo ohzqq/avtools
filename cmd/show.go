@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/avtools/tool"
+	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +19,11 @@ var showCmd = &cobra.Command{
 		flag.Args.Input = input
 		//c := tool.NewerCmd().SetFlags(flag)
 		//cue := c.Media.GetFile("cue")
-		cue := tool.LoadCue(flag.Args.Cue)
-		cue.Ch.Write()
+		ffmeta := ffmeta.Load(flag.Args.Meta)
 
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
-		fmt.Printf("%+V\n", string(cue.Ch.ToCue().Dump()))
+		fmt.Printf("%+V\n", ffmeta)
 		//}
 	},
 }

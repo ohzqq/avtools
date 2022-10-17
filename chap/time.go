@@ -35,6 +35,10 @@ func ParseNum[N Number](num N) string {
 	return strconv.FormatFloat(float64(num), 'f', 0, 64)
 }
 
+func (ch *Time) SetTimebase(base float64) {
+	ch.base = base
+}
+
 func (ch Time) Secs() int {
 	secs := ch.time / ch.base
 	return int(math.Round(secs))
