@@ -1,4 +1,4 @@
-package tool
+package media
 
 import (
 	"github.com/ohzqq/avtools/ffmpeg"
@@ -59,7 +59,7 @@ func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
 	if f.Args.HasOutput() {
 		cmd.Output(f.Args.Output)
 	} else {
-		cmd.Output(OutputFromInput(f.Args.Input).String())
+		//cmd.Output(OutputFromInput(f.Args.Input).String())
 	}
 
 	return cmd
@@ -70,13 +70,13 @@ func (f Flag) Media() *Media {
 	if f.Args.HasInput() {
 		media = NewMedia(f.Args.Input)
 		if f.Args.HasMeta() {
-			media.SetFile("ffmeta", f.Args.Meta)
+			media.SetFFmeta(f.Args.Meta)
 		}
 		if f.Args.HasCue() {
-			media.SetFile("cue", f.Args.Cue)
+			media.SetCue(f.Args.Cue)
 		}
 		if f.Args.HasCover() {
-			media.SetFile("cover", f.Args.Cover)
+			media.AddFile("cover", f.Args.Cover)
 		}
 	}
 	return media

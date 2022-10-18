@@ -20,7 +20,7 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
-		c := media.New(input)
+		c := media.NewMedia(input)
 		c.SetFFmeta(flag.Args.Meta)
 		c.SetCue(flag.Args.Cue)
 		fmt.Printf("%+V\n", c.HasAudio())

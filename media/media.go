@@ -1,6 +1,9 @@
 package media
 
 import (
+	"log"
+	"path/filepath"
+
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/ffprobe"
@@ -12,15 +15,28 @@ type Media struct {
 	Meta
 }
 
+type Meta struct {
+	*ffmeta.FFmeta
+}
+
 type RelatedFiles map[string]string
 
-func New(i string) *Media {
+func NewMedia(i string) *Media {
 	media := Media{
 		input: i,
 		files: make(RelatedFiles),
 	}
 	media.Meta = media.ReadEmbeddedMeta()
 	return &media
+}
+
+func (m *Media) AddFile(name, path string) *Media {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	m.files[name] = abs
+	return m
 }
 
 func (m Media) HasFFmeta() bool {
@@ -45,10 +61,6 @@ func (m Media) HasCue() bool {
 func (m *Media) SetCue(c string) *Media {
 	m.files["cue"] = c
 	return m
-}
-
-type Meta struct {
-	*ffmeta.FFmeta
 }
 
 func (m *Media) SetMeta() *Media {
