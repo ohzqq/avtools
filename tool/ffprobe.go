@@ -28,7 +28,7 @@ func NewFFprobeCmd(i string) *ffprobeCmd {
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(i)
+	//println(i)
 	return &ffprobeCmd{input: abs}
 }
 

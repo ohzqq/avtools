@@ -7,11 +7,13 @@ import (
 	"strings"
 )
 
-const ffmpegBin = `ffmpeg`
+const (
+	ffmpegBin  = `ffmpeg`
+	hideBanner = "-hide_banner"
+)
 
 type Cmd struct {
 	*Args
-	args []string
 }
 
 func New() *Cmd {
@@ -37,7 +39,8 @@ func (c Cmd) String() string {
 }
 
 func (c *Cmd) ParseArgs() ([]string, error) {
-	var args []string
+	args := []string{hideBanner}
+
 	if c.HasLogLevel() {
 		args = append(args, c.logLevel...)
 	}
