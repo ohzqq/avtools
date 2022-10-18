@@ -1,13 +1,5 @@
 package ffmpeg
 
-import (
-	"bytes"
-	"fmt"
-
-	"github.com/BurntSushi/toml"
-	"gopkg.in/yaml.v2"
-)
-
 type Args struct {
 	logLevel      []string
 	PreInput      []string
@@ -34,19 +26,6 @@ func NewArgs() *Args {
 		logLevel:   []string{"-loglevel"},
 		Metadata:   make(map[string]string),
 	}
-}
-
-func (c Args) Toml() {
-	data := map[string]Args{
-		"poot": c,
-	}
-	var buf bytes.Buffer
-	toml.NewEncoder(&buf).Encode(data)
-	fmt.Println(buf.String())
-
-	var buffy bytes.Buffer
-	yaml.NewEncoder(&buffy).Encode(data)
-	fmt.Println(buffy.String())
 }
 
 func (c Args) HasLogLevel() bool {

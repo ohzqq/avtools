@@ -19,23 +19,25 @@ var showCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		flag.Args.Input = input
-		c := tool.NewerCmd().SetFlags(flag).NewFFmpegCmd()
-		eq := ffmpeg.NewFilter("eq")
-		eq.Set("brightness", "1.0")
-		fps := ffmpeg.NewFilter("fps")
-		fps.Set("60")
-		c.SetVideoCodec("libx264").
-			AppendVideoFilter(eq).
-			AppendVideoFilter(fps)
-		c.Toml()
+
+		medias(input)
 	},
 }
 
 func medias(input string) {
-	c := media.NewMedia(input)
-	c.SetFFmeta(flag.Args.Meta)
-	c.SetCue(flag.Args.Cue)
-	fmt.Printf("%+V\n", c.HasAudio())
+	//c := media.NewMedia(input)
+	c := media.NewCmd().Input(input)
+	c.Media.SetFFmeta(flag.Args.Meta)
+	c.Media.SetCue(flag.Args.Cue)
+	ff := c.NewFFmpegCmd()
+	eq := ffmpeg.NewFilter("eq")
+	eq.Set("brightness", "1.0")
+	fps := ffmpeg.NewFilter("fps")
+	fps.Set("60")
+	ff.SetVideoCodec("libx264").
+		AppendVideoFilter(eq).
+		AppendVideoFilter(fps)
+	fmt.Printf("%+V\n", ff.String())
 }
 
 func ffdump(input string) {

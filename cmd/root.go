@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/tool"
 
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ var (
 	cfgFile string
 	flags   tool.Options
 	flag    tool.Flag
+	cfg     media.Config
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -62,8 +64,10 @@ func initConfig() {
 
 		// Search config in home directory with name ".avtools" (without extension).
 		viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("config.yml")
+		//viper.SetConfigType("yaml")
+		//viper.SetConfigName("config.yml")
+		viper.SetConfigType("toml")
+		viper.SetConfigName("config.toml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -72,6 +76,7 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		tool.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
+		//tool.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
+		media.InitConfig(viper.GetViper())
 	}
 }

@@ -60,7 +60,46 @@ func (c *Cmd) SetFlags(f Flag) *Cmd {
 }
 
 func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
-	return c.Flag.FFmpegCmd()
+	cmd := ffmpeg.New()
+
+	if v := Cfg().Defaults.LogLevel; v != "" {
+		cmd.LogLevel(v)
+	}
+
+	if c.Bool.Verbose {
+		cmd.LogLevel("info")
+	}
+
+	if Cfg().Defaults.Overwrite || c.Bool.Overwrite {
+		cmd.AppendPreInput("y")
+	}
+
+	if c.Args.HasStart() {
+		cmd.AppendPreInput("ss", c.Args.Start)
+	}
+
+	if c.Args.HasEnd() {
+		cmd.AppendPreInput("to", c.Args.End)
+	}
+
+	//if c.Args.HasInput() {
+	if c.Media != nil {
+		cmd.Input(c.Media.input)
+	}
+
+	if c.Args.HasMeta() {
+		cmd.FFmeta(c.Args.Meta)
+	}
+
+	if c.Args.HasOutput() {
+		cmd.Output("tmp")
+		//cmd.Output(c.Args.Output)
+	} else {
+		cmd.Output("tmp")
+		//cmd.Output(OutputFromInput(f.Args.Input).String())
+	}
+
+	return cmd
 }
 
 func (cmd *Cmd) Tmp(f string) *Cmd {
