@@ -14,8 +14,8 @@ import (
 
 const ffmetaComment = ";FFMETADATA1\n"
 
-func LoadJson(d []byte) FFmeta {
-	var meta FFmeta
+func LoadJson(d []byte) *FFmeta {
+	meta := NewFFmeta()
 	err := json.Unmarshal(d, &meta)
 	if err != nil {
 		log.Fatal(err)
