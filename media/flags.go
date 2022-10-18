@@ -78,6 +78,7 @@ func (f Flag) Media() *Media {
 		if f.Args.HasCover() {
 			media.AddFile("cover", f.Args.Cover)
 		}
+		media.SetMeta()
 	}
 	return media
 }

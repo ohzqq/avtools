@@ -1,4 +1,4 @@
-package tool
+package media
 
 import (
 	"bytes"
@@ -21,20 +21,7 @@ type Cmd struct {
 	num     int
 }
 
-func NewCmd(cmd *exec.Cmd, verbose bool) *Cmd {
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return &Cmd{
-		cwd:     cwd,
-		exec:    cmd,
-		verbose: verbose,
-	}
-}
-
-func NewerCmd() *Cmd {
+func NewCmd() *Cmd {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -45,9 +32,14 @@ func NewerCmd() *Cmd {
 	}
 }
 
-func (c *Cmd) New(bin string, args []string) *Cmd {
+func (c *Cmd) Input(i string) *Cmd {
+	c.Media = NewMedia(i)
+	return c
+}
+
+func (c *Cmd) Exec(bin string, args []string) *Cmd {
 	cmd := exec.Command(bin, args...)
-	c.Batch = append(c.Batch, cmd)
+	c.AddCmd(cmd)
 	return c
 }
 
