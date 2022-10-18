@@ -28,8 +28,6 @@ func LoadJson(d []byte) FFmeta {
 		}
 	}
 
-	//meta.Tags = meta.Format.Tags
-
 	return meta
 }
 
