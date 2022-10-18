@@ -23,7 +23,7 @@ var showCmd = &cobra.Command{
 		c := media.New(input)
 		c.SetFFmeta(flag.Args.Meta)
 		c.SetCue(flag.Args.Cue)
-		fmt.Printf("%+V\n", c.Meta())
+		fmt.Printf("%+V\n", c.HasAudio())
 	},
 }
 

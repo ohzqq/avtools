@@ -22,31 +22,59 @@ type Stream struct {
 
 type Format struct {
 	Filename string
-	Dur      duration `json:"duration"`
+	Dur      Duration `json:"duration"`
 	Size     string
 	BitRate  string `json:"bit_rate"`
 	Tags     map[string]string
 }
 
-type duration string
+type Duration string
 
 func NewFFmeta() *FFmeta {
 	return &FFmeta{Chapters: chap.NewChapters()}
 }
 
-func (ff FFmeta) Duration() duration {
+func (ff FFmeta) Duration() Duration {
 	return ff.Dur
 }
 
-func (d duration) String() string {
+func (ff FFmeta) HasAudio() bool {
+	return len(ff.AudioStreams()) > 0
+}
+
+func (ff FFmeta) AudioStreams() []*Stream {
+	var streams []*Stream
+	for _, s := range ff.Streams {
+		if s.CodecType == "audio" {
+			streams = append(streams, s)
+		}
+	}
+	return streams
+}
+
+func (ff FFmeta) HasVideo() bool {
+	return len(ff.VideoStreams()) > 0
+}
+
+func (ff FFmeta) VideoStreams() []*Stream {
+	var streams []*Stream
+	for _, s := range ff.Streams {
+		if s.CodecType == "video" {
+			streams = append(streams, s)
+		}
+	}
+	return streams
+}
+
+func (d Duration) String() string {
 	return string(d)
 }
 
-func (d duration) Int() int {
+func (d Duration) Int() int {
 	return int(math.Round(d.Float()))
 }
 
-func (d duration) Float() float64 {
+func (d Duration) Float() float64 {
 	f, err := strconv.ParseFloat(d.String(), 64)
 	if err != nil {
 		return 0

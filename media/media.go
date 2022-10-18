@@ -7,10 +7,9 @@ import (
 )
 
 type Media struct {
-	input       string
-	files       RelatedFiles
-	meta        *ffmeta.FFmeta
-	cueChapters chap.Chapters
+	input string
+	files RelatedFiles
+	Meta
 }
 
 type RelatedFiles map[string]string
@@ -20,21 +19,8 @@ func New(i string) *Media {
 		input: i,
 		files: make(RelatedFiles),
 	}
+	media.Meta = media.ReadEmbeddedMeta()
 	return &media
-}
-
-func (m Media) Meta() *ffmeta.FFmeta {
-	meta := m.ReadEmbeddedMeta()
-
-	if m.HasFFmeta() {
-		meta = m.ReadFFmeta()
-	}
-
-	if m.HasCue() {
-		meta.SetChapters(m.ReadCueSheet())
-	}
-
-	return meta
 }
 
 func (m Media) HasFFmeta() bool {
@@ -61,7 +47,23 @@ func (m *Media) SetCue(c string) *Media {
 	return m
 }
 
-func (m *Media) ReadEmbeddedMeta() *ffmeta.FFmeta {
+type Meta struct {
+	*ffmeta.FFmeta
+}
+
+func (m *Media) SetMeta() *Media {
+	if m.HasFFmeta() {
+		m.Meta = m.ReadFFmeta()
+	}
+
+	if m.HasCue() {
+		m.Meta.SetChapters(m.ReadCueSheet())
+	}
+
+	return m
+}
+
+func (m *Media) ReadEmbeddedMeta() Meta {
 	probe := ffprobe.New()
 	probe.Input(m.input).
 		Stream("a").
@@ -72,7 +74,7 @@ func (m *Media) ReadEmbeddedMeta() *ffmeta.FFmeta {
 		Json()
 
 	data := probe.Run()
-	return ffmeta.LoadJson(data)
+	return Meta{FFmeta: ffmeta.LoadJson(data)}
 }
 
 func (m *Media) ReadCueSheet() chap.Chapters {
@@ -83,10 +85,10 @@ func (m *Media) ReadCueSheet() chap.Chapters {
 	return ch
 }
 
-func (m *Media) ReadFFmeta() *ffmeta.FFmeta {
+func (m *Media) ReadFFmeta() Meta {
 	var ff *ffmeta.FFmeta
 	if m.HasFFmeta() {
 		ff = ffmeta.LoadIni(m.files["ffmeta"])
 	}
-	return ff
+	return Meta{FFmeta: ff}
 }
