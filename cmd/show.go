@@ -5,6 +5,7 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
+	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -19,22 +20,25 @@ var showCmd = &cobra.Command{
 		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
 		//c := ffmpeg.New()
 		flag.Args.Input = input
-		//c := tool.NewerCmd().SetFlags(flag)
-		//cue := c.Media.GetFile("cue")
-		//ff := ffmeta.LoadIni(flag.Args.Meta)
-		data := tool.EmbeddedMeta(input)
-		ff := ffmeta.LoadJson(data)
-		//ffmeta := ffmeta.LoadJson(data)
-		ch := chap.NewChapters().FromCue(flag.Args.Cue)
-		ff.SetChapters(ch)
-		ff.Save()
-
-		//for _, c := range u.Cmd.Batch {
-		//c.Run()
-		fmt.Printf("%+V\n", string(ff.Dump()))
-		fmt.Printf("dur %+V\n", ff.Duration().String())
-		//}
+		c := media.New(input)
+		c.ReadCueSheet(flag.Args.Cue)
+		c.ReadFFmeta(flag.Args.Meta)
+		fmt.Printf("%+V\n", c)
 	},
+}
+
+func ffdump(input string) {
+	data := tool.EmbeddedMeta(input)
+	ff := ffmeta.LoadJson(data)
+	//ffmeta := ffmeta.LoadJson(data)
+	ch := chap.NewChapters().FromCue(flag.Args.Cue)
+	ff.SetChapters(ch)
+	ff.Save()
+
+	//for _, c := range u.Cmd.Batch {
+	//c.Run()
+	fmt.Printf("%+V\n", string(ff.Dump()))
+	fmt.Printf("dur %+V\n", ff.Duration().String())
 }
 
 func init() {

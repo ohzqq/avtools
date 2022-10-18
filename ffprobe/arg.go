@@ -21,8 +21,8 @@ type Entries map[string][]string
 
 func NewEntries() Entries {
 	return Entries{
-		"format": string{},
-		"stream": string{},
+		"format": []string{},
+		"stream": []string{},
 	}
 }
 
@@ -36,7 +36,7 @@ func (e Entries) AddStream(vals ...string) {
 	e.Add("stream", vals...)
 }
 
-func (e Entries) Add(key, vals ...string) {
+func (e Entries) Add(key string, vals ...string) {
 	e[key] = append(e[key], vals...)
 }
 
@@ -50,9 +50,9 @@ func (e Entries) String() string {
 			entry = append(entry, v)
 		}
 
-		entry = strings.Join(entry, "=")
+		ent := strings.Join(entry, "=")
 
-		entries = append(entries, entry)
+		entries = append(entries, ent)
 	}
 
 	return strings.Join(entries, ":")
@@ -90,12 +90,12 @@ func (c *Args) Stream(s ...string) *Args {
 }
 
 func (c *Args) ShowChapters() *Args {
-	c.showChapters = true
+	c.showChaps = true
 	return c
 }
 
 func (c Args) HasEntries() bool {
-	return len(c.Entries) > 0
+	return len(c.entries) > 0
 }
 
 func (c *Args) Entry(key string, vals ...string) *Args {
@@ -119,10 +119,12 @@ func (c Args) HasFormat() bool {
 
 func (c *Args) Json() *Args {
 	c.format = append(c.format, ofJson)
+	return c
 }
 
 func (c *Args) Plain() *Args {
 	c.format = append(c.format, ofPlain)
+	return c
 }
 
 func (c Args) HasInput() bool {

@@ -1,6 +1,7 @@
 package ffprobe
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
@@ -15,18 +16,44 @@ const (
 	selectStreams = "-select_streams"
 	writer        = "-of"
 	pretty        = "-pretty"
-	showChaps     = "-show_chapters"
+	showChapters  = "-show_chapters"
 )
 
 type Cmd struct {
 	*Args
-	args []string
 }
 
 func New() *Cmd {
 	return &Cmd{
 		Args: NewArgs(),
 	}
+}
+
+func (c Cmd) Run() []byte {
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+
+	cmd, err := c.Build()
+	if err != nil {
+		log.Fatal("Cmd failed to build: %v\n", cmd.String())
+	}
+
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+
+	err = cmd.Run()
+
+	if err != nil {
+		fmt.Printf("%v\n", stderr.String())
+	}
+
+	if len(stdout.Bytes()) > 0 {
+		return stdout.Bytes()
+	}
+
+	return nil
 }
 
 func (c Cmd) Build() (*exec.Cmd, error) {
@@ -56,7 +83,7 @@ func (c Cmd) ParseArgs() ([]string, error) {
 		args = append(args, pretty)
 	}
 
-	if c.showChapters {
+	if c.showChaps {
 		args = append(args, showChapters)
 	}
 
@@ -75,7 +102,7 @@ func (c Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasInput() {
-		args = append(args, c.Input)
+		args = append(args, c.input)
 	} else {
 		return args, fmt.Errorf("no input file specified")
 	}
