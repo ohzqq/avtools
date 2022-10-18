@@ -5,6 +5,7 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
+	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
@@ -17,14 +18,24 @@ var showCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		//tool.NewFFmpegCmd(input).Options(flags).ShowMeta()
-		//c := ffmpeg.New()
 		flag.Args.Input = input
-		c := media.NewMedia(input)
-		c.SetFFmeta(flag.Args.Meta)
-		c.SetCue(flag.Args.Cue)
-		fmt.Printf("%+V\n", c.HasAudio())
+		c := tool.NewerCmd().SetFlags(flag).NewFFmpegCmd()
+		eq := ffmpeg.NewFilter("eq")
+		eq.Set("brightness", "1.0")
+		fps := ffmpeg.NewFilter("fps")
+		fps.Set("60")
+		c.SetVideoCodec("libx264").
+			AppendVideoFilter(eq).
+			AppendVideoFilter(fps)
+		c.Toml()
 	},
+}
+
+func medias(input string) {
+	c := media.NewMedia(input)
+	c.SetFFmeta(flag.Args.Meta)
+	c.SetCue(flag.Args.Cue)
+	fmt.Printf("%+V\n", c.HasAudio())
 }
 
 func ffdump(input string) {

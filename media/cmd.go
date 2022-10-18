@@ -48,6 +48,11 @@ func (c *Cmd) AddCmd(cmd *exec.Cmd) *Cmd {
 	return c
 }
 
+func (c *Cmd) Verbose() *Cmd {
+	c.verbose = true
+	return c
+}
+
 func (c *Cmd) SetFlags(f Flag) *Cmd {
 	c.Flag = f
 	c.Media = f.Media()

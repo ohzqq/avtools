@@ -1,4 +1,6 @@
-package tool
+//go:build exclude
+
+package media
 
 import (
 	"fmt"
@@ -23,6 +25,10 @@ type defaults struct {
 	Output    string
 	LogLevel  string
 	Overwrite bool
+}
+
+func Cfg() AVcfg {
+	return cfg
 }
 
 func InitCfg() {
@@ -66,10 +72,6 @@ func CfgProfiles(def, profiles *viper.Viper) {
 			cfg.profiles["default"] = pro
 		}
 	}
-}
-
-func Cfg() AVcfg {
-	return cfg
 }
 
 func (cfg AVcfg) GetProfile(p string) *Args {
