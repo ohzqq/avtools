@@ -21,9 +21,9 @@ var showCmd = &cobra.Command{
 		//c := ffmpeg.New()
 		flag.Args.Input = input
 		c := media.New(input)
-		c.ReadCueSheet(flag.Args.Cue)
-		c.ReadFFmeta(flag.Args.Meta)
-		fmt.Printf("%+V\n", c)
+		c.SetFFmeta(flag.Args.Meta)
+		c.SetCue(flag.Args.Cue)
+		fmt.Printf("%+V\n", c.Meta())
 	},
 }
 
