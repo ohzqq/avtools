@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +11,7 @@ var rmCmd = &cobra.Command{
 	Long:  `Use this to remove metadata, art, or chapters from a/v files`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		tool.NewFFmpegCmd(args[0]).Options(flags).Remove()
+		//tool.NewFFmpegCmd(args[0]).Options(flags).Remove()
 	},
 }
 
