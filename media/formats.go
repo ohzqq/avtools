@@ -1,4 +1,4 @@
-package tool
+package media
 
 //func (f *FileFormat) Mimetype() string {
 //  return mime.TypeByExtension(f.Ext())
