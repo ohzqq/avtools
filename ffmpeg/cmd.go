@@ -1,6 +1,7 @@
 package ffmpeg
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
@@ -28,6 +29,29 @@ func (c Cmd) Build() (*exec.Cmd, error) {
 		return nil, err
 	}
 	return exec.Command(ffmpegBin, args...), nil
+}
+
+func (c Cmd) Run() ([]byte, error) {
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
+
+	cmd, err := c.Build()
+	if err != nil {
+		return stderr.Bytes(), fmt.Errorf("Cmd failed to build: %v\n", cmd.String())
+	}
+
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+
+	err = cmd.Run()
+
+	if err != nil {
+		return stderr.Bytes(), fmt.Errorf("%v\n", stderr.String())
+	}
+
+	return stdout.Bytes(), nil
 }
 
 func (c Cmd) String() string {

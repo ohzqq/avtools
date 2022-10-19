@@ -2,7 +2,6 @@ package tool
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -13,13 +12,20 @@ import (
 
 type Cmd struct {
 	Flag
-	Media   *media.Media
-	verbose bool
-	cwd     string
-	exec    *exec.Cmd
-	Batch   []*exec.Cmd
-	tmpFile string
-	num     int
+	Media     *media.Media
+	isVerbose bool
+	cwd       string
+	Batch     []*exec.Cmd
+	batch     []Command
+	tmpFile   string
+	num       int
+}
+
+type Command interface {
+	Build() (*exec.Cmd, error)
+	String() string
+	ParseArgs() ([]string, error)
+	Run() ([]byte, error)
 }
 
 func NewCmd() *Cmd {
@@ -50,7 +56,7 @@ func (c *Cmd) AddCmd(cmd *exec.Cmd) *Cmd {
 }
 
 func (c *Cmd) Verbose() *Cmd {
-	c.verbose = true
+	c.isVerbose = true
 	return c
 }
 
@@ -107,30 +113,46 @@ func (cmd *Cmd) Tmp(f string) *Cmd {
 	return cmd
 }
 
-func (cmd Cmd) Run() []byte {
-	if cmd.tmpFile != "" {
-		defer os.Remove(cmd.tmpFile)
-	}
+func (c Cmd) RunBatch() []byte {
+	var buf bytes.Buffer
+	for _, cmd := range c.batch {
+		out, err := cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	var (
-		stderr bytes.Buffer
-		stdout bytes.Buffer
-	)
-	cmd.exec.Stderr = &stderr
-	cmd.exec.Stdout = &stdout
-
-	err := cmd.exec.Run()
-	if err != nil {
-		log.Fatal("Command finished with error: %v\n", cmd.exec.String())
-		fmt.Printf("%v\n", stderr.String())
+		_, err = buf.Write(out)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-
-	if len(stdout.Bytes()) > 0 {
-		return stdout.Bytes()
-	}
-
-	if cmd.verbose {
-		fmt.Println(cmd.exec.String())
-	}
-	return nil
+	return buf.Bytes()
 }
+
+//func (cmd Cmd) Run() []byte {
+//  if cmd.tmpFile != "" {
+//    defer os.Remove(cmd.tmpFile)
+//  }
+
+//  var (
+//    stderr bytes.Buffer
+//    stdout bytes.Buffer
+//  )
+//  cmd.exec.Stderr = &stderr
+//  cmd.exec.Stdout = &stdout
+
+//  err := cmd.exec.Run()
+//  if err != nil {
+//    log.Fatal("Command finished with error: %v\n", cmd.exec.String())
+//    fmt.Printf("%v\n", stderr.String())
+//  }
+
+//  if len(stdout.Bytes()) > 0 {
+//    return stdout.Bytes()
+//  }
+
+//  if cmd.isVerbose {
+//    fmt.Println(cmd.exec.String())
+//  }
+//  return nil
+//}

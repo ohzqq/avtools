@@ -29,7 +29,7 @@ func New() *Cmd {
 	}
 }
 
-func (c Cmd) Run() []byte {
+func (c Cmd) Run() ([]byte, error) {
 	var (
 		stderr bytes.Buffer
 		stdout bytes.Buffer
@@ -37,7 +37,7 @@ func (c Cmd) Run() []byte {
 
 	cmd, err := c.Build()
 	if err != nil {
-		log.Fatal("Cmd failed to build: %v\n", cmd.String())
+		return stderr.Bytes(), fmt.Errorf("Cmd failed to build: %v\n", cmd.String())
 	}
 
 	cmd.Stderr = &stderr
@@ -46,14 +46,10 @@ func (c Cmd) Run() []byte {
 	err = cmd.Run()
 
 	if err != nil {
-		fmt.Printf("%v\n", stderr.String())
+		return stderr.Bytes(), fmt.Errorf("%v\n", stderr.String())
 	}
 
-	if len(stdout.Bytes()) > 0 {
-		return stdout.Bytes()
-	}
-
-	return nil
+	return stdout.Bytes(), nil
 }
 
 func (c Cmd) Build() (*exec.Cmd, error) {
