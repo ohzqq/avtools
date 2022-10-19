@@ -16,8 +16,7 @@ type Cmd struct {
 	Media     *media.Media
 	isVerbose bool
 	cwd       string
-	Batch     []*exec.Cmd
-	batch     []Command
+	Batch     []Command
 	bin       string
 	args      []string
 	tmpFile   string
@@ -66,15 +65,13 @@ func (c *Cmd) SetArgs(args ...string) *Cmd {
 	return c
 }
 
-func (c *Cmd) Exec(bin string, args []string) *Cmd {
+func (c *Cmd) Command(bin string, args []string) *Cmd {
 	c.args = args
 	c.bin = bin
-	cmd := exec.Command(bin, args...)
-	c.AddCmd(cmd)
 	return c
 }
 
-func (c *Cmd) AddCmd(cmd *exec.Cmd) *Cmd {
+func (c *Cmd) Add(cmd Command) *Cmd {
 	c.Batch = append(c.Batch, cmd)
 	return c
 }
@@ -90,7 +87,7 @@ func (c *Cmd) SetFlags(f Flag) *Cmd {
 	return c
 }
 
-func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
+func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
 	cmd := Cfg().GetProfile("default").FFmpegCmd()
 
 	if c.Flag.Args.HasProfile() {
@@ -139,7 +136,7 @@ func (cmd *Cmd) Tmp(f string) *Cmd {
 
 func (c Cmd) RunBatch() []byte {
 	var buf bytes.Buffer
-	for _, cmd := range c.batch {
+	for _, cmd := range c.Batch {
 		out, err := cmd.Run()
 		if err != nil {
 			log.Fatal(err)

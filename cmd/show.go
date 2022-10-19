@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/tool"
@@ -28,22 +27,16 @@ var showCmd = &cobra.Command{
 func medias(input string) {
 	//c := media.NewMedia(input)
 	c := tool.NewCmd().Input(input).SetFlags(flag)
-	c.Media.SetFFmeta(flag.Args.Meta)
-	c.Media.SetCue(flag.Args.Cue)
-	ff := c.NewFFmpegCmd()
+	ff := c.FFmpeg()
 	eq := ffmpeg.NewFilter("eq")
 	eq.Set("brightness", "1.0")
 	fps := ffmpeg.NewFilter("fps")
 	fps.Set("60")
-	//ff.SetVideoCodec("libx264").
-	//  AppendVideoFilter(eq).
-	//  AppendVideoFilter(fps)
+	ff.SetVideoCodec("libx264").
+		AppendVideoFilter(eq).
+		AppendVideoFilter(fps)
 
-	ffcmd, err := ff.Build()
-	if err != nil {
-		log.Fatal(err)
-	}
-	c.AddCmd(ffcmd)
+	c.Add(ff)
 	fmt.Printf("%+V\n", c.Batch[0].String())
 }
 
