@@ -44,7 +44,6 @@ func (c Cmd) Run() ([]byte, error) {
 	cmd.Stdout = &stdout
 
 	err = cmd.Run()
-
 	if err != nil {
 		return stderr.Bytes(), fmt.Errorf("%v\n", stderr.String())
 	}

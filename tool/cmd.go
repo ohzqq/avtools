@@ -2,6 +2,7 @@ package tool
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -17,6 +18,8 @@ type Cmd struct {
 	cwd       string
 	Batch     []*exec.Cmd
 	batch     []Command
+	bin       string
+	args      []string
 	tmpFile   string
 	num       int
 }
@@ -44,7 +47,28 @@ func (c *Cmd) Input(i string) *Cmd {
 	return c
 }
 
+func (c Cmd) ParseArgs() ([]string, error) {
+	return c.args, nil
+}
+
+func (c Cmd) Build() (*exec.Cmd, error) {
+	cmd := exec.Command(c.bin, c.args...)
+	return cmd, nil
+}
+
+func (c *Cmd) Bin(bin string) *Cmd {
+	c.bin = bin
+	return c
+}
+
+func (c *Cmd) SetArgs(args ...string) *Cmd {
+	c.args = args
+	return c
+}
+
 func (c *Cmd) Exec(bin string, args []string) *Cmd {
+	c.args = args
+	c.bin = bin
 	cmd := exec.Command(bin, args...)
 	c.AddCmd(cmd)
 	return c
@@ -129,30 +153,24 @@ func (c Cmd) RunBatch() []byte {
 	return buf.Bytes()
 }
 
-//func (cmd Cmd) Run() []byte {
-//  if cmd.tmpFile != "" {
-//    defer os.Remove(cmd.tmpFile)
-//  }
+func (c Cmd) Run() ([]byte, error) {
+	var (
+		stderr bytes.Buffer
+		stdout bytes.Buffer
+	)
 
-//  var (
-//    stderr bytes.Buffer
-//    stdout bytes.Buffer
-//  )
-//  cmd.exec.Stderr = &stderr
-//  cmd.exec.Stdout = &stdout
+	cmd, err := c.Build()
+	if err != nil {
+		return stderr.Bytes(), fmt.Errorf("Cmd failed to build: %v\n", cmd.String())
+	}
 
-//  err := cmd.exec.Run()
-//  if err != nil {
-//    log.Fatal("Command finished with error: %v\n", cmd.exec.String())
-//    fmt.Printf("%v\n", stderr.String())
-//  }
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
 
-//  if len(stdout.Bytes()) > 0 {
-//    return stdout.Bytes()
-//  }
+	err = cmd.Run()
+	if err != nil {
+		return stderr.Bytes(), fmt.Errorf("%v\n", stderr.String())
+	}
 
-//  if cmd.isVerbose {
-//    fmt.Println(cmd.exec.String())
-//  }
-//  return nil
-//}
+	return stdout.Bytes(), nil
+}
