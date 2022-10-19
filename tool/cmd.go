@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/media"
@@ -44,6 +45,10 @@ func NewCmd() *Cmd {
 func (c *Cmd) Input(i string) *Cmd {
 	c.Media = media.NewMedia(i)
 	return c
+}
+
+func (c Cmd) String() string {
+	return strings.Join(c.args, " ")
 }
 
 func (c Cmd) ParseArgs() ([]string, error) {

@@ -99,3 +99,11 @@ func (m *Media) ReadFFmeta() Meta {
 	}
 	return Meta{FFmeta: ff}
 }
+
+func (m Media) AudioCodec() string {
+	if m.HasAudio() {
+		a := m.AudioStreams()
+		return a[0].CodecType
+	}
+	return ""
+}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -11,11 +12,11 @@ var updateCmd = &cobra.Command{
 	Long:  `Adds album art or updates the metadata (using ffmpeg's metadata format). Album art of aac requires Atomic Parsley`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		//tool.NewFFmpegCmd(args[0]).Options(flags).Update()
 		flag.Args.Input = args[0]
-		//u := tool.NewUpdateCmd()
-		//u.Cmd = media.NewerCmd().SetFlags(flag)
-		//u.ParseArgs()
+		u := tool.NewUpdateCmd()
+		u.SetFlags(flag)
+		c := u.Parse()
+		c.RunBatch()
 		//for _, c := range u.Cmd.Batch {
 		//c.Run()
 		//}
