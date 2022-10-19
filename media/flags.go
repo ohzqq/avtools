@@ -1,9 +1,5 @@
 package media
 
-import (
-	"github.com/ohzqq/avtools/ffmpeg"
-)
-
 type Flag struct {
 	Args ArgFlag
 	Bool BoolFlag
@@ -31,53 +27,23 @@ type ArgFlag struct {
 	Cue     string
 }
 
-func (f Flag) FFmpegCmd() *ffmpeg.Cmd {
-	cmd := ffmpeg.New()
-
-	if f.Bool.Overwrite {
-		cmd.AppendPreInput("y")
-	}
-
-	if f.Args.HasStart() {
-		cmd.AppendPreInput("ss", f.Args.Start)
-	}
-
-	if f.Args.HasEnd() {
-		cmd.AppendPreInput("to", f.Args.End)
-	}
-
-	if f.Args.HasInput() {
-		cmd.Input(f.Args.Input)
-	}
-
-	if f.Args.HasMeta() {
-		cmd.FFmeta(f.Args.Meta)
-		//cmd.AppendPostInput("i", f.Args.Meta)
-		//cmd.AppendPostInput("map_metadata", "1")
-	}
-
-	if f.Args.HasOutput() {
-		cmd.Output(f.Args.Output)
-	} else {
-		//cmd.Output(OutputFromInput(f.Args.Input).String())
-	}
-
-	return cmd
-}
-
 func (f Flag) Media() *Media {
 	var media *Media
 	if f.Args.HasInput() {
 		media = NewMedia(f.Args.Input)
+
 		if f.Args.HasMeta() {
 			media.SetFFmeta(f.Args.Meta)
 		}
+
 		if f.Args.HasCue() {
 			media.SetCue(f.Args.Cue)
 		}
+
 		if f.Args.HasCover() {
 			media.AddFile("cover", f.Args.Cover)
 		}
+
 		media.SetMeta()
 	}
 	return media

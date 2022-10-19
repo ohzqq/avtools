@@ -3,6 +3,7 @@ package media
 import (
 	"log"
 
+	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/spf13/viper"
 )
 
@@ -43,6 +44,82 @@ func InitConfig(v *viper.Viper) {
 
 func Cfg() Config {
 	return cfg
+}
+
+func (p Profile) FFmpegCmd() *ffmpeg.Cmd {
+	ff := ffmpeg.New()
+
+	if len(p.PreInput) > 0 {
+		ff.PreInput = p.PreInput
+	}
+
+	if len(p.PostInput) > 0 {
+		ff.PostInput = p.PostInput
+	}
+
+	if p.VideoCodec != "" {
+		ff.SetVideoCodec(p.VideoCodec)
+	}
+
+	if len(p.VideoParams) > 0 {
+		for k, v := range p.VideoParams {
+			ff.AppendVideoParam(k, v)
+		}
+	}
+
+	if len(p.VideoFilters) > 0 {
+		for k, v := range p.VideoFilters {
+			f := k
+			if k == "misc" {
+				f = ""
+			}
+
+			filter := ffmpeg.NewFilter(f)
+			filter.Set(v)
+			ff.AppendVideoFilter(filter)
+		}
+	}
+
+	if p.AudioCodec != "" {
+		ff.SetAudioCodec(p.AudioCodec)
+	}
+
+	if len(p.AudioParams) > 0 {
+		for k, v := range p.AudioParams {
+			ff.AppendAudioParam(k, v)
+		}
+	}
+
+	if len(p.AudioFilters) > 0 {
+		for k, v := range p.AudioFilters {
+			f := k
+			if k == "misc" {
+				f = ""
+			}
+
+			filter := ffmpeg.NewFilter(f)
+			filter.Set(v)
+			ff.AppendAudioFilter(filter)
+		}
+	}
+
+	if len(p.Filters) > 0 {
+		for k, v := range p.Filters {
+			f := k
+			if k == "misc" {
+				f = ""
+			}
+
+			filter := ffmpeg.NewFilter(f)
+			filter.Set(v)
+			ff.AppendFilter(filter)
+		}
+	}
+
+	if p.Ext != "" {
+	}
+
+	return ff
 }
 
 func (d Defaults) HasPadding() bool {

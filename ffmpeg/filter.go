@@ -32,6 +32,12 @@ func (f Filter) String() string {
 	for _, val := range f.Params {
 		params = append(params, strings.Join(val, "="))
 	}
+
 	p := strings.Join(params, ":")
+
+	if f.Name == "" {
+		return p
+	}
+
 	return f.Name + "=" + p
 }

@@ -33,7 +33,5 @@ func (o Output) String() string {
 	if o.Pad {
 		name = o.Name + fmt.Sprintf(o.Padding, o.num)
 	}
-	println(name)
-
 	return filepath.Join(o.path, name+o.Ext)
 }

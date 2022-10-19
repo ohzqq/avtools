@@ -1,5 +1,11 @@
 package ffmpeg
 
+const (
+	aCodecFlag   = `-c:a`
+	vCodecFlag   = `-c:v`
+	logLevelFlag = `-loglevel`
+)
+
 type Args struct {
 	logLevel      []string
 	PreInput      []string
@@ -21,9 +27,9 @@ type Args struct {
 
 func NewArgs() *Args {
 	return &Args{
-		videoCodec: []string{"-c:v"},
-		audioCodec: []string{"-c:a"},
-		logLevel:   []string{"-loglevel"},
+		videoCodec: []string{vCodecFlag},
+		audioCodec: []string{aCodecFlag},
+		logLevel:   []string{logLevelFlag},
 		Metadata:   make(map[string]string),
 	}
 }
