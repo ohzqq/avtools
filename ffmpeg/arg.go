@@ -12,10 +12,10 @@ type Args struct {
 	input         Input
 	PostInput     []string
 	streamCopy    bool
-	videoCodec    []string
+	videoCodec    string
 	VideoParams   []string
 	VideoFilters  Filters
-	audioCodec    []string
+	audioCodec    string
 	AudioParams   []string
 	AudioFilters  Filters
 	FilterComplex Filters
@@ -27,10 +27,8 @@ type Args struct {
 
 func NewArgs() *Args {
 	return &Args{
-		videoCodec: []string{vCodecFlag},
-		audioCodec: []string{aCodecFlag},
-		logLevel:   []string{logLevelFlag},
-		Metadata:   make(map[string]string),
+		logLevel: []string{logLevelFlag},
+		Metadata: make(map[string]string),
 	}
 }
 
@@ -82,22 +80,22 @@ func (c *Args) AppendPostInput(flag string, val ...string) *Args {
 	return c
 }
 
-func (c Args) HasVideoCodec() bool {
-	return len(c.videoCodec) > 1
-}
-
-func (c *Args) SetVideoCodec(codec string) *Args {
-	c.videoCodec = append(c.videoCodec, codec)
-	return c
-}
-
 func (c *Args) Stream() *Args {
 	c.streamCopy = true
 	return c
 }
 
+func (c Args) HasVideoCodec() bool {
+	return c.videoCodec != ""
+}
+
+func (c *Args) SetVideoCodec(codec string) *Args {
+	c.videoCodec = codec
+	return c
+}
+
 func (c *Args) CV(codec string) *Args {
-	c.videoCodec = append(c.videoCodec, codec)
+	c.videoCodec = codec
 	return c
 }
 
@@ -126,16 +124,16 @@ func (c *Args) VF(f Filter) *Args {
 }
 
 func (c Args) HasAudioCodec() bool {
-	return len(c.audioCodec) > 1
+	return c.audioCodec != ""
 }
 
 func (c *Args) SetAudioCodec(codec string) *Args {
-	c.audioCodec = append(c.audioCodec, codec)
+	c.audioCodec = codec
 	return c
 }
 
 func (c *Args) CA(codec string) *Args {
-	c.audioCodec = append(c.audioCodec, codec)
+	c.audioCodec = codec
 	return c
 }
 

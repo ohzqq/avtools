@@ -60,17 +60,17 @@ func (c *Cmd) SetFlags(f Flag) *Cmd {
 }
 
 func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
-	cmd := ffmpeg.New()
+	cmd := Cfg().GetProfile("default").FFmpegCmd()
 
-	if v := Cfg().Defaults.LogLevel; v != "" {
-		cmd.LogLevel(v)
+	if c.Flag.Args.HasProfile() {
+		cmd = Cfg().GetProfile(c.Flag.Args.Profile).FFmpegCmd()
 	}
 
 	if c.Bool.Verbose {
 		cmd.LogLevel("info")
 	}
 
-	if Cfg().Defaults.Overwrite || c.Bool.Overwrite {
+	if c.Bool.Overwrite {
 		cmd.AppendPreInput("y")
 	}
 

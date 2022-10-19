@@ -60,7 +60,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasVideoCodec() && !c.streamCopy {
-		args = append(args, c.videoCodec...)
+		args = append(args, vCodecFlag, c.videoCodec)
 	}
 
 	if c.HasVideoParams() {
@@ -72,7 +72,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	}
 
 	if c.HasAudioCodec() && !c.streamCopy {
-		args = append(args, c.audioCodec...)
+		args = append(args, aCodecFlag, c.audioCodec)
 	}
 
 	if c.streamCopy {

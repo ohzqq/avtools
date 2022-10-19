@@ -40,14 +40,42 @@ func InitConfig(v *viper.Viper) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	p := Profile{
+		VideoCodec: "copy",
+		AudioCodec: "copy",
+	}
+	cfg.Profiles["default"] = p
 }
 
 func Cfg() Config {
 	return cfg
 }
 
+func (c Config) GetProfile(p string) Profile {
+	if pro, ok := c.Profiles[p]; ok {
+		return pro
+	}
+	return Profile{}
+}
+
+func (c Config) ListProfiles() []string {
+	var pros []string
+	for p, _ := range c.Profiles {
+		pros = append(pros, p)
+	}
+	return pros
+}
+
 func (p Profile) FFmpegCmd() *ffmpeg.Cmd {
 	ff := ffmpeg.New()
+
+	if v := Cfg().Defaults.LogLevel; v != "" {
+		ff.LogLevel(v)
+	}
+
+	if Cfg().Defaults.Overwrite {
+		ff.AppendPreInput("y")
+	}
 
 	if len(p.PreInput) > 0 {
 		ff.PreInput = p.PreInput
@@ -116,8 +144,12 @@ func (p Profile) FFmpegCmd() *ffmpeg.Cmd {
 		}
 	}
 
+	name := Cfg().Defaults.Output
+	out := NewOutput(name)
 	if p.Ext != "" {
+		out.Ext = p.Ext
 	}
+	ff.Output(out.String())
 
 	return ff
 }
