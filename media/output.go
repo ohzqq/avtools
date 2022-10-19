@@ -1,4 +1,4 @@
-package tool
+package media
 
 import (
 	"fmt"
@@ -6,37 +6,34 @@ import (
 	"strings"
 )
 
-type output struct {
+type Output struct {
 	num     int
-	name    string
-	ext     string
+	Name    string
+	Ext     string
 	path    string
-	padding string
+	Padding string
 	Pad     bool
 }
 
-func NewOutput() *output {
-	return &output{
+func NewOutput(o string) *Output {
+	dir, file := filepath.Split(o)
+	ext := filepath.Ext(file)
+	return &Output{
 		num:     1,
-		Pad:     true,
-		padding: "%03d",
-		name:    "tmp",
+		path:    dir,
+		Pad:     Cfg().Defaults.HasPadding(),
+		Padding: Cfg().Defaults.Padding,
+		Ext:     ext,
+		Name:    strings.TrimSuffix(file, ext),
 	}
 }
 
-func OutputFromInput(i string) *output {
-	out := NewOutput()
-	dir, file := filepath.Split(i)
-	out.path = dir
-	out.ext = filepath.Ext(file)
-	out.name = strings.TrimSuffix(file, out.ext)
-	return out
-}
-
-func (o output) String() string {
+func (o Output) String() string {
+	name := o.Name
 	if o.Pad {
-		o.name = o.name + fmt.Sprintf(o.padding, o.num)
+		name = o.Name + fmt.Sprintf(o.Padding, o.num)
 	}
+	println(name)
 
-	return filepath.Join(o.path, o.name+o.ext)
+	return filepath.Join(o.path, name+o.Ext)
 }

@@ -15,7 +15,7 @@ import (
 var (
 	cfgFile string
 	flags   tool.Options
-	flag    tool.Flag
+	flag    media.Flag
 	cfg     media.Config
 )
 

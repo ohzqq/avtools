@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +13,12 @@ var updateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		//tool.NewFFmpegCmd(args[0]).Options(flags).Update()
 		flag.Args.Input = args[0]
-		u := tool.NewUpdateCmd()
-		u.Cmd = tool.NewerCmd().SetFlags(flag)
-		u.ParseArgs()
-		for _, c := range u.Cmd.Batch {
-			c.Run()
-		}
+		//u := tool.NewUpdateCmd()
+		//u.Cmd = media.NewerCmd().SetFlags(flag)
+		//u.ParseArgs()
+		//for _, c := range u.Cmd.Batch {
+		//c.Run()
+		//}
 	},
 }
 

@@ -82,7 +82,6 @@ func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
 		cmd.AppendPreInput("to", c.Args.End)
 	}
 
-	//if c.Args.HasInput() {
 	if c.Media != nil {
 		cmd.Input(c.Media.input)
 	}
@@ -91,13 +90,13 @@ func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
 		cmd.FFmeta(c.Args.Meta)
 	}
 
+	var out *Output
 	if c.Args.HasOutput() {
-		cmd.Output("tmp")
-		//cmd.Output(c.Args.Output)
+		out = NewOutput(c.Args.Output)
 	} else {
-		cmd.Output("tmp")
-		//cmd.Output(OutputFromInput(f.Args.Input).String())
+		out = NewOutput(c.Args.Input)
 	}
+	cmd.Output(out.String())
 
 	return cmd
 }

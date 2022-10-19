@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
@@ -26,7 +27,7 @@ var showCmd = &cobra.Command{
 
 func medias(input string) {
 	//c := media.NewMedia(input)
-	c := media.NewCmd().Input(input)
+	c := media.NewCmd().Input(input).SetFlags(flag)
 	c.Media.SetFFmeta(flag.Args.Meta)
 	c.Media.SetCue(flag.Args.Cue)
 	ff := c.NewFFmpegCmd()
@@ -37,7 +38,13 @@ func medias(input string) {
 	ff.SetVideoCodec("libx264").
 		AppendVideoFilter(eq).
 		AppendVideoFilter(fps)
-	fmt.Printf("%+V\n", ff.String())
+
+	ffcmd, err := ff.Build()
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.AddCmd(ffcmd)
+	fmt.Printf("%+V\n", c.Batch[0].String())
 }
 
 func ffdump(input string) {

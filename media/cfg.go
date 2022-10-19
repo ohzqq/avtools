@@ -44,3 +44,19 @@ func InitConfig(v *viper.Viper) {
 func Cfg() Config {
 	return cfg
 }
+
+func (d Defaults) HasPadding() bool {
+	return d.Padding != ""
+}
+
+func (d Defaults) HasLogLevel() bool {
+	return d.LogLevel != ""
+}
+
+func (d Defaults) HasOutput() bool {
+	return d.Output != ""
+}
+
+func (d Defaults) HasProfile() bool {
+	return d.Profile != ""
+}
