@@ -19,8 +19,6 @@ type Meta struct {
 	*ffmeta.FFmeta
 }
 
-type RelatedFiles map[string]string
-
 func NewMedia(i string) *Media {
 	media := Media{
 		Input: i,
@@ -35,31 +33,25 @@ func (m *Media) AddFile(name, path string) *Media {
 	if err != nil {
 		log.Fatal(err)
 	}
-	m.files[name] = abs
+	m.files[name] = FileFormat(abs)
 	return m
 }
 
 func (m Media) HasFFmeta() bool {
-	if ff, ok := m.files["ffmeta"]; ok && ff != "" {
-		return true
-	}
-	return false
+	return m.files.Has("ffmeta")
 }
 
 func (m *Media) SetFFmeta(ff string) *Media {
-	m.files["ffmeta"] = ff
+	m.files["ffmeta"] = FileFormat(ff)
 	return m
 }
 
 func (m Media) HasCue() bool {
-	if c, ok := m.files["cue"]; ok && c != "" {
-		return true
-	}
-	return false
+	return m.files.Has("cue")
 }
 
 func (m *Media) SetCue(c string) *Media {
-	m.files["cue"] = c
+	m.files["cue"] = FileFormat(c)
 	return m
 }
 
@@ -92,7 +84,7 @@ func (m *Media) ReadEmbeddedMeta() Meta {
 func (m *Media) ReadCueSheet() chap.Chapters {
 	var ch chap.Chapters
 	if m.HasCue() {
-		ch = chap.NewChapters().FromCue(m.files["cue"])
+		ch = chap.NewChapters().FromCue(m.files.Get("cue"))
 	}
 	return ch
 }
@@ -100,7 +92,7 @@ func (m *Media) ReadCueSheet() chap.Chapters {
 func (m *Media) ReadFFmeta() Meta {
 	var ff *ffmeta.FFmeta
 	if m.HasFFmeta() {
-		ff = ffmeta.LoadIni(m.files["ffmeta"])
+		ff = ffmeta.LoadIni(m.files.Get("ffmeta"))
 	}
 	return Meta{FFmeta: ff}
 }
