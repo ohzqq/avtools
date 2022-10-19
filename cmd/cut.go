@@ -17,9 +17,9 @@ var cutCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(cutCmd)
-	cutCmd.Flags().StringVarP(&flags.Start, "start", "s", "", "start of clip")
-	cutCmd.Flags().StringVarP(&flags.End, "end", "e", "", "end of clip")
-	cutCmd.Flags().IntVarP(&flags.ChapNo, "num", "n", 0, "chapter number")
+	cutCmd.Flags().StringVarP(&flag.Args.Start, "start", "s", "", "start of clip")
+	cutCmd.Flags().StringVarP(&flag.Args.End, "end", "e", "", "end of clip")
+	cutCmd.Flags().IntVarP(&flag.Args.ChapNo, "num", "n", 0, "chapter number")
 	cutCmd.MarkFlagsMutuallyExclusive("start", "num")
 	cutCmd.MarkFlagsMutuallyExclusive("end", "num")
 }

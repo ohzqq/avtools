@@ -1,4 +1,4 @@
-package media
+package tool
 
 import (
 	"bytes"
@@ -8,11 +8,12 @@ import (
 	"os/exec"
 
 	"github.com/ohzqq/avtools/ffmpeg"
+	"github.com/ohzqq/avtools/media"
 )
 
 type Cmd struct {
 	Flag
-	Media   *Media
+	Media   *media.Media
 	verbose bool
 	cwd     string
 	exec    *exec.Cmd
@@ -33,7 +34,7 @@ func NewCmd() *Cmd {
 }
 
 func (c *Cmd) Input(i string) *Cmd {
-	c.Media = NewMedia(i)
+	c.Media = media.NewMedia(i)
 	return c
 }
 
@@ -83,7 +84,7 @@ func (c *Cmd) NewFFmpegCmd() *ffmpeg.Cmd {
 	}
 
 	if c.Media != nil {
-		cmd.Input(c.Media.input)
+		cmd.Input(c.Media.Input)
 	}
 
 	if c.Args.HasMeta() {

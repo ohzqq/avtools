@@ -17,6 +17,6 @@ var splitCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(splitCmd)
-	splitCmd.PersistentFlags().StringVarP(&flags.CueFile, "cuesheet", "c", "", "split file with cue sheet")
-	splitCmd.PersistentFlags().StringVarP(&flags.MetaFile, "ffmeta", "f", "", "split file with ffmetadata file")
+	splitCmd.PersistentFlags().StringVarP(&flag.Args.Cue, "cuesheet", "c", "", "update chapter metadata")
+	splitCmd.PersistentFlags().StringVarP(&flag.Args.Meta, "ffmeta", "f", "", "update ffmetadata")
 }

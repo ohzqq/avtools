@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/tool"
 
 	"github.com/spf13/cobra"
@@ -14,9 +13,8 @@ import (
 
 var (
 	cfgFile string
-	flags   tool.Options
-	flag    media.Flag
-	cfg     media.Config
+	flag    tool.Flag
+	cfg     tool.Config
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,9 +45,9 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/avtools/config.yml)")
 	rootCmd.PersistentFlags().StringVarP(&flag.Args.Output, "output", "o", "", "set output name")
-	rootCmd.PersistentFlags().StringVarP(&flags.Profile, "profile", "p", "default", "set profile")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Verbose, "verbose", "v", true, "print ffmpeg/ffprobe command string")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Overwrite, "overwrite", "y", false, "overwrite existing files")
+	rootCmd.PersistentFlags().StringVarP(&flag.Args.Profile, "profile", "p", "default", "set profile")
+	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Verbose, "verbose", "v", true, "print ffmpeg/ffprobe command string")
+	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Overwrite, "overwrite", "y", false, "overwrite existing files")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -71,12 +69,9 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-	tool.InitCfg()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		//tool.CfgProfiles(viper.Sub("defaults"), viper.Sub("profiles"))
-		media.InitConfig(viper.GetViper())
+		tool.InitConfig(viper.GetViper())
 	}
 }

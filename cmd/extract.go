@@ -17,7 +17,7 @@ var extractCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(extractCmd)
-	extractCmd.PersistentFlags().BoolVarP(&flags.MetaSwitch, "meta", "m", false, "save ffmetadata to disk")
-	extractCmd.PersistentFlags().BoolVarP(&flags.CueSwitch, "cue", "c", false, "save cue sheet to disk")
-	extractCmd.PersistentFlags().BoolVarP(&flags.CoverSwitch, "album-art", "a", false, "save album art to disk")
+	extractCmd.PersistentFlags().BoolVarP(&flag.Bool.Meta, "meta", "m", false, "print ffmeta")
+	extractCmd.PersistentFlags().BoolVarP(&flag.Bool.Cue, "cue", "C", false, "print cue sheet")
+	extractCmd.PersistentFlags().BoolVarP(&flag.Bool.Json, "json", "j", false, "print json")
 }

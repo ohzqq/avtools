@@ -17,7 +17,7 @@ var rmCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(rmCmd)
-	rmCmd.PersistentFlags().BoolVarP(&flags.MetaSwitch, "meta", "m", false, "delete all embedded metadata")
-	rmCmd.PersistentFlags().BoolVarP(&flags.CoverSwitch, "album-art", "a", false, "remove embedded album art")
-	rmCmd.PersistentFlags().BoolVarP(&flags.ChapSwitch, "chapters", "c", false, "remove embedded album art")
+	rmCmd.PersistentFlags().BoolVarP(&flag.Bool.Meta, "meta", "m", false, "print ffmeta")
+	rmCmd.PersistentFlags().BoolVarP(&flag.Bool.Cue, "cue", "C", false, "print cue sheet")
+	rmCmd.PersistentFlags().BoolVarP(&flag.Bool.Json, "json", "j", false, "print json")
 }

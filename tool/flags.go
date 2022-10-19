@@ -1,4 +1,6 @@
-package media
+package tool
+
+import "github.com/ohzqq/avtools/media"
 
 type Flag struct {
 	Args ArgFlag
@@ -27,26 +29,27 @@ type ArgFlag struct {
 	Cue     string
 }
 
-func (f Flag) Media() *Media {
-	var media *Media
+func (f Flag) Media() *media.Media {
+	var m *media.Media
 	if f.Args.HasInput() {
-		media = NewMedia(f.Args.Input)
+		m = media.NewMedia(f.Args.Input)
 
 		if f.Args.HasMeta() {
-			media.SetFFmeta(f.Args.Meta)
+			m.SetFFmeta(f.Args.Meta)
 		}
 
 		if f.Args.HasCue() {
-			media.SetCue(f.Args.Cue)
+			m.SetCue(f.Args.Cue)
 		}
 
 		if f.Args.HasCover() {
-			media.AddFile("cover", f.Args.Cover)
+			m.AddFile("cover", f.Args.Cover)
 		}
 
-		media.SetMeta()
+		m.SetMeta()
 	}
-	return media
+
+	return m
 }
 
 func (f ArgFlag) HasCover() bool {

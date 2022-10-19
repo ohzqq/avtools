@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ohzqq/avtools/chap"
-	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/ffmpeg"
-	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +27,7 @@ var showCmd = &cobra.Command{
 
 func medias(input string) {
 	//c := media.NewMedia(input)
-	c := media.NewCmd().Input(input).SetFlags(flag)
+	c := tool.NewCmd().Input(input).SetFlags(flag)
 	c.Media.SetFFmeta(flag.Args.Meta)
 	c.Media.SetCue(flag.Args.Cue)
 	ff := c.NewFFmpegCmd()
@@ -48,20 +45,6 @@ func medias(input string) {
 	}
 	c.AddCmd(ffcmd)
 	fmt.Printf("%+V\n", c.Batch[0].String())
-}
-
-func ffdump(input string) {
-	data := tool.EmbeddedMeta(input)
-	ff := ffmeta.LoadJson(data)
-	//ffmeta := ffmeta.LoadJson(data)
-	ch := chap.NewChapters().FromCue(flag.Args.Cue)
-	ff.SetChapters(ch)
-	ff.Save()
-
-	//for _, c := range u.Cmd.Batch {
-	//c.Run()
-	fmt.Printf("%+V\n", string(ff.Dump()))
-	fmt.Printf("dur %+V\n", ff.Duration().String())
 }
 
 func init() {
