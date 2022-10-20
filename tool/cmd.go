@@ -117,9 +117,8 @@ func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
 		ffcmd.AppendPreInput("to", c.Args.End)
 	}
 
-	println("media")
-	if c.Media != nil {
-		ffcmd.Input(c.Media.Input.String())
+	if c.Args.Media != nil {
+		ffcmd.Input(c.Args.Input.Abs)
 	}
 
 	if c.flag.Args.HasMeta() {
