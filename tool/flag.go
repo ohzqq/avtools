@@ -33,28 +33,41 @@ type ArgFlag struct {
 }
 
 type Args struct {
-	Profile Profile
-	Start   string
-	End     string
-	Output  file.File
-	Input   file.File
-	Cover   file.File
-	Meta    file.File
-	Cue     file.File
-	Media   *media.Media
+	Profile   Profile
+	Start     string
+	End       string
+	output    file.File
+	Input     file.File
+	Cover     file.File
+	Meta      file.File
+	Cue       file.File
+	Media     *media.Media
+	Num       int
+	PadOutput bool
+	Padding   string
+}
+
+func (a Args) Output() string {
+	if a.PadOutput {
+		return a.output.Pad(a.Num)
+	}
+	return a.output.Name
 }
 
 func (f Flag) Parse() Args {
 	return Args{
-		Profile: f.Args.GetProfile(),
-		Start:   f.Args.Start,
-		End:     f.Args.End,
-		Output:  file.New(f.Args.Output),
-		Input:   file.New(f.Args.Input),
-		Cover:   file.New(f.Args.Cover),
-		Meta:    file.New(f.Args.Meta),
-		Cue:     file.New(f.Args.Cue),
-		Media:   f.Media(),
+		Profile:   f.Args.GetProfile(),
+		Start:     f.Args.Start,
+		End:       f.Args.End,
+		output:    file.New(f.Args.Output),
+		Input:     file.New(f.Args.Input),
+		Cover:     file.New(f.Args.Cover),
+		Meta:      file.New(f.Args.Meta),
+		Cue:       file.New(f.Args.Cue),
+		Media:     f.Media(),
+		PadOutput: Cfg().Defaults.HasPadding(),
+		Padding:   Cfg().Defaults.Padding,
+		Num:       1,
 	}
 }
 

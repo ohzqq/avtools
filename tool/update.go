@@ -2,7 +2,6 @@ package tool
 
 import (
 	"log"
-	"path/filepath"
 
 	"github.com/ohzqq/avtools/ffmpeg"
 )
@@ -18,23 +17,28 @@ func NewUpdateCmd() *Update {
 }
 
 func (u *Update) Parse() *Cmd {
-	out := NewOutput(u.flag.Args.Output)
 	u.FFmpeg = u.Cmd.FFmpeg()
 
 	u.FFmpeg.Stream()
 
+	if u.flag.Args.HasCue() {
+		u.FFmpeg.HasChapters()
+		tmp := u.MkTmp()
+		err := u.Args.Media.Meta.Write(tmp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		u.FFmpeg.FFmeta(tmp.Name())
+	}
+
 	var cover *Cmd
 	if u.flag.Args.HasCover() {
-		u.FFmpeg.VN()
 		switch u.Cmd.Args.Input.Ext {
 		case ".m4b", ".m4a":
-			cpath, err := filepath.Abs(u.flag.Args.Cover)
-			if err != nil {
-				log.Fatal(err)
-			}
+			u.FFmpeg.VN()
 			cover = NewCmd().
 				Bin("AtomicParsley").
-				SetArgs(out.String(), "--artwork", cpath, "--overWrite")
+				SetArgs(u.Args.Output(), "--artwork", u.Args.Cover.Abs, "--overWrite")
 		case ".mp3":
 			u.FFmpeg.Input(u.flag.Args.Cover)
 			u.FFmpeg.AppendAudioParam("id3v2_version", "3")

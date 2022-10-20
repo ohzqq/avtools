@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools/ffmpeg"
+	"github.com/ohzqq/avtools/file"
 	"github.com/ohzqq/avtools/media"
 )
 
@@ -22,8 +23,7 @@ type Cmd struct {
 	Batch     []Command
 	bin       string
 	args      []string
-	tmpFile   string
-	num       int
+	tmp       *os.File
 }
 
 type Command interface {
@@ -45,7 +45,8 @@ func NewCmd() *Cmd {
 }
 
 func (c *Cmd) Input(i string) *Cmd {
-	c.Media = media.NewMedia(i)
+	c.Args.Input = file.New(i)
+	c.Args.Media = media.NewMedia(i)
 	return c
 }
 
@@ -134,12 +135,20 @@ func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
 	return ffcmd
 }
 
-func (cmd *Cmd) Tmp(f string) *Cmd {
-	cmd.tmpFile = f
-	return cmd
+func (cmd *Cmd) MkTmp() *os.File {
+	f, err := os.CreateTemp("", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	cmd.tmp = f
+	return f
 }
 
 func (c Cmd) RunBatch() []byte {
+	if c.tmp != nil {
+		defer os.Remove(c.tmp.Name())
+	}
+
 	var buf bytes.Buffer
 	for _, cmd := range c.Batch {
 		out, err := cmd.Run()
@@ -147,6 +156,8 @@ func (c Cmd) RunBatch() []byte {
 			fmt.Printf("cmd string: %s\n", cmd.String())
 			log.Fatal(err)
 		}
+
+		fmt.Println(cmd.String())
 
 		_, err = buf.Write(out)
 		if err != nil {

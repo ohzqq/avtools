@@ -57,7 +57,9 @@ func (m *Media) SetCue(c string) *Media {
 
 func (m *Media) SetMeta() *Media {
 	if m.HasFFmeta() {
-		m.Meta = m.ReadFFmeta()
+		meta := m.ReadFFmeta()
+		m.Meta.Format.Tags = meta.Format.Tags
+		m.Meta.Chapters = meta.Chapters
 	}
 
 	if m.HasCue() {
@@ -81,7 +83,10 @@ func (m *Media) ReadEmbeddedMeta() Meta {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return Meta{FFmeta: ffmeta.LoadJson(data)}
+
+	return Meta{
+		FFmeta: ffmeta.LoadJson(data),
+	}
 }
 
 func (m *Media) ReadCueSheet() chap.Chapters {

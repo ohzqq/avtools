@@ -69,7 +69,7 @@ func (c *Args) FFmeta(i string) *Args {
 	return c
 }
 
-func (c *Args) SetHasChapters() *Args {
+func (c *Args) HasChapters() *Args {
 	c.input.HasChapters = true
 	return c
 }
