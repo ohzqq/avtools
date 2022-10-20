@@ -2,6 +2,7 @@ package tool
 
 import (
 	"github.com/ohzqq/avtools/ffmpeg"
+	"github.com/ohzqq/avtools/file"
 )
 
 type ExtractCmd struct {
@@ -21,8 +22,9 @@ func (e *ExtractCmd) Parse() *Cmd {
 	}
 
 	if e.flag.Bool.Meta {
-		ff := ffmpeg.New()
-		ff.AppendPostInput("f", "ffmetadata").Output("ffmeta.ini").Input(e.Args.Input.Abs).Overwrite()
+		//ff := ffmpeg.New()
+		//ff.AppendPostInput("f", "ffmetadata").Output("ffmeta.ini").Input(e.Args.Input.Abs).Overwrite()
+		ff := ExtractFFmeta(e.Args.Input.Abs)
 		e.Add(ff)
 	}
 
@@ -32,4 +34,14 @@ func (e *ExtractCmd) Parse() *Cmd {
 	}
 
 	return e.Cmd
+}
+
+func ExtractFFmeta(input string) *ffmpeg.Cmd {
+	i := file.New(input)
+	ff := ffmpeg.New()
+	ff.AppendPostInput("f", "ffmetadata").
+		Output("ffmeta.ini").
+		Input(i.Abs).
+		Overwrite()
+	return ff
 }

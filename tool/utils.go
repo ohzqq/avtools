@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gosimple/slug"
+	"github.com/ohzqq/avtools/file"
 )
 
 func TmpFile(d []byte) string {
@@ -110,22 +111,21 @@ func ffChapstoSeconds(timebase, start, end string) (string, string) {
 	return s, e
 }
 
-func find(ext string) []string {
-	var files []string
+func FindFilesByExt(ext, dir string) []file.File {
+	var files []file.File
 
-	entries, err := os.ReadDir(".")
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, f := range entries {
-		if filepath.Ext(f.Name()) == ext {
-			file, err := filepath.Abs(f.Name())
-			if err != nil {
-				log.Fatal(err)
-			}
-			files = append(files, file)
+		path := filepath.Join(dir, f.Name())
+		n := file.New(path)
+		if n.Ext == ext {
+			files = append(files, n)
 		}
 	}
+
 	return files
 }

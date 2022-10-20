@@ -108,7 +108,7 @@ func (ff FFmeta) Save() error {
 }
 
 func (ff FFmeta) SaveAs(name string) error {
-	if name == "" || ff.name == "" {
+	if name == "" && ff.name == "" {
 		name = "tmp"
 	}
 
