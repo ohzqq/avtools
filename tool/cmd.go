@@ -13,7 +13,8 @@ import (
 )
 
 type Cmd struct {
-	Flag
+	Args
+	flag      Flag
 	Media     *media.Media
 	output    Output
 	isVerbose bool
@@ -88,46 +89,47 @@ func (c *Cmd) Verbose() *Cmd {
 }
 
 func (c *Cmd) SetFlags(f Flag) *Cmd {
-	c.Flag = f
-	c.Media = f.Media()
+	c.flag = f
+	c.Args = f.Parse()
 	return c
 }
 
 func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
 	ffcmd := Cfg().GetProfile("default").FFmpegCmd()
 
-	if c.Flag.Args.HasProfile() {
-		ffcmd = Cfg().GetProfile(c.Flag.Args.Profile).FFmpegCmd()
+	if c.flag.Args.HasProfile() {
+		ffcmd = Cfg().GetProfile(c.flag.Args.Profile).FFmpegCmd()
 	}
 
-	if c.Bool.Verbose {
+	if c.flag.Bool.Verbose {
 		ffcmd.LogLevel("info")
 	}
 
-	if c.Bool.Overwrite {
+	if c.flag.Bool.Overwrite {
 		ffcmd.AppendPreInput("y")
 	}
 
-	if c.Args.HasStart() {
+	if c.flag.Args.HasStart() {
 		ffcmd.AppendPreInput("ss", c.Args.Start)
 	}
 
-	if c.Args.HasEnd() {
+	if c.flag.Args.HasEnd() {
 		ffcmd.AppendPreInput("to", c.Args.End)
 	}
 
+	println("media")
 	if c.Media != nil {
 		ffcmd.Input(c.Media.Input.String())
 	}
 
-	if c.Args.HasMeta() {
-		ffcmd.FFmeta(c.Args.Meta)
+	if c.flag.Args.HasMeta() {
+		ffcmd.FFmeta(c.flag.Args.Meta)
 	}
 
-	if !c.Args.HasOutput() {
-		c.Args.Output = c.Args.Input
+	if !c.flag.Args.HasOutput() {
+		c.flag.Args.Output = c.flag.Args.Input
 	}
-	out := NewOutput(c.Args.Output)
+	out := NewOutput(c.flag.Args.Output)
 	ffcmd.Output(out.String())
 
 	return ffcmd

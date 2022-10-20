@@ -1,6 +1,9 @@
 package tool
 
-import "github.com/ohzqq/avtools/media"
+import (
+	"github.com/ohzqq/avtools/file"
+	"github.com/ohzqq/avtools/media"
+)
 
 type Flag struct {
 	Args ArgFlag
@@ -27,6 +30,32 @@ type ArgFlag struct {
 	Cover   string
 	Meta    string
 	Cue     string
+}
+
+type Args struct {
+	Profile Profile
+	Start   string
+	End     string
+	Output  file.File
+	Input   file.File
+	Cover   file.File
+	Meta    file.File
+	Cue     file.File
+	Media   *media.Media
+}
+
+func (f Flag) Parse() Args {
+	return Args{
+		Profile: f.Args.GetProfile(),
+		Start:   f.Args.Start,
+		End:     f.Args.End,
+		Output:  file.New(f.Args.Output),
+		Input:   file.New(f.Args.Input),
+		Cover:   file.New(f.Args.Cover),
+		Meta:    file.New(f.Args.Meta),
+		Cue:     file.New(f.Args.Cue),
+		Media:   f.Media(),
+	}
 }
 
 func (f Flag) Media() *media.Media {
@@ -66,6 +95,13 @@ func (f ArgFlag) HasMeta() bool {
 
 func (f ArgFlag) HasProfile() bool {
 	return f.Profile != ""
+}
+
+func (f ArgFlag) GetProfile() Profile {
+	if f.HasProfile() {
+		return Cfg().GetProfile(f.Profile)
+	}
+	return Cfg().GetProfile("default")
 }
 
 func (f ArgFlag) HasStart() bool {

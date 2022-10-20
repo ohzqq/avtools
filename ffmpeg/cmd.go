@@ -86,6 +86,10 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, vCodecFlag, c.videoCodec)
 	}
 
+	if c.noVideo {
+		args = append(args, noVideo)
+	}
+
 	if c.HasVideoParams() {
 		args = append(args, c.VideoParams...)
 	}
@@ -98,7 +102,11 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, aCodecFlag, c.audioCodec)
 	}
 
-	if c.streamCopy {
+	if c.noAudio {
+		args = append(args, noAudio)
+	}
+
+	if c.streamCopy && !c.noAudio || !c.noVideo {
 		args = append(args, "-c", "copy")
 	}
 

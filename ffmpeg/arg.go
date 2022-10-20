@@ -4,6 +4,8 @@ const (
 	aCodecFlag   = `-c:a`
 	vCodecFlag   = `-c:v`
 	logLevelFlag = `-loglevel`
+	noAudio      = `-an`
+	noVideo      = `-vn`
 )
 
 type Args struct {
@@ -12,6 +14,8 @@ type Args struct {
 	input         Input
 	PostInput     []string
 	streamCopy    bool
+	noAudio       bool
+	noVideo       bool
 	videoCodec    string
 	VideoParams   []string
 	VideoFilters  Filters
@@ -86,6 +90,9 @@ func (c *Args) Stream() *Args {
 }
 
 func (c Args) HasVideoCodec() bool {
+	if c.noVideo {
+		return false
+	}
 	return c.videoCodec != ""
 }
 
@@ -96,6 +103,12 @@ func (c *Args) SetVideoCodec(codec string) *Args {
 
 func (c *Args) CV(codec string) *Args {
 	c.videoCodec = codec
+	return c
+}
+
+func (c *Args) VN() *Args {
+	c.videoCodec = ""
+	c.noVideo = true
 	return c
 }
 
@@ -124,6 +137,9 @@ func (c *Args) VF(f Filter) *Args {
 }
 
 func (c Args) HasAudioCodec() bool {
+	if c.noAudio {
+		return false
+	}
 	return c.audioCodec != ""
 }
 
@@ -137,6 +153,11 @@ func (c *Args) CA(codec string) *Args {
 	return c
 }
 
+func (c *Args) AN() *Args {
+	c.audioCodec = ""
+	c.noAudio = true
+	return c
+}
 func (c Args) HasAudioParams() bool {
 	return len(c.AudioParams) > 0
 }
