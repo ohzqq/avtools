@@ -55,6 +55,27 @@ func (m *Media) SetCue(c string) *Media {
 	return m
 }
 
+func (m Media) HasEmbeddedCover() bool {
+	for _, v := range m.Meta.VideoStreams() {
+		if v.CodecName == "mjpeg" || v.CodecName == "png" {
+			return true
+		}
+	}
+	return false
+}
+
+func (m Media) EmbeddedCoverExt() string {
+	for _, v := range m.Meta.VideoStreams() {
+		if v.CodecName == "mjpeg" {
+			return ".jpg"
+		}
+		if v.CodecName == "png" {
+			return ".png"
+		}
+	}
+	return ""
+}
+
 func (m *Media) SetMeta() *Media {
 	if m.HasFFmeta() {
 		meta := m.ReadFFmeta()
@@ -72,7 +93,6 @@ func (m *Media) SetMeta() *Media {
 func (m *Media) ReadEmbeddedMeta() Meta {
 	probe := ffprobe.New()
 	probe.Input(m.Input.String()).
-		Stream("a").
 		FormatEntry("filename", "start_time", "duration", "size", "bit_rate").
 		StreamEntry("codec_type", "codec_name").
 		Entry("format_tags").
