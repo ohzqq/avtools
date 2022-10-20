@@ -15,6 +15,7 @@ import (
 type Cmd struct {
 	Flag
 	Media     *media.Media
+	output    Output
 	isVerbose bool
 	cwd       string
 	Batch     []Command
@@ -93,45 +94,43 @@ func (c *Cmd) SetFlags(f Flag) *Cmd {
 }
 
 func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
-	cmd := Cfg().GetProfile("default").FFmpegCmd()
+	ffcmd := Cfg().GetProfile("default").FFmpegCmd()
 
 	if c.Flag.Args.HasProfile() {
-		cmd = Cfg().GetProfile(c.Flag.Args.Profile).FFmpegCmd()
+		ffcmd = Cfg().GetProfile(c.Flag.Args.Profile).FFmpegCmd()
 	}
 
 	if c.Bool.Verbose {
-		cmd.LogLevel("info")
+		ffcmd.LogLevel("info")
 	}
 
 	if c.Bool.Overwrite {
-		cmd.AppendPreInput("y")
+		ffcmd.AppendPreInput("y")
 	}
 
 	if c.Args.HasStart() {
-		cmd.AppendPreInput("ss", c.Args.Start)
+		ffcmd.AppendPreInput("ss", c.Args.Start)
 	}
 
 	if c.Args.HasEnd() {
-		cmd.AppendPreInput("to", c.Args.End)
+		ffcmd.AppendPreInput("to", c.Args.End)
 	}
 
 	if c.Media != nil {
-		cmd.Input(c.Media.Input)
+		ffcmd.Input(c.Media.Input.String())
 	}
 
 	if c.Args.HasMeta() {
-		cmd.FFmeta(c.Args.Meta)
+		ffcmd.FFmeta(c.Args.Meta)
 	}
 
-	var out *Output
-	if c.Args.HasOutput() {
-		out = NewOutput(c.Args.Output)
-	} else {
-		out = NewOutput(c.Args.Input)
+	if !c.Args.HasOutput() {
+		c.Args.Output = c.Args.Input
 	}
-	cmd.Output(out.String())
+	out := NewOutput(c.Args.Output)
+	ffcmd.Output(out.String())
 
-	return cmd
+	return ffcmd
 }
 
 func (cmd *Cmd) Tmp(f string) *Cmd {
@@ -144,6 +143,7 @@ func (c Cmd) RunBatch() []byte {
 	for _, cmd := range c.Batch {
 		out, err := cmd.Run()
 		if err != nil {
+			fmt.Printf("cmd string: %s\n", cmd.String())
 			log.Fatal(err)
 		}
 
@@ -152,6 +152,7 @@ func (c Cmd) RunBatch() []byte {
 			log.Fatal(err)
 		}
 	}
+
 	return buf.Bytes()
 }
 

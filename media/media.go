@@ -10,7 +10,7 @@ import (
 )
 
 type Media struct {
-	Input string
+	Input FileFormat
 	Files RelatedFiles
 	Meta
 }
@@ -21,7 +21,7 @@ type Meta struct {
 
 func NewMedia(i string) *Media {
 	media := Media{
-		Input: i,
+		Input: FileFormat(i),
 		Files: make(RelatedFiles),
 	}
 	media.Meta = media.ReadEmbeddedMeta()
@@ -69,7 +69,7 @@ func (m *Media) SetMeta() *Media {
 
 func (m *Media) ReadEmbeddedMeta() Meta {
 	probe := ffprobe.New()
-	probe.Input(m.Input).
+	probe.Input(m.Input.String()).
 		Stream("a").
 		FormatEntry("filename", "start_time", "duration", "size", "bit_rate").
 		StreamEntry("codec_type", "codec_name").

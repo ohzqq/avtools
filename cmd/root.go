@@ -46,7 +46,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/avtools/config.yml)")
 	rootCmd.PersistentFlags().StringVarP(&flag.Args.Output, "output", "o", "", "set output name")
 	rootCmd.PersistentFlags().StringVarP(&flag.Args.Profile, "profile", "p", "default", "set profile")
-	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Verbose, "verbose", "v", true, "print ffmpeg/ffprobe command string")
+	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Verbose, "verbose", "v", false, "print ffmpeg/ffprobe command string")
 	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Overwrite, "overwrite", "y", false, "overwrite existing files")
 }
 
