@@ -17,9 +17,6 @@ var updateCmd = &cobra.Command{
 		u.SetFlags(flag)
 		c := u.Parse()
 		c.RunBatch()
-		//for _, c := range u.Cmd.Batch {
-		//c.Run()
-		//}
 	},
 }
 
