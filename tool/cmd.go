@@ -16,7 +16,6 @@ import (
 type Cmd struct {
 	Args
 	flag      Flag
-	Media     *media.Media
 	output    Output
 	isVerbose bool
 	cwd       string
@@ -52,6 +51,10 @@ func (c *Cmd) Input(i string) *Cmd {
 
 func (c Cmd) String() string {
 	return strings.Join(c.args, " ")
+}
+
+func (c Cmd) Media() *media.Media {
+	return c.Args.Media
 }
 
 func (c Cmd) ParseArgs() ([]string, error) {

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +17,6 @@ var extractCmd = &cobra.Command{
 		e.SetFlags(flag)
 		c := e.Parse()
 		c.RunBatch()
-		fmt.Printf("%+V\n", c.Args.Media.Meta.Streams)
 	},
 }
 

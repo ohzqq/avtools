@@ -106,9 +106,9 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 		args = append(args, noAudio)
 	}
 
-	if c.streamCopy && !c.noAudio || !c.noVideo {
-		args = append(args, "-c", "copy")
-	}
+	//if c.streamCopy && !c.noAudio || !c.noVideo {
+	//  args = append(args, "-c", "copy")
+	//}
 
 	if c.HasAudioFilters() && !c.HasFilters() && !c.HasFilterGraph() {
 		args = append(args, "-af", c.AudioFilters.String())

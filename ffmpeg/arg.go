@@ -45,6 +45,11 @@ func (c *Args) LogLevel(l string) *Args {
 	return c
 }
 
+func (c *Args) Overwrite() *Args {
+	c.AppendPreInput("y")
+	return c
+}
+
 func (c Args) HasPreInput() bool {
 	return len(c.PreInput) > 0
 }

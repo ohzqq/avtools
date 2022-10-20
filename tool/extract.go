@@ -1,6 +1,8 @@
 package tool
 
-import "github.com/ohzqq/avtools/ffmpeg"
+import (
+	"github.com/ohzqq/avtools/ffmpeg"
+)
 
 type ExtractCmd struct {
 	*Cmd
@@ -11,23 +13,22 @@ func Extract() *ExtractCmd {
 }
 
 func (e *ExtractCmd) Parse() *Cmd {
-	if e.flag.Bool.Cover && e.Args.Media.HasEmbeddedCover() {
-		out := "cover" + e.Args.Media.EmbeddedCoverExt()
-		ff := ffmpeg.New()
+	if e.flag.Bool.Cover && e.Media().HasEmbeddedCover() {
+		out := "cover" + e.Media().EmbeddedCoverExt()
+		ff := e.FFmpeg()
 		ff.AN().CV("copy").Output(out)
 		e.Add(ff)
 	}
 
 	if e.flag.Bool.Meta {
 		ff := ffmpeg.New()
-		filter := ffmpeg.NewFilter("ffmetadata")
-		ff.Filter(filter).Output("ffmeta.ini")
+		ff.AppendPostInput("f", "ffmetadata").Output("ffmeta.ini").Input(e.Args.Input.Abs).Overwrite()
 		e.Add(ff)
 	}
 
 	if e.flag.Bool.Cue {
-		e.Media.Meta.Chapters.File = "chapters.cue"
-		e.Media.Meta.Chapters.Write()
+		e.Media().Meta.Chapters.File = "chapters.cue"
+		e.Media().Meta.Chapters.Write()
 	}
 
 	return e.Cmd
