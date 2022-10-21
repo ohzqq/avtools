@@ -2,6 +2,7 @@ package tool
 
 import (
 	"log"
+	"strings"
 
 	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/file"
@@ -65,7 +66,10 @@ func (c *CutCmd) Parse() *Cmd {
 			c.to = c.Args.End
 		}
 
-		o := c.Args.Input.AddSuffix(c.ss + "-" + c.to)
+		s := strings.ReplaceAll(c.ss, ":", "")
+		e := strings.ReplaceAll(c.to, ":", "")
+
+		o := c.Args.Input.AddSuffix(s + "-" + e)
 
 		ff = c.FFmpegCmd()
 		ff.Output(o)
