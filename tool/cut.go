@@ -23,7 +23,7 @@ func Cut() *CutCmd {
 func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 	var (
 		num   = no - 1
-		chaps = c.Media().Meta.Chapters.Chapters
+		chaps = c.Media.Meta.Chapters.Chapters
 		ff    *ffmpeg.Cmd
 	)
 
@@ -31,7 +31,7 @@ func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 		ch := chaps[num]
 		ss := ch.Start().SecsString()
 		to := ch.End().SecsString()
-		in := file.New(c.Media().Input.String())
+		in := file.New(c.Media.Input.String())
 		c.Start(ss).End(to)
 		ff = c.FFmpegCmd()
 		ff.Output(in.Pad(no))
@@ -55,21 +55,21 @@ func (c *CutCmd) End(to string) *CutCmd {
 func (c *CutCmd) Parse() *Cmd {
 	var ff *ffmpeg.Cmd
 
-	if c.flag.Args.HasChapNo() {
-		ff = c.Chap(c.Args.ChapNo)
+	if c.HasChapNo() {
+		ff = c.Chap(c.ChapNo)
 	} else {
-		if c.flag.Args.HasStart() {
-			c.ss = c.Args.Start
+		if c.HasStart() {
+			c.ss = c.Cmd.Start
 		}
 
-		if c.flag.Args.HasEnd() {
-			c.to = c.Args.End
+		if c.HasEnd() {
+			c.to = c.Cmd.End
 		}
 
 		s := strings.ReplaceAll(c.ss, ":", "")
 		e := strings.ReplaceAll(c.to, ":", "")
 
-		o := c.Args.Input.AddSuffix(s + "-" + e)
+		o := c.Input.AddSuffix(s + "-" + e)
 
 		ff = c.FFmpegCmd()
 		ff.Output(o)

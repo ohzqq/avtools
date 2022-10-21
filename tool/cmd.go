@@ -17,7 +17,7 @@ type Cmd struct {
 	Profile   Profile
 	Start     string
 	End       string
-	output    file.File
+	Output    file.File
 	Input     file.File
 	Cover     file.File
 	Meta      file.File
@@ -27,8 +27,7 @@ type Cmd struct {
 	PadOutput bool
 	Padding   string
 	ChapNo    int
-	flag      Flag
-	output    Output
+	flag      BoolFlag
 	isVerbose bool
 	cwd       string
 	Batch     []Command
@@ -51,13 +50,14 @@ func NewCmd() *Cmd {
 	}
 
 	return &Cmd{
-		cwd: cwd,
+		Profile: Cfg().GetProfile("default"),
+		cwd:     cwd,
 	}
 }
 
-func (c *Cmd) Input(i string) *Cmd {
-	c.Args.Input = file.New(i)
-	c.Args.Media = media.NewMedia(i)
+func (c *Cmd) SetInput(i string) *Cmd {
+	c.Input = file.New(i)
+	c.Media = media.NewMedia(i)
 	return c
 }
 
@@ -65,9 +65,9 @@ func (c Cmd) String() string {
 	return strings.Join(c.args, " ")
 }
 
-func (c Cmd) Media() *media.Media {
-	return c.Args.Media
-}
+//func (c Cmd) Media() *media.Media {
+//  return c.Args.Media
+//}
 
 func (c Cmd) ParseArgs() ([]string, error) {
 	return c.args, nil
@@ -108,74 +108,86 @@ func (c *Cmd) ParseFlags(f Flag) *Cmd {
 	c.flag = f
 
 	if f.Args.Profile != "" {
-		c.Profile = f.Args.GetProfile()
+		c.Profile = Cfg().GetProfile(f.Args.Profile)
 	}
 
 	if f.Args.Start != "" {
 		c.Start = f.Args.Start
 	}
+
 	if f.Args.End != "" {
 		c.End = f.Args.End
 	}
+
 	if f.Args.Output != "" {
-		c.output = file.New(f.Args.Output)
+		c.Output = file.New(f.Args.Output)
 	}
+
 	if f.Args.Input != "" {
 		c.Input = file.New(f.Args.Input)
+		c.Media = media.NewMedia(f.Args.Input)
 	}
+
 	if f.Args.Cover != "" {
 		c.Cover = file.New(f.Args.Cover)
+		c.Media.AddFile("cover", f.Args.Cover)
 	}
+
 	if f.Args.Meta != "" {
 		c.Meta = file.New(f.Args.Meta)
+		c.Media.SetFFmeta(f.Args.Meta)
 	}
+
 	if f.Args.Cue != "" {
 		c.Cue = file.New(f.Args.Cue)
+		c.Media.SetCue(f.Args.Cue)
 	}
-	c.Media = f.Media()
+
+	if f.Args.Input != "" {
+		c.Media.SetMeta()
+	}
+
 	c.PadOutput = Cfg().Defaults.HasPadding()
 	c.Padding = Cfg().Defaults.Padding
 	c.Num = 1
-	c.ChapNo = f.Args.ChapNo
+
+	if f.Args.ChapNo != 0 {
+		c.ChapNo = f.Args.ChapNo
+	}
 	return c
 }
 
 func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
-	ffcmd := Cfg().GetProfile("default").FFmpegCmd()
+	ffcmd := c.Profile.FFmpegCmd()
 
-	if c.flag.Args.HasProfile() {
-		ffcmd = Cfg().GetProfile(c.flag.Args.Profile).FFmpegCmd()
-	}
-
-	if c.flag.Bool.Verbose {
+	if c.flag.Verbose {
 		ffcmd.LogLevel("info")
 	}
 
-	if c.flag.Bool.Overwrite {
+	if c.flag.Overwrite {
 		ffcmd.AppendPreInput("y")
 	}
 
-	if c.flag.Args.HasStart() {
-		ffcmd.AppendPreInput("ss", c.Args.Start)
+	if c.HasStart() {
+		ffcmd.AppendPreInput("ss", c.Start)
 	}
 
-	if c.flag.Args.HasEnd() {
-		ffcmd.AppendPreInput("to", c.Args.End)
+	if c.HasEnd() {
+		ffcmd.AppendPreInput("to", c.End)
 	}
 
-	if c.Args.Media != nil {
-		ffcmd.Input(c.Args.Input.Abs)
+	if c.Media != nil {
+		ffcmd.Input(c.Input.Abs)
 	}
 
-	if c.flag.Args.HasMeta() {
-		ffcmd.FFmeta(c.flag.Args.Meta)
+	if c.HasMeta() {
+		ffcmd.FFmeta(c.Meta.Abs)
 	}
 
-	if !c.flag.Args.HasOutput() {
-		c.flag.Args.Output = c.flag.Args.Input
+	if !c.HasOutput() {
+		c.Output = file.New(c.Input.Abs)
 	}
-	out := NewOutput(c.flag.Args.Output)
-	ffcmd.Output(out.String())
+	ffcmd.Output(c.Output.Abs)
 
 	return ffcmd
 }

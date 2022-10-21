@@ -46,6 +46,14 @@ func (m *Media) SetFFmeta(ff string) *Media {
 	return m
 }
 
+func (m Media) EachChapter() []*chap.Chapter {
+	var ch []*chap.Chapter
+	if len(m.Meta.Chapters.Chapters) > 0 {
+		ch = m.Meta.Chapters.Chapters
+	}
+	return ch
+}
+
 func (m Media) HasCue() bool {
 	return m.Files.Has("cue")
 }

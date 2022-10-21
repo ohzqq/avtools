@@ -46,7 +46,7 @@ func (j *JoinCmd) Parse() *Cmd {
 	ff.AppendPreInput("f", "concat")
 	ff.AppendPreInput("safe", "0")
 
-	if !j.flag.Args.HasOutput() {
+	if !j.HasOutput() {
 		ff.Output("tmp" + j.ext)
 	}
 

@@ -10,15 +10,15 @@ func Rm() *RmCmd {
 
 func (rm *RmCmd) Parse() *Cmd {
 	ff := rm.FFmpeg()
-	if rm.flag.Bool.Cover && rm.Media().HasEmbeddedCover() {
+	if rm.flag.Cover && rm.Media.HasEmbeddedCover() {
 		ff.VN()
 	}
 
-	if rm.flag.Bool.Meta {
+	if rm.flag.Meta {
 		ff.AppendPostInput("map_metadata", "-1")
 	}
 
-	if rm.flag.Bool.Cue {
+	if rm.flag.Cue {
 		ff.AppendPostInput("map_chapters", "-1")
 	}
 

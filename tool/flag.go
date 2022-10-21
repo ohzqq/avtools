@@ -55,86 +55,75 @@ func (a Args) Output() string {
 	return a.output.Name
 }
 
-func (f Flag) Parse() Args {
-	return Args{
-		Profile:   f.Args.GetProfile(),
-		Start:     f.Args.Start,
-		End:       f.Args.End,
-		output:    file.New(f.Args.Output),
-		Input:     file.New(f.Args.Input),
-		Cover:     file.New(f.Args.Cover),
-		Meta:      file.New(f.Args.Meta),
-		Cue:       file.New(f.Args.Cue),
-		Media:     f.Media(),
-		PadOutput: Cfg().Defaults.HasPadding(),
-		Padding:   Cfg().Defaults.Padding,
-		Num:       1,
-		ChapNo:    f.Args.ChapNo,
-	}
+//func (f Flag) Parse() Args {
+//  return Args{
+//    Profile:   f.Args.GetProfile(),
+//    Start:     f.Args.Start,
+//    End:       f.Args.End,
+//    output:    file.New(f.Args.Output),
+//    Input:     file.New(f.Args.Input),
+//    Cover:     file.New(f.Args.Cover),
+//    Meta:      file.New(f.Args.Meta),
+//    Cue:       file.New(f.Args.Cue),
+//    Media:     f.Media(),
+//    PadOutput: Cfg().Defaults.HasPadding(),
+//    Padding:   Cfg().Defaults.Padding,
+//    Num:       1,
+//    ChapNo:    f.Args.ChapNo,
+//  }
+//}
+
+//func (f Flag) Media() *media.Media {
+//  var m *media.Media
+//  if f.Args.HasInput() {
+//    m = media.NewMedia(f.Args.Input)
+
+//    if f.Args.HasMeta() {
+//      m.SetFFmeta(f.Args.Meta)
+//    }
+
+//    if f.Args.HasCue() {
+//      m.SetCue(f.Args.Cue)
+//    }
+
+//    if f.Args.HasCover() {
+//      m.AddFile("cover", f.Args.Cover)
+//    }
+
+//    m.SetMeta()
+//  }
+
+//  return m
+//}
+
+func (f Cmd) HasCover() bool {
+	return f.Cover.Abs != ""
 }
 
-func (f Flag) Media() *media.Media {
-	var m *media.Media
-	if f.Args.HasInput() {
-		m = media.NewMedia(f.Args.Input)
-
-		if f.Args.HasMeta() {
-			m.SetFFmeta(f.Args.Meta)
-		}
-
-		if f.Args.HasCue() {
-			m.SetCue(f.Args.Cue)
-		}
-
-		if f.Args.HasCover() {
-			m.AddFile("cover", f.Args.Cover)
-		}
-
-		m.SetMeta()
-	}
-
-	return m
-}
-
-func (f ArgFlag) HasCover() bool {
-	return f.Cover != ""
-}
-
-func (f ArgFlag) HasChapNo() bool {
+func (f Cmd) HasChapNo() bool {
 	return f.ChapNo != 0
 }
 
-func (f ArgFlag) HasCue() bool {
-	return f.Cue != ""
+func (f Cmd) HasCue() bool {
+	return f.Cue.Abs != ""
 }
 
-func (f ArgFlag) HasMeta() bool {
-	return f.Meta != ""
+func (f Cmd) HasMeta() bool {
+	return f.Meta.Abs != ""
 }
 
-func (f ArgFlag) HasProfile() bool {
-	return f.Profile != ""
-}
-
-func (f ArgFlag) GetProfile() Profile {
-	if f.HasProfile() {
-		return Cfg().GetProfile(f.Profile)
-	}
-	return Cfg().GetProfile("default")
-}
-
-func (f ArgFlag) HasStart() bool {
+func (f Cmd) HasStart() bool {
 	return f.Start != ""
 }
 
-func (f ArgFlag) HasEnd() bool {
+func (f Cmd) HasEnd() bool {
 	return f.End != ""
 }
 
-func (f ArgFlag) HasInput() bool {
-	return f.Input != ""
+func (f Cmd) HasInput() bool {
+	return f.Input.Abs != ""
 }
 
-func (f ArgFlag) HasOutput() bool {
-	return f.Output != ""
+func (f Cmd) HasOutput() bool {
+	return f.Output.Abs != ""
 }

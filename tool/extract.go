@@ -14,23 +14,23 @@ func Extract() *ExtractCmd {
 }
 
 func (e *ExtractCmd) Parse() *Cmd {
-	if e.flag.Bool.Cover && e.Media().HasEmbeddedCover() {
-		out := "cover" + e.Media().EmbeddedCoverExt()
+	if e.flag.Cover && e.Media.HasEmbeddedCover() {
+		out := "cover" + e.Media.EmbeddedCoverExt()
 		ff := e.FFmpeg()
 		ff.AN().CV("copy").Output(out)
 		e.Add(ff)
 	}
 
-	if e.flag.Bool.Meta {
+	if e.flag.Meta {
 		//ff := ffmpeg.New()
 		//ff.AppendPostInput("f", "ffmetadata").Output("ffmeta.ini").Input(e.Args.Input.Abs).Overwrite()
-		ff := ExtractFFmeta(e.Args.Input.Abs)
+		ff := ExtractFFmeta(e.Input.Abs)
 		e.Add(ff)
 	}
 
-	if e.flag.Bool.Cue {
-		e.Media().Meta.Chapters.File = "chapters.cue"
-		e.Media().Meta.Chapters.Write()
+	if e.flag.Cue {
+		e.Media.Meta.Chapters.File = "chapters.cue"
+		e.Media.Meta.Chapters.Write()
 	}
 
 	return e.Cmd

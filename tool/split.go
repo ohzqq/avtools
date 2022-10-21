@@ -9,7 +9,7 @@ func Split() *SplitCmd {
 }
 
 func (s *SplitCmd) Parse() *Cmd {
-	for idx, _ := range s.Media().Meta.Chapters.Chapters {
+	for idx, _ := range s.Media.EachChapter() {
 		cut := Cut()
 		cut.ParseFlags(s.flag)
 		ff := cut.Chap(idx + 1)
