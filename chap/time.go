@@ -54,6 +54,10 @@ func (ch Time) String() string {
 	return ParseNum(ch.time, 0)
 }
 
+func (ch Time) SecsString() string {
+	return ParseNum(ch.time/ch.base, 3)
+}
+
 func (c Time) HHMMSS() string {
 	secs := c.Secs()
 	hh := secs / 3600

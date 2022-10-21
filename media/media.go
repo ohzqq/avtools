@@ -80,7 +80,7 @@ func (m *Media) SetMeta() *Media {
 	if m.HasFFmeta() {
 		meta := m.ReadFFmeta()
 		m.Meta.Format.Tags = meta.Format.Tags
-		m.Meta.Chapters = meta.Chapters
+		m.Meta.SetChapters(meta.Chapters)
 	}
 
 	if m.HasCue() {

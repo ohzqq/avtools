@@ -60,6 +60,16 @@ func (c *Args) AppendPreInput(flag string, val ...string) *Args {
 	return c
 }
 
+func (c *Args) SS(t string) *Args {
+	c.AppendPreInput("ss", t)
+	return c
+}
+
+func (c *Args) To(t string) *Args {
+	c.AppendPreInput("to", t)
+	return c
+}
+
 func (c Args) HasInput() bool {
 	return len(c.input.files) > 0
 }

@@ -39,7 +39,7 @@ func (ch Chapter) Start() Time {
 
 func (ch Chapter) End() Time {
 	if t := ch.base; t != 1 {
-		ch.start.base = float64(t)
+		ch.end.base = float64(t)
 	}
 	return ch.end
 }
