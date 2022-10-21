@@ -1,11 +1,5 @@
 package tool
 
-import (
-	"fmt"
-
-	"github.com/ohzqq/avtools/file"
-)
-
 type SplitCmd struct {
 	*Cmd
 }
@@ -15,16 +9,11 @@ func Split() *SplitCmd {
 }
 
 func (s *SplitCmd) Parse() *Cmd {
-	for idx, ch := range s.Media().Meta.Chapters.Chapters {
-		ss := ch.Start().SecsString()
-		to := ch.End().SecsString()
-		in := file.New(s.Media().Input.String())
-		cut := Cut().Start(ss).End(to)
-		cut.Input(in.Abs)
-		ff := cut.FFmpegCmd()
-		ff.Output(in.Pad(idx))
-		fmt.Println(ff.String())
-		//s.Add(cut)
+	for idx, _ := range s.Media().Meta.Chapters.Chapters {
+		cut := Cut()
+		cut.SetFlags(s.flag)
+		ff := cut.Chap(idx + 1)
+		s.Add(ff)
 	}
 	return s.Cmd
 }

@@ -2,6 +2,7 @@ package tool
 
 import (
 	"github.com/ohzqq/avtools/ffmpeg"
+	"github.com/ohzqq/avtools/file"
 )
 
 type CutCmd struct {
@@ -14,6 +15,26 @@ func Cut() *CutCmd {
 	return &CutCmd{
 		Cmd: NewCmd(),
 	}
+}
+
+func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
+	var (
+		num   = no - 1
+		chaps = c.Media().Meta.Chapters.Chapters
+		ff    *ffmpeg.Cmd
+	)
+
+	if num < len(chaps) {
+		ch := chaps[num]
+		ss := ch.Start().SecsString()
+		to := ch.End().SecsString()
+		in := file.New(c.Media().Input.String())
+		c.Start(ss).End(to)
+		ff = c.FFmpegCmd()
+		ff.Output(in.Pad(no))
+	}
+
+	return ff
 }
 
 func (c *CutCmd) Start(ss string) *CutCmd {

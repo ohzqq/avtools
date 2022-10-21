@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -18,8 +16,7 @@ var splitCmd = &cobra.Command{
 		u := tool.Split()
 		u.SetFlags(flag)
 		c := u.Parse()
-		fmt.Printf("%+V\n", c)
-		//c.RunBatch()
+		c.RunBatch()
 	},
 }
 

@@ -154,6 +154,7 @@ func (c Cmd) RunBatch() []byte {
 
 	var buf bytes.Buffer
 	for _, cmd := range c.Batch {
+		fmt.Println(cmd.String())
 		out, err := cmd.Run()
 		if err != nil {
 			fmt.Printf("cmd string: %s\n", cmd.String())
