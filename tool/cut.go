@@ -1,6 +1,8 @@
 package tool
 
 import (
+	"log"
+
 	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/file"
 )
@@ -32,6 +34,8 @@ func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 		c.Start(ss).End(to)
 		ff = c.FFmpegCmd()
 		ff.Output(in.Pad(no))
+	} else {
+		log.Fatalf("there are only %v chapters", len(chaps))
 	}
 
 	return ff
@@ -48,15 +52,24 @@ func (c *CutCmd) End(to string) *CutCmd {
 }
 
 func (c *CutCmd) Parse() *Cmd {
-	if c.flag.Args.HasStart() {
-		c.ss = c.flag.Args.Start
-	}
+	var ff *ffmpeg.Cmd
 
-	if c.flag.Args.HasEnd() {
-		c.to = c.flag.Args.End
-	}
+	if c.flag.Args.HasChapNo() {
+		ff = c.Chap(c.Args.ChapNo)
+	} else {
+		if c.flag.Args.HasStart() {
+			c.ss = c.Args.Start
+		}
 
-	ff := c.FFmpegCmd()
+		if c.flag.Args.HasEnd() {
+			c.to = c.Args.End
+		}
+
+		o := c.Args.Input.AddSuffix(c.ss + "-" + c.to)
+
+		ff = c.FFmpegCmd()
+		ff.Output(o)
+	}
 
 	c.Add(ff)
 

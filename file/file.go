@@ -15,6 +15,7 @@ type File struct {
 	Name    string
 	File    string
 	Padding string
+	name    string
 }
 
 func New(n string) File {
@@ -30,10 +31,16 @@ func New(n string) File {
 		Padding: "%03d",
 	}
 	f.Name = strings.TrimSuffix(abs, f.Ext)
+	f.name = strings.TrimSuffix(f.Base, f.Ext)
 
 	f.Path, f.File = filepath.Split(abs)
 
 	return f
+}
+
+func (f File) AddSuffix(s string) string {
+	name := f.name + s + f.Ext
+	return filepath.Join(f.Path, name)
 }
 
 func (f File) Pad(i int) string {

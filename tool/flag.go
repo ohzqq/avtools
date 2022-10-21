@@ -45,6 +45,7 @@ type Args struct {
 	Num       int
 	PadOutput bool
 	Padding   string
+	ChapNo    int
 }
 
 func (a Args) Output() string {
@@ -68,6 +69,7 @@ func (f Flag) Parse() Args {
 		PadOutput: Cfg().Defaults.HasPadding(),
 		Padding:   Cfg().Defaults.Padding,
 		Num:       1,
+		ChapNo:    f.Args.ChapNo,
 	}
 }
 
@@ -96,6 +98,10 @@ func (f Flag) Media() *media.Media {
 
 func (f ArgFlag) HasCover() bool {
 	return f.Cover != ""
+}
+
+func (f ArgFlag) HasChapNo() bool {
+	return f.ChapNo != 0
 }
 
 func (f ArgFlag) HasCue() bool {
