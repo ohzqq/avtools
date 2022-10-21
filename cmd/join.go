@@ -18,7 +18,7 @@ var joinCmd = &cobra.Command{
 			dir = args[1]
 		}
 		jcmd := tool.Join(ext, dir)
-		jcmd.SetFlags(flag)
+		jcmd.ParseFlags(flag)
 		c := jcmd.Parse()
 		c.RunBatch()
 		//fmt.Printf("%+V\n", c.String())

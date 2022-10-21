@@ -14,7 +14,7 @@ var rmCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flag.Args.Input = args[0]
 		e := tool.Rm()
-		e.SetFlags(flag)
+		e.ParseFlags(flag)
 		c := e.Parse()
 		c.RunBatch()
 		//fmt.Printf("%+V\n", c)

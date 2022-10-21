@@ -14,7 +14,7 @@ var splitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flag.Args.Input = args[0]
 		u := tool.Split()
-		u.SetFlags(flag)
+		u.ParseFlags(flag)
 		c := u.Parse()
 		c.RunBatch()
 	},

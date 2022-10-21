@@ -14,7 +14,19 @@ import (
 )
 
 type Cmd struct {
-	Args
+	Profile   Profile
+	Start     string
+	End       string
+	output    file.File
+	Input     file.File
+	Cover     file.File
+	Meta      file.File
+	Cue       file.File
+	Media     *media.Media
+	Num       int
+	PadOutput bool
+	Padding   string
+	ChapNo    int
 	flag      Flag
 	output    Output
 	isVerbose bool
@@ -92,9 +104,39 @@ func (c *Cmd) Verbose() *Cmd {
 	return c
 }
 
-func (c *Cmd) SetFlags(f Flag) *Cmd {
+func (c *Cmd) ParseFlags(f Flag) *Cmd {
 	c.flag = f
-	c.Args = f.Parse()
+
+	if f.Args.Profile != "" {
+		c.Profile = f.Args.GetProfile()
+	}
+
+	if f.Args.Start != "" {
+		c.Start = f.Args.Start
+	}
+	if f.Args.End != "" {
+		c.End = f.Args.End
+	}
+	if f.Args.Output != "" {
+		c.output = file.New(f.Args.Output)
+	}
+	if f.Args.Input != "" {
+		c.Input = file.New(f.Args.Input)
+	}
+	if f.Args.Cover != "" {
+		c.Cover = file.New(f.Args.Cover)
+	}
+	if f.Args.Meta != "" {
+		c.Meta = file.New(f.Args.Meta)
+	}
+	if f.Args.Cue != "" {
+		c.Cue = file.New(f.Args.Cue)
+	}
+	c.Media = f.Media()
+	c.PadOutput = Cfg().Defaults.HasPadding()
+	c.Padding = Cfg().Defaults.Padding
+	c.Num = 1
+	c.ChapNo = f.Args.ChapNo
 	return c
 }
 

@@ -14,7 +14,7 @@ var updateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flag.Args.Input = args[0]
 		u := tool.NewUpdateCmd()
-		u.SetFlags(flag)
+		u.ParseFlags(flag)
 		c := u.Parse()
 		c.RunBatch()
 	},

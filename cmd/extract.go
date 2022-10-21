@@ -14,7 +14,7 @@ var extractCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flag.Args.Input = args[0]
 		e := tool.Extract()
-		e.SetFlags(flag)
+		e.ParseFlags(flag)
 		c := e.Parse()
 		c.RunBatch()
 	},
