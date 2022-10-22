@@ -28,7 +28,7 @@ type Cmd struct {
 	Padding   string
 	ChapNo    int
 	flag      BoolFlag
-	flags     Flag
+	cliFlags  Flag
 	isVerbose bool
 	cwd       string
 	Batch     []Command
@@ -66,10 +66,6 @@ func (c Cmd) String() string {
 	return strings.Join(c.args, " ")
 }
 
-//func (c Cmd) Media() *media.Media {
-//  return c.Args.Media
-//}
-
 func (c Cmd) ParseArgs() ([]string, error) {
 	return c.args, nil
 }
@@ -106,7 +102,7 @@ func (c *Cmd) Verbose() *Cmd {
 }
 
 func (c *Cmd) ParseFlags(f Flag) *Cmd {
-	c.flags = f
+	c.cliFlags = f
 
 	if f.Args.Profile != "" {
 		c.Profile = Cfg().GetProfile(f.Args.Profile)
@@ -169,14 +165,6 @@ func (c *Cmd) FFmpeg() *ffmpeg.Cmd {
 		ffcmd.AppendPreInput("y")
 	}
 
-	if c.HasStart() {
-		ffcmd.AppendPreInput("ss", c.Start)
-	}
-
-	if c.HasEnd() {
-		ffcmd.AppendPreInput("to", c.End)
-	}
-
 	if c.Media != nil {
 		ffcmd.Input(c.Input.Abs)
 	}
@@ -216,8 +204,6 @@ func (c Cmd) RunBatch() []byte {
 			log.Fatal(err)
 		}
 
-		fmt.Println(cmd.String())
-
 		_, err = buf.Write(out)
 		if err != nil {
 			log.Fatal(err)
@@ -247,4 +233,36 @@ func (c Cmd) Run() ([]byte, error) {
 	}
 
 	return stdout.Bytes(), nil
+}
+
+func (c Cmd) HasCover() bool {
+	return c.Cover.Abs != ""
+}
+
+func (c Cmd) HasChapNo() bool {
+	return c.ChapNo != 0
+}
+
+func (c Cmd) HasCue() bool {
+	return c.Cue.Abs != ""
+}
+
+func (c Cmd) HasMeta() bool {
+	return c.Meta.Abs != ""
+}
+
+func (c Cmd) HasStart() bool {
+	return c.Start != ""
+}
+
+func (c Cmd) HasEnd() bool {
+	return c.End != ""
+}
+
+func (c Cmd) HasInput() bool {
+	return c.Input.Abs != ""
+}
+
+func (c Cmd) HasOutput() bool {
+	return c.Output.Abs != ""
 }

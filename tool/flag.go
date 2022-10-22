@@ -32,98 +32,56 @@ type ArgFlag struct {
 	Cue     string
 }
 
-type Args struct {
-	Profile   Profile
-	Start     string
-	End       string
-	output    file.File
-	Input     file.File
-	Cover     file.File
-	Meta      file.File
-	Cue       file.File
-	Media     *media.Media
-	Num       int
-	PadOutput bool
-	Padding   string
-	ChapNo    int
-}
+func (f Flag) Parse() *Cmd {
+	c := NewCmd()
 
-func (a Args) Output() string {
-	if a.PadOutput {
-		return a.output.Pad(a.Num)
+	if f.Args.Profile != "" {
+		c.Profile = Cfg().GetProfile(f.Args.Profile)
 	}
-	return a.output.Name
-}
 
-//func (f Flag) Parse() Args {
-//  return Args{
-//    Profile:   f.Args.GetProfile(),
-//    Start:     f.Args.Start,
-//    End:       f.Args.End,
-//    output:    file.New(f.Args.Output),
-//    Input:     file.New(f.Args.Input),
-//    Cover:     file.New(f.Args.Cover),
-//    Meta:      file.New(f.Args.Meta),
-//    Cue:       file.New(f.Args.Cue),
-//    Media:     f.Media(),
-//    PadOutput: Cfg().Defaults.HasPadding(),
-//    Padding:   Cfg().Defaults.Padding,
-//    Num:       1,
-//    ChapNo:    f.Args.ChapNo,
-//  }
-//}
+	if f.Args.Start != "" {
+		c.Start = f.Args.Start
+	}
 
-//func (f Flag) Media() *media.Media {
-//  var m *media.Media
-//  if f.Args.HasInput() {
-//    m = media.NewMedia(f.Args.Input)
+	if f.Args.End != "" {
+		c.End = f.Args.End
+	}
 
-//    if f.Args.HasMeta() {
-//      m.SetFFmeta(f.Args.Meta)
-//    }
+	if f.Args.Output != "" {
+		c.Output = file.New(f.Args.Output)
+	}
 
-//    if f.Args.HasCue() {
-//      m.SetCue(f.Args.Cue)
-//    }
+	if f.Args.Input != "" {
+		c.Input = file.New(f.Args.Input)
+		c.Media = media.NewMedia(f.Args.Input)
+	}
 
-//    if f.Args.HasCover() {
-//      m.AddFile("cover", f.Args.Cover)
-//    }
+	if f.Args.Cover != "" {
+		c.Cover = file.New(f.Args.Cover)
+		c.Media.AddFile("cover", f.Args.Cover)
+	}
 
-//    m.SetMeta()
-//  }
+	if f.Args.Meta != "" {
+		c.Meta = file.New(f.Args.Meta)
+		c.Media.SetFFmeta(f.Args.Meta)
+	}
 
-//  return m
-//}
+	if f.Args.Cue != "" {
+		c.Cue = file.New(f.Args.Cue)
+		c.Media.SetCue(f.Args.Cue)
+	}
 
-func (f Cmd) HasCover() bool {
-	return f.Cover.Abs != ""
-}
+	if f.Args.Input != "" {
+		c.Media.SetMeta()
+	}
 
-func (f Cmd) HasChapNo() bool {
-	return f.ChapNo != 0
-}
+	c.PadOutput = Cfg().Defaults.HasPadding()
+	c.Padding = Cfg().Defaults.Padding
+	c.Num = 1
 
-func (f Cmd) HasCue() bool {
-	return f.Cue.Abs != ""
-}
+	if f.Args.ChapNo != 0 {
+		c.ChapNo = f.Args.ChapNo
+	}
 
-func (f Cmd) HasMeta() bool {
-	return f.Meta.Abs != ""
-}
-
-func (f Cmd) HasStart() bool {
-	return f.Start != ""
-}
-
-func (f Cmd) HasEnd() bool {
-	return f.End != ""
-}
-
-func (f Cmd) HasInput() bool {
-	return f.Input.Abs != ""
-}
-
-func (f Cmd) HasOutput() bool {
-	return f.Output.Abs != ""
+	return c
 }

@@ -11,7 +11,7 @@ func Split() *SplitCmd {
 func (s *SplitCmd) Parse() *Cmd {
 	for idx, _ := range s.Media.EachChapter() {
 		cut := Cut()
-		cut.ParseFlags(s.flags)
+		cut.ParseFlags(s.cliFlags)
 		ff := cut.Chap(idx + 1)
 		s.Add(ff)
 	}
