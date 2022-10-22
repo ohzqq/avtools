@@ -10,47 +10,34 @@ import (
 	"github.com/ohzqq/avtools/file"
 )
 
-type RelatedFiles map[string]FileFormat
+type RelatedFiles map[string]MediaFile
 
-type FileFormat struct {
+type MediaFile struct {
 	file.File
 }
 
-func (r RelatedFiles) Get(name string) FileFormat {
+func (r RelatedFiles) Get(name string) MediaFile {
 	if r.Has(name) {
 		return r[name]
 	}
-	return FileFormat{}
+	return MediaFile{}
 }
 
 func (r RelatedFiles) Has(name string) bool {
-	if f, ok := r[name]; ok && f != (FileFormat{}) {
+	if f, ok := r[name]; ok && f != (MediaFile{}) {
 		return true
 	}
 	return false
 }
 
-//func (f FileFormat) String() string {
-//  return string(f)
-//}
-
-//func (f FileFormat) Ext() string {
-//  ext := filepath.Ext(f.String())
-//  return ext
-//}
-
-//func (f FileFormat) Mimetype() string {
-//  return mime.TypeByExtension(f.Ext())
-//}
-
-func (f FileFormat) IsImage() bool {
+func (f MediaFile) IsImage() bool {
 	if strings.Contains(f.Mimetype, "image") {
 		return true
 	}
 	return false
 }
 
-func (f FileFormat) IsAudio() bool {
+func (f MediaFile) IsAudio() bool {
 	if strings.Contains(f.Mimetype, "audio") {
 		return true
 	} else {
@@ -59,7 +46,7 @@ func (f FileFormat) IsAudio() bool {
 	return false
 }
 
-func (f FileFormat) IsPlainText() bool {
+func (f MediaFile) IsPlainText() bool {
 	if strings.Contains(f.Mimetype, "text/plain") {
 		return true
 	} else {
@@ -68,7 +55,7 @@ func (f FileFormat) IsPlainText() bool {
 	return false
 }
 
-func (f FileFormat) IsFFmeta() bool {
+func (f MediaFile) IsFFmeta() bool {
 	if f.IsPlainText() {
 		contents, err := os.Open(f.Abs)
 		if err != nil {

@@ -24,7 +24,7 @@ func (u *Update) Parse() *Cmd {
 	if u.HasCue() {
 		u.FFmpeg.HasChapters()
 		tmp := u.MkTmp()
-		err := u.Media.Meta.Write(tmp)
+		err := u.Media.FFmeta.Write(tmp)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -37,7 +37,7 @@ func (j *JoinCmd) Parse() *Cmd {
 	chaps := j.CalculateChapters()
 	med := NewMedia(j.files[0].Abs)
 	med.SetChapters(chaps)
-	med.Meta.SaveAs("ffmeta")
+	med.FFmeta.SaveAs("ffmeta")
 
 	ff.Input(in.Name())
 	ff.VN()

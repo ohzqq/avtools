@@ -10,26 +10,22 @@ import (
 )
 
 type Media struct {
-	Input FileFormat
+	Input MediaFile
 	Files RelatedFiles
-	Meta
-}
-
-type Meta struct {
 	*ffmeta.FFmeta
 }
 
 func NewMedia(i string) *Media {
 	media := Media{
-		Input: FileFormat{File: file.New(i)},
+		Input: MediaFile{File: file.New(i)},
 		Files: make(RelatedFiles),
 	}
-	media.Meta = media.ReadEmbeddedMeta()
+	media.FFmeta = media.ReadEmbeddedMeta()
 	return &media
 }
 
 func (m *Media) AddFile(name, path string) *Media {
-	m.Files[name] = FileFormat{File: file.New(path)}
+	m.Files[name] = MediaFile{File: file.New(path)}
 	return m
 }
 
@@ -38,14 +34,14 @@ func (m Media) HasFFmeta() bool {
 }
 
 func (m *Media) SetFFmeta(ff string) *Media {
-	m.Files["ffmeta"] = FileFormat{File: file.New(ff)}
+	m.Files["ffmeta"] = MediaFile{File: file.New(ff)}
 	return m
 }
 
 func (m Media) EachChapter() []*chap.Chapter {
 	var ch []*chap.Chapter
-	if len(m.Meta.Chapters.Chapters) > 0 {
-		ch = m.Meta.Chapters.Chapters
+	if len(m.FFmeta.Chapters.Chapters) > 0 {
+		ch = m.FFmeta.Chapters.Chapters
 	}
 	return ch
 }
@@ -55,12 +51,12 @@ func (m Media) HasCue() bool {
 }
 
 func (m *Media) SetCue(c string) *Media {
-	m.Files["cue"] = FileFormat{File: file.New(c)}
+	m.Files["cue"] = MediaFile{File: file.New(c)}
 	return m
 }
 
 func (m Media) HasEmbeddedCover() bool {
-	for _, v := range m.Meta.VideoStreams() {
+	for _, v := range m.FFmeta.VideoStreams() {
 		if v.CodecName == "mjpeg" || v.CodecName == "png" {
 			return true
 		}
@@ -69,7 +65,7 @@ func (m Media) HasEmbeddedCover() bool {
 }
 
 func (m Media) EmbeddedCoverExt() string {
-	for _, v := range m.Meta.VideoStreams() {
+	for _, v := range m.FFmeta.VideoStreams() {
 		if v.CodecName == "mjpeg" {
 			return ".jpg"
 		}
@@ -83,18 +79,18 @@ func (m Media) EmbeddedCoverExt() string {
 func (m *Media) SetMeta() *Media {
 	if m.HasFFmeta() {
 		meta := m.ReadFFmeta()
-		m.Meta.Format.Tags = meta.Format.Tags
-		m.Meta.SetChapters(meta.Chapters)
+		m.FFmeta.Format.Tags = meta.Format.Tags
+		m.FFmeta.SetChapters(meta.Chapters)
 	}
 
 	if m.HasCue() {
-		m.Meta.SetChapters(m.ReadCueSheet())
+		m.FFmeta.SetChapters(m.ReadCueSheet())
 	}
 
 	return m
 }
 
-func (m *Media) ReadEmbeddedMeta() Meta {
+func (m *Media) ReadEmbeddedMeta() *ffmeta.FFmeta {
 	probe := ffprobe.New()
 	probe.Input(m.Input.Abs).
 		FormatEntry("filename", "start_time", "duration", "size", "bit_rate").
@@ -108,9 +104,7 @@ func (m *Media) ReadEmbeddedMeta() Meta {
 		log.Fatal(err)
 	}
 
-	return Meta{
-		FFmeta: ffmeta.LoadJson(data),
-	}
+	return ffmeta.LoadJson(data)
 }
 
 func (m *Media) ReadCueSheet() chap.Chapters {
@@ -121,12 +115,12 @@ func (m *Media) ReadCueSheet() chap.Chapters {
 	return ch
 }
 
-func (m *Media) ReadFFmeta() Meta {
+func (m *Media) ReadFFmeta() *ffmeta.FFmeta {
 	var ff *ffmeta.FFmeta
 	if m.HasFFmeta() {
 		ff = ffmeta.LoadIni(m.Files.Get("ffmeta").Abs)
 	}
-	return Meta{FFmeta: ff}
+	return ff
 }
 
 func (m Media) AudioCodec() string {

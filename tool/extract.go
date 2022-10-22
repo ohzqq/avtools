@@ -29,8 +29,8 @@ func (e *ExtractCmd) Parse() *Cmd {
 	}
 
 	if e.flag.Cue {
-		e.Media.Meta.Chapters.File = "chapters.cue"
-		e.Media.Meta.Chapters.Write()
+		e.Media.FFmeta.Chapters.File = "chapters.cue"
+		e.Media.FFmeta.Chapters.Write()
 	}
 
 	return e.Cmd
