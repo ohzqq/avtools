@@ -26,7 +26,7 @@ var showCmd = &cobra.Command{
 
 func medias(input string) {
 	//c := media.NewMedia(input)
-	c := tool.NewCmd().Input(input).ParseFlags(flag)
+	c := tool.NewCmd().SetInput(input).ParseFlags(flag)
 	ff := c.FFmpeg()
 	eq := ffmpeg.NewFilter("eq")
 	eq.Set("brightness", "1.0")

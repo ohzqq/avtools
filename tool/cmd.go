@@ -28,6 +28,7 @@ type Cmd struct {
 	Padding   string
 	ChapNo    int
 	flag      BoolFlag
+	flags     Flag
 	isVerbose bool
 	cwd       string
 	Batch     []Command
@@ -105,7 +106,7 @@ func (c *Cmd) Verbose() *Cmd {
 }
 
 func (c *Cmd) ParseFlags(f Flag) *Cmd {
-	c.flag = f
+	c.flags = f
 
 	if f.Args.Profile != "" {
 		c.Profile = Cfg().GetProfile(f.Args.Profile)

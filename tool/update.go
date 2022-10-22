@@ -21,10 +21,10 @@ func (u *Update) Parse() *Cmd {
 
 	u.FFmpeg.Stream()
 
-	if u.flag.Args.HasCue() {
+	if u.HasCue() {
 		u.FFmpeg.HasChapters()
 		tmp := u.MkTmp()
-		err := u.Args.Media.Meta.Write(tmp)
+		err := u.Media.Meta.Write(tmp)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -32,15 +32,15 @@ func (u *Update) Parse() *Cmd {
 	}
 
 	var cover *Cmd
-	if u.flag.Args.HasCover() {
-		switch u.Cmd.Args.Input.Ext {
+	if u.HasCover() {
+		switch u.Cmd.Input.Ext {
 		case ".m4b", ".m4a":
 			u.FFmpeg.VN()
 			cover = NewCmd().
 				Bin("AtomicParsley").
-				SetArgs(u.Args.Output(), "--artwork", u.Args.Cover.Abs, "--overWrite")
+				SetArgs(u.Output.Abs, "--artwork", u.Cover.Abs, "--overWrite")
 		case ".mp3":
-			u.FFmpeg.Input(u.flag.Args.Cover)
+			u.FFmpeg.Input(u.Cover.Abs)
 			u.FFmpeg.AppendAudioParam("id3v2_version", "3")
 			u.FFmpeg.AppendAudioParam("metadata:s:v", "title='Album cover'")
 			u.FFmpeg.AppendAudioParam("metadata:s:v", "comment='Cover (front)'")
