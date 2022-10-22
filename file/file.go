@@ -41,6 +41,10 @@ func New(n string) File {
 	return f
 }
 
+func (f File) WithExt(e string) string {
+	return filepath.Join(f.Path, f.name+e)
+}
+
 func (f File) AddSuffix(s string) string {
 	name := f.name + s + f.Ext
 	return filepath.Join(f.Path, name)

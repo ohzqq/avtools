@@ -44,7 +44,7 @@ func Load(file string) *Sheet {
 	return &sheet
 }
 
-func file(line string) string {
+func cueFile(line string) string {
 	fileRegexp := regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
 	matches := fileRegexp.FindStringSubmatch(line)
 	title := matches[fileRegexp.SubexpIndex("title")]

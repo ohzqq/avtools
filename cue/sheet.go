@@ -1,33 +1,33 @@
 package cue
 
 import (
-	"path/filepath"
 	"strings"
+
+	"github.com/ohzqq/avtools/file"
 )
 
 type Sheet struct {
-	file       string
-	Audio      string
+	file       file.File
+	Audio      file.File
 	Tracks     []Track
 	titles     []string
 	startTimes []int
 }
 
-func NewCueSheet(file string) *Sheet {
-	return &Sheet{file: file}
+func NewCueSheet(f string) *Sheet {
+	return &Sheet{file: file.New(f)}
 }
 
 func (s *Sheet) SetAudio(name string) *Sheet {
-	s.Audio = name
+	s.Audio = file.New(name)
 	return s
 }
 
 func (s Sheet) File() string {
-	return s.Audio
+	return s.Audio.Abs
 }
 
 func (s Sheet) Ext() string {
-	ext := filepath.Ext(s.Audio)
-	ext = strings.TrimPrefix(ext, ".")
+	ext := strings.TrimPrefix(s.Audio.Ext, ".")
 	return strings.ToUpper(ext)
 }

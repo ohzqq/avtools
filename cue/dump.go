@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/ohzqq/avtools/file"
 )
 
 func (s Sheet) Dump() []byte {
@@ -14,8 +16,8 @@ func (s Sheet) Dump() []byte {
 		buf  bytes.Buffer
 	)
 
-	if s.Audio == "" {
-		s.Audio = "tmp"
+	if s.Audio.Abs == "" {
+		s.Audio = file.New("tmp")
 	}
 
 	err := tmpl.Execute(&buf, s)
@@ -35,11 +37,11 @@ func (s Sheet) Write(wr io.Writer) error {
 }
 
 func (s Sheet) Save() error {
-	return s.SaveAs(s.Audio)
+	return s.SaveAs(s.Audio.Abs)
 }
 
 func (s Sheet) SaveAs(name string) error {
-	if name == "" || s.Audio == "" {
+	if name == "" || s.Audio.Abs == "" {
 		name = "tmp"
 	}
 
