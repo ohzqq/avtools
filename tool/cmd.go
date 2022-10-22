@@ -10,7 +10,6 @@ import (
 
 	"github.com/ohzqq/avtools/ffmpeg"
 	"github.com/ohzqq/avtools/file"
-	"github.com/ohzqq/avtools/media"
 )
 
 type Cmd struct {
@@ -22,7 +21,7 @@ type Cmd struct {
 	Cover     file.File
 	Meta      file.File
 	Cue       file.File
-	Media     *media.Media
+	Media     *Media
 	Num       int
 	PadOutput bool
 	Padding   string
@@ -58,7 +57,7 @@ func NewCmd() *Cmd {
 
 func (c *Cmd) SetInput(i string) *Cmd {
 	c.Input = file.New(i)
-	c.Media = media.NewMedia(i)
+	c.Media = NewMedia(i)
 	return c
 }
 
@@ -122,7 +121,7 @@ func (c *Cmd) ParseFlags(f Flag) *Cmd {
 
 	if f.Args.Input != "" {
 		c.Input = file.New(f.Args.Input)
-		c.Media = media.NewMedia(f.Args.Input)
+		c.Media = NewMedia(f.Args.Input)
 	}
 
 	if f.Args.Cover != "" {
