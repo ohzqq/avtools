@@ -6,7 +6,6 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/file"
-	"github.com/ohzqq/avtools/media"
 )
 
 type JoinCmd struct {
@@ -36,7 +35,7 @@ func (j *JoinCmd) Parse() *Cmd {
 	ff := j.FFmpeg()
 
 	chaps := j.CalculateChapters()
-	med := media.NewMedia(j.files[0].Abs)
+	med := NewMedia(j.files[0].Abs)
 	med.SetChapters(chaps)
 	med.Meta.SaveAs("ffmeta")
 
@@ -61,7 +60,7 @@ func (j JoinCmd) CalculateChapters() chap.Chapters {
 		chaps = chap.NewChapters()
 	)
 	for idx, f := range j.files {
-		m := media.NewMedia(f.Abs)
+		m := NewMedia(f.Abs)
 		d := m.Duration().Float()
 		e := start[idx] + d
 		end = append(end, e)
