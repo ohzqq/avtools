@@ -151,6 +151,7 @@ func (c *Cmd) ParseFlags(f Flag) *Cmd {
 	if f.Args.ChapNo != 0 {
 		c.ChapNo = f.Args.ChapNo
 	}
+
 	return c
 }
 

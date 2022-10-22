@@ -43,7 +43,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/avtools/config.yml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/avtools/config.toml)")
 	rootCmd.PersistentFlags().StringVarP(&flag.Args.Output, "output", "o", "", "set output name")
 	rootCmd.PersistentFlags().StringVarP(&flag.Args.Profile, "profile", "p", "default", "set profile")
 	rootCmd.PersistentFlags().BoolVarP(&flag.Bool.Verbose, "verbose", "v", false, "print ffmpeg/ffprobe command string")

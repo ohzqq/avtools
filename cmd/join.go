@@ -21,7 +21,6 @@ var joinCmd = &cobra.Command{
 		jcmd.ParseFlags(flag)
 		c := jcmd.Parse()
 		c.RunBatch()
-		//fmt.Printf("%+V\n", c.String())
 	},
 }
 
