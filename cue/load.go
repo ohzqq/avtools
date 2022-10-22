@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func Load(file string) *CueSheet {
-	var sheet CueSheet
+func Load(file string) *Sheet {
+	var sheet Sheet
 
 	contents, err := os.Open(file)
 	if err != nil {

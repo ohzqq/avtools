@@ -32,7 +32,7 @@ func (c Chapters) FromCue(name string) Chapters {
 	return c
 }
 
-func (c Chapters) ToCue() *cue.CueSheet {
+func (c Chapters) ToCue() *cue.Sheet {
 	name := c.File
 	if c.File == "" {
 		name = "tmp"

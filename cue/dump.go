@@ -8,17 +8,17 @@ import (
 	"os"
 )
 
-func (c CueSheet) Dump() []byte {
+func (s Sheet) Dump() []byte {
 	var (
 		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
 		buf  bytes.Buffer
 	)
 
-	if c.Audio == "" {
-		c.Audio = "tmp"
+	if s.Audio == "" {
+		s.Audio = "tmp"
 	}
 
-	err := tmpl.Execute(&buf, c)
+	err := tmpl.Execute(&buf, s)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,20 +26,20 @@ func (c CueSheet) Dump() []byte {
 	return buf.Bytes()
 }
 
-func (c CueSheet) Write(wr io.Writer) error {
-	_, err := wr.Write(c.Dump())
+func (s Sheet) Write(wr io.Writer) error {
+	_, err := wr.Write(s.Dump())
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c CueSheet) Save() error {
-	return c.SaveAs(c.Audio)
+func (s Sheet) Save() error {
+	return s.SaveAs(s.Audio)
 }
 
-func (c CueSheet) SaveAs(name string) error {
-	if name == "" || c.Audio == "" {
+func (s Sheet) SaveAs(name string) error {
+	if name == "" || s.Audio == "" {
 		name = "tmp"
 	}
 
@@ -49,7 +49,7 @@ func (c CueSheet) SaveAs(name string) error {
 	}
 	defer file.Close()
 
-	err = c.Write(file)
+	err = s.Write(file)
 	if err != nil {
 		return err
 	}

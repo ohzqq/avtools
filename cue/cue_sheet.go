@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type CueSheet struct {
+type Sheet struct {
 	file       string
 	Audio      string
 	Tracks     []Track
@@ -13,21 +13,21 @@ type CueSheet struct {
 	startTimes []int
 }
 
-func NewCueSheet(file string) *CueSheet {
-	return &CueSheet{file: file}
+func NewCueSheet(file string) *Sheet {
+	return &Sheet{file: file}
 }
 
-func (c *CueSheet) SetAudio(name string) *CueSheet {
-	c.Audio = name
-	return c
+func (s *Sheet) SetAudio(name string) *Sheet {
+	s.Audio = name
+	return s
 }
 
-func (c CueSheet) File() string {
-	return c.Audio
+func (s Sheet) File() string {
+	return s.Audio
 }
 
-func (c CueSheet) Ext() string {
-	ext := filepath.Ext(c.Audio)
+func (s Sheet) Ext() string {
+	ext := filepath.Ext(s.Audio)
 	ext = strings.TrimPrefix(ext, ".")
 	return strings.ToUpper(ext)
 }

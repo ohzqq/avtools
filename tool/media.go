@@ -41,7 +41,7 @@ func (m *Media) SetFFmeta(ff string) *Media {
 func (m Media) EachChapter() []*chap.Chapter {
 	var ch []*chap.Chapter
 	if len(m.Meta.Chapters.Chapters) > 0 {
-		ch = m.Meta.Chapters.Chapters
+		ch = m.Meta.Chapters.Each()
 	}
 	return ch
 }
