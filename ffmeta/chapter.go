@@ -53,9 +53,17 @@ func (ff Meta) LastChapterEnd() *chap.Chapter {
 	return ch
 }
 
+var tmplFuncs = template.FuncMap{
+	"inc": Inc,
+}
+
+func Inc(n int) int {
+	return n + 1
+}
+
 func (ff Meta) IniChaps() []byte {
 	var (
-		tmpl = template.Must(template.New("ffmeta").Parse(ffmetaTmpl))
+		tmpl = template.Must(template.New("ffmeta").Funcs(tmplFuncs).Parse(ffmetaTmpl))
 		buf  bytes.Buffer
 	)
 
@@ -70,11 +78,15 @@ func (ff Meta) IniChaps() []byte {
 }
 
 const ffmetaTmpl = `
-{{- range .Each}}
+{{- $idx, $ch := range .Each}}
 [CHAPTER]
-TIMEBASE={{.Timebase.String}}
-START={{.Start.String}}
-END={{.End.String}}
-title={{.Title}}
+TIMEBASE={{$ch.Timebase.String}}
+START={{$ch.Start.String}}
+END={{$ch.End.String}}
+{{- if eq $ch.Title ""}}
+title=Chapter {{inc $idx}}
+{{- else}}
+title={{$ch.Title}}
+{{- end}}
 {{- end -}}
 `
