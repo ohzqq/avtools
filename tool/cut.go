@@ -20,7 +20,7 @@ func Cut() *CutCmd {
 func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 	var (
 		num   = no - 1
-		chaps = c.Media.FFmeta.Chapters.Chapters
+		chaps = c.Media.Meta.Chapters.Chapters
 		ff    *ffmpeg.Cmd
 	)
 

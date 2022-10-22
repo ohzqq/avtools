@@ -22,15 +22,13 @@ func (e *ExtractCmd) Parse() *Cmd {
 	}
 
 	if e.flag.Meta {
-		//ff := ffmpeg.New()
-		//ff.AppendPostInput("f", "ffmetadata").Output("ffmeta.ini").Input(e.Args.Input.Abs).Overwrite()
 		ff := ExtractFFmeta(e.Input.Abs)
 		e.Add(ff)
 	}
 
 	if e.flag.Cue {
-		e.Media.FFmeta.Chapters.File = "chapters.cue"
-		e.Media.FFmeta.Chapters.Write()
+		e.Media.Meta.Chapters.File = "chapters.cue"
+		e.Media.Meta.Chapters.Write()
 	}
 
 	return e.Cmd

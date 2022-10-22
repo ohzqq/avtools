@@ -7,7 +7,7 @@ import (
 	"github.com/ohzqq/avtools/chap"
 )
 
-type FFmeta struct {
+type Meta struct {
 	chap.Chapters
 	name    string
 	Streams []*Stream
@@ -30,19 +30,19 @@ type Format struct {
 
 type Duration string
 
-func NewFFmeta() *FFmeta {
-	return &FFmeta{Chapters: chap.NewChapters()}
+func NewFFmeta() *Meta {
+	return &Meta{Chapters: chap.NewChapters()}
 }
 
-func (ff FFmeta) Duration() Duration {
+func (ff Meta) Duration() Duration {
 	return ff.Dur
 }
 
-func (ff FFmeta) HasAudio() bool {
+func (ff Meta) HasAudio() bool {
 	return len(ff.AudioStreams()) > 0
 }
 
-func (ff FFmeta) AudioStreams() []*Stream {
+func (ff Meta) AudioStreams() []*Stream {
 	var streams []*Stream
 	for _, s := range ff.Streams {
 		if s.CodecType == "audio" {
@@ -52,11 +52,11 @@ func (ff FFmeta) AudioStreams() []*Stream {
 	return streams
 }
 
-func (ff FFmeta) HasVideo() bool {
+func (ff Meta) HasVideo() bool {
 	return len(ff.VideoStreams()) > 0
 }
 
-func (ff FFmeta) VideoStreams() []*Stream {
+func (ff Meta) VideoStreams() []*Stream {
 	var streams []*Stream
 	for _, s := range ff.Streams {
 		if s.CodecType == "video" {

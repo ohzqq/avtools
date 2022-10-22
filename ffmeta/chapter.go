@@ -38,12 +38,12 @@ func (c Chapter) Timebase() float64 {
 	return baseFloat
 }
 
-func (ff *FFmeta) SetChapters(c chap.Chapters) *FFmeta {
+func (ff *Meta) SetChapters(c chap.Chapters) *Meta {
 	ff.Chapters = c
 	return ff
 }
 
-func (ff FFmeta) LastChapterEnd() *chap.Chapter {
+func (ff Meta) LastChapterEnd() *chap.Chapter {
 	ch := ff.LastChapter()
 	if ch.End().Secs() == 0 && ff.Duration().Int() != 0 {
 		to := ff.Duration().Float() * 1000
@@ -53,7 +53,7 @@ func (ff FFmeta) LastChapterEnd() *chap.Chapter {
 	return ch
 }
 
-func (ff FFmeta) IniChaps() []byte {
+func (ff Meta) IniChaps() []byte {
 	var (
 		tmpl = template.Must(template.New("ffmeta").Parse(ffmetaTmpl))
 		buf  bytes.Buffer

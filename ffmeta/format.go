@@ -14,7 +14,7 @@ import (
 
 const ffmetaComment = ";FFMETADATA1\n"
 
-func LoadJson(d []byte) *FFmeta {
+func LoadJson(d []byte) *Meta {
 	meta := NewFFmeta()
 	err := json.Unmarshal(d, &meta)
 	if err != nil {
@@ -31,7 +31,7 @@ func LoadJson(d []byte) *FFmeta {
 	return meta
 }
 
-func LoadIni(input string) *FFmeta {
+func LoadIni(input string) *Meta {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
 	opts.InsensitiveSections = true
@@ -63,7 +63,7 @@ func LoadIni(input string) *FFmeta {
 	return ffmeta
 }
 
-func (ff FFmeta) Dump() []byte {
+func (ff Meta) Dump() []byte {
 	ini.PrettyFormat = false
 
 	opts := ini.LoadOptions{
@@ -94,7 +94,7 @@ func (ff FFmeta) Dump() []byte {
 	return buf.Bytes()
 }
 
-func (ff FFmeta) Write(wr io.Writer) error {
+func (ff Meta) Write(wr io.Writer) error {
 	_, err := io.WriteString(wr, ffmetaComment)
 	_, err = wr.Write(ff.Dump())
 	if err != nil {
@@ -103,11 +103,11 @@ func (ff FFmeta) Write(wr io.Writer) error {
 	return nil
 }
 
-func (ff FFmeta) Save() error {
+func (ff Meta) Save() error {
 	return ff.SaveAs(ff.name)
 }
 
-func (ff FFmeta) SaveAs(name string) error {
+func (ff Meta) SaveAs(name string) error {
 	if name == "" && ff.name == "" {
 		name = "tmp"
 	}
@@ -126,7 +126,7 @@ func (ff FFmeta) SaveAs(name string) error {
 	return nil
 }
 
-func (ff FFmeta) DumpJson() []byte {
+func (ff Meta) DumpJson() []byte {
 	data, err := json.Marshal(ff)
 	if err != nil {
 		log.Fatal(err)
