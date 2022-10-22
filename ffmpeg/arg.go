@@ -9,7 +9,7 @@ const (
 )
 
 type Args struct {
-	logLevel      []string
+	logLevel      string
 	PreInput      []string
 	input         Input
 	PostInput     []string
@@ -31,17 +31,16 @@ type Args struct {
 
 func NewArgs() *Args {
 	return &Args{
-		logLevel: []string{logLevelFlag},
 		Metadata: make(map[string]string),
 	}
 }
 
 func (c Args) HasLogLevel() bool {
-	return len(c.logLevel) > 1
+	return c.logLevel != ""
 }
 
 func (c *Args) LogLevel(l string) *Args {
-	c.logLevel = append(c.logLevel, l)
+	c.logLevel = l
 	return c
 }
 

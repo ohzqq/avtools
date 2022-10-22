@@ -65,7 +65,7 @@ func (c *Cmd) ParseArgs() ([]string, error) {
 	args := []string{hideBanner}
 
 	if c.HasLogLevel() {
-		args = append(args, c.logLevel...)
+		args = append(args, logLevelFlag, c.logLevel)
 	}
 
 	if c.HasPreInput() {

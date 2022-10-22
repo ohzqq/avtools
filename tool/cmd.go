@@ -104,6 +104,10 @@ func (c *Cmd) ParseFlags(f Flag) *Cmd {
 	c.cliFlags = f
 	c.flag = f.Bool
 
+	if f.Bool.Verbose {
+		c.Verbose()
+	}
+
 	if f.Args.Profile != "" {
 		c.Profile = Cfg().GetProfile(f.Args.Profile)
 	}
@@ -198,7 +202,9 @@ func (c Cmd) RunBatch() []byte {
 
 	var buf bytes.Buffer
 	for _, cmd := range c.Batch {
-		fmt.Println(cmd.String())
+		if c.isVerbose {
+			fmt.Println(cmd.String())
+		}
 		out, err := cmd.Run()
 		if err != nil {
 			fmt.Printf("cmd string: %s\n", cmd.String())
