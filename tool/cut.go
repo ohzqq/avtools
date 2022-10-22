@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools/ffmpeg"
-	"github.com/ohzqq/avtools/file"
 )
 
 type CutCmd struct {
@@ -29,7 +28,7 @@ func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 		ch := chaps[num]
 		ss := ch.Start().SecsString()
 		to := ch.End().SecsString()
-		in := file.New(c.Media.Input.String())
+		in := c.Media.Input.File
 		c.Start = ss
 		c.End = to
 		ff = c.FFmpegCmd()

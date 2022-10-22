@@ -2,11 +2,11 @@ package tool
 
 import (
 	"log"
-	"path/filepath"
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/ffprobe"
+	"github.com/ohzqq/avtools/file"
 )
 
 type Media struct {
@@ -21,7 +21,7 @@ type Meta struct {
 
 func NewMedia(i string) *Media {
 	media := Media{
-		Input: FileFormat(i),
+		Input: FileFormat{File: file.New(i)},
 		Files: make(RelatedFiles),
 	}
 	media.Meta = media.ReadEmbeddedMeta()
@@ -29,11 +29,7 @@ func NewMedia(i string) *Media {
 }
 
 func (m *Media) AddFile(name, path string) *Media {
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	m.Files[name] = FileFormat(abs)
+	m.Files[name] = FileFormat{File: file.New(path)}
 	return m
 }
 
@@ -42,7 +38,7 @@ func (m Media) HasFFmeta() bool {
 }
 
 func (m *Media) SetFFmeta(ff string) *Media {
-	m.Files["ffmeta"] = FileFormat(ff)
+	m.Files["ffmeta"] = FileFormat{File: file.New(ff)}
 	return m
 }
 
@@ -59,7 +55,7 @@ func (m Media) HasCue() bool {
 }
 
 func (m *Media) SetCue(c string) *Media {
-	m.Files["cue"] = FileFormat(c)
+	m.Files["cue"] = FileFormat{File: file.New(c)}
 	return m
 }
 
@@ -100,7 +96,7 @@ func (m *Media) SetMeta() *Media {
 
 func (m *Media) ReadEmbeddedMeta() Meta {
 	probe := ffprobe.New()
-	probe.Input(m.Input.String()).
+	probe.Input(m.Input.Abs).
 		FormatEntry("filename", "start_time", "duration", "size", "bit_rate").
 		StreamEntry("codec_type", "codec_name").
 		Entry("format_tags").
@@ -120,7 +116,7 @@ func (m *Media) ReadEmbeddedMeta() Meta {
 func (m *Media) ReadCueSheet() chap.Chapters {
 	var ch chap.Chapters
 	if m.HasCue() {
-		ch = chap.NewChapters().FromCue(m.Files.Get("cue"))
+		ch = chap.NewChapters().FromCue(m.Files.Get("cue").Abs)
 	}
 	return ch
 }
@@ -128,7 +124,7 @@ func (m *Media) ReadCueSheet() chap.Chapters {
 func (m *Media) ReadFFmeta() Meta {
 	var ff *ffmeta.FFmeta
 	if m.HasFFmeta() {
-		ff = ffmeta.LoadIni(m.Files.Get("ffmeta"))
+		ff = ffmeta.LoadIni(m.Files.Get("ffmeta").Abs)
 	}
 	return Meta{FFmeta: ff}
 }

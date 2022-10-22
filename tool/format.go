@@ -4,52 +4,54 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"mime"
 	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/ohzqq/avtools/file"
 )
 
 type RelatedFiles map[string]FileFormat
 
-type FileFormat string
+type FileFormat struct {
+	file.File
+}
 
-func (r RelatedFiles) Get(name string) string {
+func (r RelatedFiles) Get(name string) FileFormat {
 	if r.Has(name) {
-		return r[name].String()
+		return r[name]
 	}
-	return ""
+	return FileFormat{}
 }
 
 func (r RelatedFiles) Has(name string) bool {
-	if f, ok := r[name]; ok && f != "" {
+	if f, ok := r[name]; ok && f != (FileFormat{}) {
 		return true
 	}
 	return false
 }
 
-func (f FileFormat) String() string {
-	return string(f)
-}
+//func (f FileFormat) String() string {
+//  return string(f)
+//}
 
-func (f FileFormat) Ext() string {
-	ext := filepath.Ext(f.String())
-	return ext
-}
+//func (f FileFormat) Ext() string {
+//  ext := filepath.Ext(f.String())
+//  return ext
+//}
 
-func (f FileFormat) Mimetype() string {
-	return mime.TypeByExtension(f.Ext())
-}
+//func (f FileFormat) Mimetype() string {
+//  return mime.TypeByExtension(f.Ext())
+//}
 
 func (f FileFormat) IsImage() bool {
-	if strings.Contains(f.Mimetype(), "image") {
+	if strings.Contains(f.Mimetype, "image") {
 		return true
 	}
 	return false
 }
 
 func (f FileFormat) IsAudio() bool {
-	if strings.Contains(f.Mimetype(), "audio") {
+	if strings.Contains(f.Mimetype, "audio") {
 		return true
 	} else {
 		fmt.Println("not an audio file")
@@ -58,7 +60,7 @@ func (f FileFormat) IsAudio() bool {
 }
 
 func (f FileFormat) IsPlainText() bool {
-	if strings.Contains(f.Mimetype(), "text/plain") {
+	if strings.Contains(f.Mimetype, "text/plain") {
 		return true
 	} else {
 		log.Fatalln("needs to be plain text file")
@@ -68,7 +70,7 @@ func (f FileFormat) IsPlainText() bool {
 
 func (f FileFormat) IsFFmeta() bool {
 	if f.IsPlainText() {
-		contents, err := os.Open(f.String())
+		contents, err := os.Open(f.Abs)
 		if err != nil {
 			log.Fatal(err)
 		}

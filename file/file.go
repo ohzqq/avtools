@@ -3,19 +3,21 @@ package file
 import (
 	"fmt"
 	"log"
+	"mime"
 	"path/filepath"
 	"strings"
 )
 
 type File struct {
-	Abs     string
-	Path    string
-	Base    string
-	Ext     string
-	Name    string
-	File    string
-	Padding string
-	name    string
+	Abs      string
+	Path     string
+	Base     string
+	Ext      string
+	Name     string
+	File     string
+	Padding  string
+	Mimetype string
+	name     string
 }
 
 func New(n string) File {
@@ -30,6 +32,7 @@ func New(n string) File {
 		Abs:     abs,
 		Padding: "%03d",
 	}
+	f.Mimetype = mime.TypeByExtension(f.Ext)
 	f.Name = strings.TrimSuffix(abs, f.Ext)
 	f.name = strings.TrimSuffix(f.Base, f.Ext)
 
