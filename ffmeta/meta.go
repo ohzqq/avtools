@@ -8,11 +8,11 @@ import (
 )
 
 type Meta struct {
-	chap.Chapters
-	name    string
-	Streams []*Stream
-	Format  `json:"format"`
-	Chaps   []Chapter `json:"chapters"`
+	chap.Chapters `json:"-"`
+	name          string
+	Streams       []*Stream
+	Format        `json:"format"`
+	Chaps         []Chapter `json:"chapters"`
 }
 
 type Stream struct {

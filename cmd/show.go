@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ohzqq/avtools/tool"
 	"github.com/spf13/cobra"
 )
@@ -15,6 +18,16 @@ var showCmd = &cobra.Command{
 		flag.Args.Input = input
 		c := tool.NewCmd()
 		c.ParseFlags(flag)
+		if cmd.Flags().Changed("cue") {
+			c.Media.Meta.Chapters.ToCue().Write(os.Stdout)
+		}
+		if cmd.Flags().Changed("meta") {
+			c.Media.Meta.Write(os.Stdout)
+		}
+		if cmd.Flags().Changed("json") {
+			data := c.Media.Meta.DumpJson()
+			fmt.Println(string(data))
+		}
 		//ff := media.Cfg().Profiles["gif"].FFmpegCmd()
 		//ff.Input(input)
 
@@ -25,6 +38,6 @@ var showCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(showCmd)
 	showCmd.PersistentFlags().BoolVarP(&flag.Bool.Meta, "meta", "m", false, "print ffmeta")
-	showCmd.PersistentFlags().BoolVarP(&flag.Bool.Cue, "cue", "C", false, "print cue sheet")
+	showCmd.PersistentFlags().BoolVarP(&flag.Bool.Cue, "cue", "c", false, "print cue sheet")
 	showCmd.PersistentFlags().BoolVarP(&flag.Bool.Json, "json", "j", false, "print json")
 }

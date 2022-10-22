@@ -4,14 +4,16 @@ import (
 	"log"
 
 	"github.com/ohzqq/avtools/chap"
+	"github.com/ohzqq/avtools/cue"
 	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/ffprobe"
 	"github.com/ohzqq/avtools/file"
 )
 
 type Media struct {
-	Input MediaFile
-	Files RelatedFiles
+	Input    MediaFile
+	Files    RelatedFiles
+	cueSheet *cue.Sheet
 	*ffmeta.Meta
 }
 

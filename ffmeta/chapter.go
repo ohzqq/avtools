@@ -14,7 +14,7 @@ type Chapter struct {
 	Base         string            `json:"time_base",ini:"timebase"`
 	StartTime    int               `json:"start",ini:"start"`
 	EndTime      int               `json:"end",ini:"end"`
-	ChapterTitle string            `ini:"title"`
+	ChapterTitle string            `json:"title", ini:"title"`
 	Tags         map[string]string `json:"tags"`
 }
 
@@ -78,7 +78,7 @@ func (ff Meta) IniChaps() []byte {
 }
 
 const ffmetaTmpl = `
-{{- $idx, $ch := range .Each}}
+{{- range $idx, $ch := .Each}}
 [CHAPTER]
 TIMEBASE={{$ch.Timebase.String}}
 START={{$ch.Start.String}}
