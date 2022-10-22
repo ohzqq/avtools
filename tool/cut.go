@@ -10,8 +10,6 @@ import (
 
 type CutCmd struct {
 	*Cmd
-	ss string
-	to string
 }
 
 func Cut() *CutCmd {
@@ -32,7 +30,8 @@ func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 		ss := ch.Start().SecsString()
 		to := ch.End().SecsString()
 		in := file.New(c.Media.Input.String())
-		c.Start(ss).End(to)
+		c.Start = ss
+		c.End = to
 		ff = c.FFmpegCmd()
 		ff.Output(in.Pad(no))
 	} else {
@@ -42,14 +41,12 @@ func (c CutCmd) Chap(no int) *ffmpeg.Cmd {
 	return ff
 }
 
-func (c *CutCmd) Start(ss string) *CutCmd {
-	c.ss = ss
-	return c
-}
+func (c *CutCmd) FFmpegCmd() *ffmpeg.Cmd {
+	ff := c.FFmpeg()
+	ff.SS(c.Start)
+	ff.To(c.End)
 
-func (c *CutCmd) End(to string) *CutCmd {
-	c.to = to
-	return c
+	return ff
 }
 
 func (c *CutCmd) Parse() *Cmd {
@@ -58,18 +55,19 @@ func (c *CutCmd) Parse() *Cmd {
 	if c.HasChapNo() {
 		ff = c.Chap(c.ChapNo)
 	} else {
+		var (
+			ss string
+			to string
+		)
 		if c.HasStart() {
-			c.ss = c.Cmd.Start
+			ss = strings.ReplaceAll(c.Start, ":", "")
 		}
 
 		if c.HasEnd() {
-			c.to = c.Cmd.End
+			to = strings.ReplaceAll(c.End, ":", "")
 		}
 
-		s := strings.ReplaceAll(c.ss, ":", "")
-		e := strings.ReplaceAll(c.to, ":", "")
-
-		o := c.Input.AddSuffix(s + "-" + e)
+		o := c.Input.AddSuffix(ss + "-" + to)
 
 		ff = c.FFmpegCmd()
 		ff.Output(o)
@@ -78,12 +76,4 @@ func (c *CutCmd) Parse() *Cmd {
 	c.Add(ff)
 
 	return c.Cmd
-}
-
-func (c *CutCmd) FFmpegCmd() *ffmpeg.Cmd {
-	ff := c.FFmpeg()
-	ff.SS(c.ss)
-	ff.To(c.to)
-
-	return ff
 }
