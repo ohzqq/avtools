@@ -102,6 +102,7 @@ func (c *Cmd) Verbose() *Cmd {
 
 func (c *Cmd) ParseFlags(f Flag) *Cmd {
 	c.cliFlags = f
+	c.flag = f.Bool
 
 	if f.Args.Profile != "" {
 		c.Profile = Cfg().GetProfile(f.Args.Profile)

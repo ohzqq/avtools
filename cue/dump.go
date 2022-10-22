@@ -70,6 +70,10 @@ func Inc(n int) int {
 const cueTmpl = `FILE "{{.File}}" {{.Ext -}}
 {{range $idx, $ch := .Tracks}}
 TRACK {{inc $idx}} AUDIO
+{{- if eq $ch.Title ""}}
+  TITLE "Chapter {{inc $idx}}"
+{{- else}}
   TITLE "{{$ch.Title}}"
+{{- end}}
   INDEX 01 {{$ch.Stamp}}
 {{- end -}}`

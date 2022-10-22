@@ -52,5 +52,5 @@ func (f File) AddSuffix(s string) string {
 
 func (f File) Pad(i int) string {
 	p := fmt.Sprintf(f.Padding, i)
-	return f.Name + p + f.Ext
+	return f.AddSuffix(p)
 }
