@@ -61,6 +61,52 @@ func (c *Cmd) SetInput(i string) *Cmd {
 	return c
 }
 
+func (c *Cmd) SetOutput(o string) *Cmd {
+	c.Output = file.New(o)
+	return c
+}
+
+func (c *Cmd) SetCover(f string) *Cmd {
+	c.Cover = file.New(f)
+	return c
+}
+
+func (c *Cmd) SetMeta(f string) *Cmd {
+	c.Meta = file.New(f)
+	return c
+}
+
+func (c *Cmd) SetCue(f string) *Cmd {
+	c.Cue = file.New(f)
+	return c
+}
+
+func (c *Cmd) Verbose() *Cmd {
+	c.isVerbose = true
+	c.flag.Verbose = true
+	return c
+}
+
+func (c *Cmd) SetMetaFlag() *Cmd {
+	c.flag.Meta = true
+	return c
+}
+
+func (c *Cmd) SetCoverFlag() *Cmd {
+	c.flag.Cover = true
+	return c
+}
+
+func (c *Cmd) SetCueFlag() *Cmd {
+	c.flag.Cue = true
+	return c
+}
+
+func (c *Cmd) SetChapFlag() *Cmd {
+	c.flag.Chap = true
+	return c
+}
+
 func (c Cmd) String() string {
 	return strings.Join(c.args, " ")
 }
@@ -92,11 +138,6 @@ func (c *Cmd) Command(bin string, args []string) *Cmd {
 
 func (c *Cmd) Add(cmd Command) *Cmd {
 	c.Batch = append(c.Batch, cmd)
-	return c
-}
-
-func (c *Cmd) Verbose() *Cmd {
-	c.isVerbose = true
 	return c
 }
 
