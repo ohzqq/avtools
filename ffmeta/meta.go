@@ -31,11 +31,23 @@ type Format struct {
 type Duration string
 
 func NewFFmeta() *Meta {
-	return &Meta{Chapters: chap.NewChapters()}
+	return &Meta{
+		Chapters: chap.NewChapters(),
+		Format:   Format{Tags: make(map[string]string)},
+	}
 }
 
 func (ff Meta) Duration() Duration {
 	return ff.Dur
+}
+
+func (ff *Meta) SetTag(key, val string) *Meta {
+	ff.Format.Tags[key] = val
+	return ff
+}
+
+func (ff Meta) GetTags() map[string]string {
+	return ff.Format.Tags
 }
 
 func (ff Meta) HasAudio() bool {
