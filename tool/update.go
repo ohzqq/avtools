@@ -6,17 +6,17 @@ import (
 	"github.com/ohzqq/avtools/ffmpeg"
 )
 
-type Update struct {
+type UpdateCmd struct {
 	*Cmd
 	FFmpeg *ffmpeg.Cmd
 	cover  *Cmd
 }
 
-func NewUpdateCmd() *Update {
-	return &Update{Cmd: NewCmd()}
+func Update() *UpdateCmd {
+	return &UpdateCmd{Cmd: NewCmd()}
 }
 
-func (u *Update) Parse() *Cmd {
+func (u *UpdateCmd) Parse() *Cmd {
 	u.FFmpeg = u.Cmd.FFmpeg()
 
 	u.FFmpeg.Stream()

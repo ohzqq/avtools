@@ -13,7 +13,7 @@ var updateCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		flag.Args.Input = args[0]
-		u := tool.NewUpdateCmd()
+		u := tool.Update()
 		u.ParseFlags(flag)
 		c := u.Parse()
 		c.RunBatch()
