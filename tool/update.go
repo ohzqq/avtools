@@ -19,8 +19,6 @@ func Update() *UpdateCmd {
 func (u *UpdateCmd) Parse() *Cmd {
 	u.FFmpeg = u.Cmd.FFmpeg()
 
-	u.FFmpeg.Stream()
-
 	if u.HasCue() {
 		u.FFmpeg.HasChapters()
 		tmp := u.MkTmp()
