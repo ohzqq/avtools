@@ -96,7 +96,7 @@ func (ff Meta) Dump() []byte {
 }
 
 func (ff Meta) Write(wr io.Writer) error {
-	_, err = wr.Write(ff.Dump())
+	_, err := wr.Write(ff.Dump())
 	if err != nil {
 		return err
 	}
