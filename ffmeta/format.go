@@ -81,7 +81,8 @@ func (ff Meta) Dump() []byte {
 	}
 
 	var buf bytes.Buffer
-	_, err := ffmeta.WriteTo(&buf)
+	_, err := buf.WriteString(ffmetaComment)
+	_, err = ffmeta.WriteTo(&buf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +96,6 @@ func (ff Meta) Dump() []byte {
 }
 
 func (ff Meta) Write(wr io.Writer) error {
-	_, err := io.WriteString(wr, ffmetaComment)
 	_, err = wr.Write(ff.Dump())
 	if err != nil {
 		return err
