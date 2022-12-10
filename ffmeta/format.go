@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/ohzqq/avtools/chap"
+	"golang.org/x/exp/slices"
 	"gopkg.in/ini.v1"
 )
 
@@ -127,29 +128,33 @@ func (ff Meta) SaveAs(name string) error {
 	return nil
 }
 
+var metaTags = []string{
+	"title",
+	"album",
+	"artist",
+	"composer",
+	"date",
+	"year",
+	"genre",
+	"comment",
+	"album_artist",
+	"track",
+	"language",
+	"lyrics",
+}
+
 func (ff Meta) DumpJson() []byte {
-	ff.Mimetype = mime.TypeByExtension(filepath.Ext(ff.Filename))
-	ff.Size = ff.Meta.Size
-	ff.FileDuration = ff.Duration().HHMMSS()
+	meta := make(map[string]interface{})
+	meta["mimetype"] = mime.TypeByExtension(filepath.Ext(ff.Filename))
+	meta["size"] = ff.Meta.Size
+	meta["duration"] = ff.Duration().HHMMSS()
+	meta["chapters"] = ff.Chapters
 	for key, val := range ff.Meta.Tags {
-		switch key {
-		case "title":
-			ff.Title = val
-		case "album":
-			ff.Album = val
-		case "artist":
-			ff.Artist = val
-		case "composer":
-			ff.Composer = val
-		case "date":
-			ff.Date = val
-		case "comment":
-			ff.Comment = val
-		case "Genre":
-			ff.Genre = val
+		if slices.Contains(metaTags, key) {
+			meta[key] = val
 		}
 	}
-	data, err := json.Marshal(ff)
+	data, err := json.Marshal(meta)
 	if err != nil {
 		log.Fatal(err)
 	}

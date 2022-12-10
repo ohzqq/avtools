@@ -20,6 +20,7 @@ type Meta struct {
 	Comment      string        `json:"comment"`
 	Genre        string        `json:"genre"`
 	Chapters     chap.Chapters `json:"chapters"`
+	FileMeta     map[string]string
 	ffprobe.Meta `json:"-"`
 	name         string
 }
