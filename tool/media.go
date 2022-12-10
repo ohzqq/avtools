@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/ohzqq/avtools/chap"
@@ -8,6 +9,7 @@ import (
 	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/ffprobe"
 	"github.com/ohzqq/avtools/file"
+	"golang.org/x/exp/slices"
 )
 
 type Media struct {
@@ -139,4 +141,23 @@ func (m Media) AudioCodec() string {
 		return a[0].CodecType
 	}
 	return ""
+}
+
+func (m Media) DumpJson() []byte {
+	meta := make(map[string]interface{})
+	meta["mimetype"] = m.Input.Mimetype
+	meta["file"] = m.Input.Abs
+	meta["size"] = m.Meta.Size
+	meta["duration"] = m.Duration().HHMMSS()
+	meta["chapters"] = m.Chapters
+	for key, val := range m.Meta.Tags {
+		if slices.Contains(metaTags, key) {
+			meta[key] = val
+		}
+	}
+	data, err := json.Marshal(meta)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
 }
