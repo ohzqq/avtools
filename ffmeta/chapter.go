@@ -47,7 +47,7 @@ func (ff *Meta) SetChapters(c chap.Chapters) *Meta {
 }
 
 func (ff Meta) LastChapterEnd() *chap.Chapter {
-	ch := ff.LastChapter()
+	ch := ff.Chapters.LastChapter()
 	if ch.End().Secs() == 0 && ff.Duration().Secs() != 0 {
 		to := ff.Duration().Float() * 1000
 		end := chap.NewChapterTime(to)

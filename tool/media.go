@@ -106,7 +106,15 @@ func (m *Media) ReadEmbeddedMeta() *ffmeta.Meta {
 		log.Fatal(err)
 	}
 
-	return ffmeta.LoadJson(data)
+	meta := ffmeta.NewFFmeta()
+	meta.Meta = ffprobe.UnmarshalJSON(data)
+
+	for _, c := range meta.Chaps {
+		ch := chap.NewChapter().SetMeta(c)
+		meta.AddChapter(ch)
+	}
+
+	return meta
 }
 
 func (m *Media) ReadCueSheet() chap.Chapters {

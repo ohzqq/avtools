@@ -21,12 +21,12 @@ func LoadJson(d []byte) *Meta {
 		log.Fatal(err)
 	}
 
-	if len(meta.Chaps) > 0 {
-		for _, c := range meta.Chaps {
-			ch := chap.NewChapter().SetMeta(c)
-			meta.Chapters.Chapters = append(meta.Chapters.Chapters, ch)
-		}
-	}
+	//if len(meta.Chaps) > 0 {
+	//  for _, c := range meta.Chaps {
+	//    ch := chap.NewChapter().SetMeta(c)
+	//    meta.Chapters.Chapters = append(meta.Chapters.Chapters, ch)
+	//  }
+	//}
 
 	return meta
 }

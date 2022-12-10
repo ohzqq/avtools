@@ -5,14 +5,17 @@ import (
 	"strconv"
 
 	"github.com/ohzqq/avtools/chap"
+	"github.com/ohzqq/avtools/ffprobe"
 )
 
+type FFmeta struct {
+	ffprobe.Meta
+}
+
 type Meta struct {
-	chap.Chapters `json:"-"`
-	name          string
-	Streams       []*Stream `json:"streams"`
-	Format        `json:"format"`
-	Chaps         []Chapter `json:"chapters"`
+	Chapters     chap.Chapters `json:"chapters"`
+	ffprobe.Meta `json:"-"`
+	name         string
 }
 
 type Stream struct {
@@ -34,8 +37,12 @@ type Duration string
 func NewFFmeta() *Meta {
 	return &Meta{
 		Chapters: chap.NewChapters(),
-		Format:   Format{Tags: make(map[string]string)},
+		//Format:   Format{Tags: make(map[string]string)},
 	}
+}
+
+func (ff *Meta) AddChapter(ch *chap.Chapter) {
+	ff.Chapters.Chapters = append(ff.Chapters.Chapters, ch)
 }
 
 func (ff Meta) Duration() chap.Time {
@@ -56,8 +63,8 @@ func (ff Meta) HasAudio() bool {
 	return len(ff.AudioStreams()) > 0
 }
 
-func (ff Meta) AudioStreams() []*Stream {
-	var streams []*Stream
+func (ff Meta) AudioStreams() []*ffprobe.Stream {
+	var streams []*ffprobe.Stream
 	for _, s := range ff.Streams {
 		if s.CodecType == "audio" {
 			streams = append(streams, s)
@@ -70,8 +77,8 @@ func (ff Meta) HasVideo() bool {
 	return len(ff.VideoStreams()) > 0
 }
 
-func (ff Meta) VideoStreams() []*Stream {
-	var streams []*Stream
+func (ff Meta) VideoStreams() []*ffprobe.Stream {
+	var streams []*ffprobe.Stream
 	for _, s := range ff.Streams {
 		if s.CodecType == "video" {
 			streams = append(streams, s)

@@ -11,13 +11,18 @@ import (
 )
 
 type Chapters struct {
-	Chapters []*Chapter
+	Chapters []*Chapter `json:"chapters"`
 	File     string
 	ext      string
 }
 
 func NewChapters() Chapters {
 	return Chapters{}
+}
+
+func (c *Chapters) AddChapter(ch *Chapter) *Chapters {
+	c.Chapters = append(c.Chapters, ch)
+	return c
 }
 
 func (c Chapters) FromCue(name string) Chapters {
@@ -49,7 +54,7 @@ func (c Chapters) ToCue() *cue.Sheet {
 	return sheet
 }
 
-func (c Chapters) ToJson() []byte {
+func (c Chapters) MarshalJSON() ([]byte, error) {
 	var chaps []map[string]string
 	for _, ch := range c.Chapters {
 		chap := map[string]string{
@@ -62,10 +67,10 @@ func (c Chapters) ToJson() []byte {
 
 	data, err := json.Marshal(chaps)
 	if err != nil {
-		log.Fatal(err)
+		return data, err
 	}
 
-	return data
+	return data, nil
 }
 
 func (c Chapters) LastChapter() *Chapter {
