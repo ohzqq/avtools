@@ -10,7 +10,7 @@ import (
 type Meta struct {
 	chap.Chapters `json:"-"`
 	name          string
-	Streams       []*Stream
+	Streams       []*Stream `json:"streams"`
 	Format        `json:"format"`
 	Chaps         []Chapter `json:"chapters"`
 }
@@ -21,11 +21,12 @@ type Stream struct {
 }
 
 type Format struct {
-	Filename string
+	Filename string   `json:"filename"`
 	Dur      Duration `json:"duration"`
-	Size     string
-	BitRate  string `json:"bit_rate"`
-	Tags     map[string]string
+	duration chap.Time
+	Size     string            `json:"size"`
+	BitRate  string            `json:"bit_rate"`
+	Tags     map[string]string `json:"tags"`
 }
 
 type Duration string
@@ -37,8 +38,9 @@ func NewFFmeta() *Meta {
 	}
 }
 
-func (ff Meta) Duration() Duration {
-	return ff.Dur
+func (ff Meta) Duration() chap.Time {
+	t := chap.ParseStr(string(ff.Dur))
+	return t
 }
 
 func (ff *Meta) SetTag(key, val string) *Meta {

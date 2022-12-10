@@ -19,6 +19,9 @@ type Chapter struct {
 }
 
 func (c Chapter) Title() string {
+	if t, ok := c.Tags["title"]; ok {
+		return t
+	}
 	return c.ChapterTitle
 }
 
@@ -45,7 +48,7 @@ func (ff *Meta) SetChapters(c chap.Chapters) *Meta {
 
 func (ff Meta) LastChapterEnd() *chap.Chapter {
 	ch := ff.LastChapter()
-	if ch.End().Secs() == 0 && ff.Duration().Int() != 0 {
+	if ch.End().Secs() == 0 && ff.Duration().Secs() != 0 {
 		to := ff.Duration().Float() * 1000
 		end := chap.NewChapterTime(to)
 		ch.SetEnd(end)
