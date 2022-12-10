@@ -39,7 +39,6 @@ func (c Cmd) Run() ([]byte, error) {
 	if err != nil {
 		return stderr.Bytes(), fmt.Errorf("Cmd failed to build: %v\n", cmd.String())
 	}
-	fmt.Println(cmd.String())
 
 	cmd.Stderr = &stderr
 	cmd.Stdout = &stdout

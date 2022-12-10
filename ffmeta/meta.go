@@ -8,28 +8,20 @@ import (
 	"github.com/ohzqq/avtools/ffprobe"
 )
 
-type FFmeta struct {
-	ffprobe.Meta
-}
-
 type Meta struct {
+	Mimetype     string        `json:"mimetype"`
+	Size         string        `json:"size"`
+	FileDuration string        `json:"duration"`
+	Title        string        `json:"title"`
+	Album        string        `json:"album"`
+	Artist       string        `json:"artist"`
+	Composer     string        `json:"composer"`
+	Date         string        `json:"date"`
+	Comment      string        `json:"comment"`
+	Genre        string        `json:"genre"`
 	Chapters     chap.Chapters `json:"chapters"`
 	ffprobe.Meta `json:"-"`
 	name         string
-}
-
-type Stream struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
-}
-
-type Format struct {
-	Filename string   `json:"filename"`
-	Dur      Duration `json:"duration"`
-	duration chap.Time
-	Size     string            `json:"size"`
-	BitRate  string            `json:"bit_rate"`
-	Tags     map[string]string `json:"tags"`
 }
 
 type Duration string
@@ -37,7 +29,6 @@ type Duration string
 func NewFFmeta() *Meta {
 	return &Meta{
 		Chapters: chap.NewChapters(),
-		//Format:   Format{Tags: make(map[string]string)},
 	}
 }
 

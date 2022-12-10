@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"mime"
 	"os"
 	"path/filepath"
 
@@ -127,6 +128,27 @@ func (ff Meta) SaveAs(name string) error {
 }
 
 func (ff Meta) DumpJson() []byte {
+	ff.Mimetype = mime.TypeByExtension(filepath.Ext(ff.Filename))
+	ff.Size = ff.Meta.Size
+	ff.FileDuration = ff.Duration().HHMMSS()
+	for key, val := range ff.Meta.Tags {
+		switch key {
+		case "title":
+			ff.Title = val
+		case "album":
+			ff.Album = val
+		case "artist":
+			ff.Artist = val
+		case "composer":
+			ff.Composer = val
+		case "date":
+			ff.Date = val
+		case "comment":
+			ff.Comment = val
+		case "Genre":
+			ff.Genre = val
+		}
+	}
 	data, err := json.Marshal(ff)
 	if err != nil {
 		log.Fatal(err)

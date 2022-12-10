@@ -35,6 +35,15 @@ type Chapter struct {
 	Tags         map[string]string `json:"tags"`
 }
 
+func UnmarshalJSON(d []byte) Meta {
+	var meta Meta
+	err := json.Unmarshal(d, &meta)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return meta
+}
+
 func (c Chapter) Title() string {
 	if t, ok := c.Tags["title"]; ok {
 		return t
@@ -56,13 +65,4 @@ func (c Chapter) Timebase() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(c.Base, 64)
 	return baseFloat
-}
-
-func UnmarshalJSON(d []byte) Meta {
-	var meta Meta
-	err := json.Unmarshal(d, &meta)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return meta
 }
