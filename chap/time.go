@@ -30,7 +30,7 @@ func ParseStr(t string) Time {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return Time{time: i}
+	return NewChapterTime(i)
 }
 
 func ParseNum[N Number](num N, dig int) string {

@@ -1,6 +1,7 @@
 package chap
 
 import (
+	"encoding/json"
 	"log"
 	"path/filepath"
 	"strings"
@@ -46,6 +47,25 @@ func (c Chapters) ToCue() *cue.Sheet {
 	}
 
 	return sheet
+}
+
+func (c Chapters) ToJson() []byte {
+	var chaps []map[string]string
+	for _, ch := range c.Chapters {
+		chap := map[string]string{
+			"start": ch.Start().HHMMSS(),
+			"end":   ch.End().HHMMSS(),
+			"title": ch.Title,
+		}
+		chaps = append(chaps, chap)
+	}
+
+	data, err := json.Marshal(chaps)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return data
 }
 
 func (c Chapters) LastChapter() *Chapter {

@@ -18,6 +18,7 @@ var showCmd = &cobra.Command{
 		flag.Args.Input = input
 		c := tool.NewCmd()
 		c.ParseFlags(flag)
+		fmt.Println(string(c.Media.Meta.Chapters.ToJson()))
 		if cmd.Flags().Changed("cue") {
 			c.Media.Meta.Chapters.ToCue().Write(os.Stdout)
 		}
