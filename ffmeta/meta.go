@@ -9,18 +9,7 @@ import (
 )
 
 type Meta struct {
-	Mimetype     string        `json:"mimetype"`
-	Size         string        `json:"size"`
-	FileDuration string        `json:"duration"`
-	Title        string        `json:"title"`
-	Album        string        `json:"album"`
-	Artist       string        `json:"artist"`
-	Composer     string        `json:"composer"`
-	Date         string        `json:"date"`
-	Comment      string        `json:"comment"`
-	Genre        string        `json:"genre"`
 	Chapters     chap.Chapters `json:"chapters"`
-	FileMeta     map[string]string
 	ffprobe.Meta `json:"-"`
 	name         string
 }

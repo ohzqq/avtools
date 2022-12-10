@@ -146,6 +146,7 @@ var metaTags = []string{
 func (ff Meta) DumpJson() []byte {
 	meta := make(map[string]interface{})
 	meta["mimetype"] = mime.TypeByExtension(filepath.Ext(ff.Filename))
+	meta["file"] = ff.Filename
 	meta["size"] = ff.Meta.Size
 	meta["duration"] = ff.Duration().HHMMSS()
 	meta["chapters"] = ff.Chapters
