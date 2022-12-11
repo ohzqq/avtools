@@ -72,9 +72,9 @@ func (j JoinCmd) CalculateChapters() chap.Chapters {
 		ch := chap.NewChapter()
 		ch.SetTitle(fmt.Sprintf("Chapter %d", idx))
 		ch.SetTimebase(1000)
-		ss := timestamp.NewChapterTime(start[idx] * 1000)
+		ss := timestamp.NewTimeStamp(start[idx] * 1000)
 		ch.SetStart(ss)
-		to := timestamp.NewChapterTime(end[idx] * 1000)
+		to := timestamp.NewTimeStamp(end[idx] * 1000)
 		ch.SetEnd(to)
 		chaps.Chapters = append(chaps.Chapters, ch)
 	}

@@ -31,8 +31,8 @@ func (c Chapters) FromCue(name string) Chapters {
 	for _, t := range sheet.Tracks {
 		ch := NewChapter()
 		ch.SetTimebase(1000)
-		ch.SetStart(timestamp.NewChapterTime(t.Start() * 1000))
-		ch.SetEnd(timestamp.NewChapterTime(t.End() * 1000))
+		ch.SetStart(timestamp.NewTimeStamp(t.Start() * 1000))
+		ch.SetEnd(timestamp.NewTimeStamp(t.End() * 1000))
 		ch.SetTitle(t.Title())
 		c.Chapters = append(c.Chapters, ch)
 	}

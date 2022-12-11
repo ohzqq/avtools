@@ -6,6 +6,7 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/ffprobe"
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type Meta struct {
@@ -26,8 +27,8 @@ func (ff *Meta) AddChapter(ch *chap.Chapter) {
 	ff.Chapters.Chapters = append(ff.Chapters.Chapters, ch)
 }
 
-func (ff Meta) Duration() chap.Time {
-	t := chap.ParseStr(string(ff.Dur))
+func (ff Meta) Duration() timestamp.Time {
+	t := timestamp.ParseString(string(ff.Dur))
 	return t
 }
 

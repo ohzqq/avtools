@@ -12,50 +12,58 @@ type Number interface {
 }
 
 type Time struct {
-	Time float64
-	Base float64
+	Duration float64
+	Base     Timebase
 }
 
 type Timebase float64
 
-func NewChapterTime[N Number](num N) Time {
+func (t Timebase) String() string {
+	return "1/" + ParseNumber(t.Float(), 0)
+}
+
+func (t Timebase) Float() float64 {
+	return float64(t)
+}
+
+func NewTimeStamp[N Number](num N) Time {
 	return Time{
-		Time: float64(num),
-		Base: 1,
+		Duration: float64(num),
+		Base:     1,
 	}
 }
 
-func ParseStr(t string) Time {
+func ParseString(t string) Time {
 	i, err := strconv.ParseFloat(t, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return NewChapterTime(i)
+	return NewTimeStamp(i)
 }
 
-func ParseNum[N Number](num N, dig int) string {
+func ParseNumber[N Number](num N, dig int) string {
 	return strconv.FormatFloat(float64(num), 'f', dig, 64)
 }
 
 func (ch *Time) SetTimebase(base float64) {
-	ch.Base = base
+	ch.Base = Timebase(base)
 }
 
 func (ch Time) Secs() int {
-	secs := ch.Time / ch.Base
+	secs := ch.Duration / ch.Base.Float()
 	return int(math.Round(secs))
 }
 
 func (ch Time) Float() float64 {
-	return ch.Time
+	return ch.Duration
 }
 
 func (ch Time) String() string {
-	return ParseNum(ch.Time, 0)
+	return ParseNumber(ch.Duration, 0)
 }
 
 func (ch Time) SecsString() string {
-	return ParseNum(ch.Time/ch.Base, 3)
+	return ParseNumber(ch.Duration/ch.Base.Float(), 3)
 }
 
 func (c Time) HHMMSS() string {
@@ -71,12 +79,4 @@ func (c Time) MMSS() string {
 	mm := secs / 60
 	ss := secs % 60
 	return fmt.Sprintf("%02d:%02d", mm, ss)
-}
-
-func (t Timebase) String() string {
-	return "1/" + ParseNum(t.Float(), 0)
-}
-
-func (t Timebase) Float() float64 {
-	return float64(t)
 }

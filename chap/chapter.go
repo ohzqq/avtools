@@ -25,8 +25,8 @@ func NewChapter() *Chapter {
 }
 
 func (ch *Chapter) SetMeta(c ChapMeta) *Chapter {
-	ch.start = timestamp.NewChapterTime(c.Start())
-	ch.end = timestamp.NewChapterTime(c.End())
+	ch.start = timestamp.NewTimeStamp(c.Start())
+	ch.end = timestamp.NewTimeStamp(c.End())
 	ch.Title = c.Title()
 	ch.base = timestamp.Timebase(c.Timebase())
 	return ch
@@ -34,14 +34,14 @@ func (ch *Chapter) SetMeta(c ChapMeta) *Chapter {
 
 func (ch Chapter) Start() timestamp.Time {
 	if t := ch.base; t != 1 {
-		ch.start.Base = float64(t)
+		ch.start.Base = timestamp.Timebase(t)
 	}
 	return ch.start
 }
 
 func (ch Chapter) End() timestamp.Time {
 	if t := ch.base; t != 1 {
-		ch.end.Base = float64(t)
+		ch.end.Base = timestamp.Timebase(t)
 	}
 	return ch.end
 }
@@ -51,11 +51,11 @@ func (ch Chapter) Timebase() timestamp.Timebase {
 }
 
 func (ch Chapter) Dur() (timestamp.Time, error) {
-	if ch.end.Time == 0 {
+	if ch.end.Duration == 0 {
 		return ch.end, fmt.Errorf("end time is needed to calculate duration")
 	}
-	t := ch.end.Time - ch.start.Time
-	return timestamp.Time{Time: t, Base: float64(ch.base)}, nil
+	t := ch.end.Duration - ch.start.Duration
+	return timestamp.Time{Duration: t, Base: timestamp.Timebase(ch.base)}, nil
 }
 
 func (ch *Chapter) SetTitle(t string) *Chapter {
