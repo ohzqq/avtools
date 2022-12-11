@@ -143,6 +143,21 @@ func (m Media) AudioCodec() string {
 	return ""
 }
 
+var metaTags = []string{
+	"album",
+	"album_artist",
+	"artist",
+	"comment",
+	"composer",
+	"copyright",
+	"date",
+	"genre",
+	"language",
+	"lyrics",
+	"title",
+	"track",
+}
+
 func (m Media) DumpJson() []byte {
 	meta := make(map[string]interface{})
 	meta["mimetype"] = m.Input.Mimetype

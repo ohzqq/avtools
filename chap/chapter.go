@@ -2,12 +2,14 @@ package chap
 
 import (
 	"fmt"
+
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type Chapter struct {
-	start Time
-	end   Time
-	base  timebase
+	start timestamp.Time
+	end   timestamp.Time
+	base  timestamp.Timebase
 	Title string
 }
 
@@ -19,41 +21,41 @@ type ChapMeta interface {
 }
 
 func NewChapter() *Chapter {
-	return &Chapter{base: timebase(1)}
+	return &Chapter{base: timestamp.Timebase(1)}
 }
 
 func (ch *Chapter) SetMeta(c ChapMeta) *Chapter {
-	ch.start = NewChapterTime(c.Start())
-	ch.end = NewChapterTime(c.End())
+	ch.start = timestamp.NewChapterTime(c.Start())
+	ch.end = timestamp.NewChapterTime(c.End())
 	ch.Title = c.Title()
-	ch.base = timebase(c.Timebase())
+	ch.base = timestamp.Timebase(c.Timebase())
 	return ch
 }
 
-func (ch Chapter) Start() Time {
+func (ch Chapter) Start() timestamp.Time {
 	if t := ch.base; t != 1 {
-		ch.start.base = float64(t)
+		ch.start.Base = float64(t)
 	}
 	return ch.start
 }
 
-func (ch Chapter) End() Time {
+func (ch Chapter) End() timestamp.Time {
 	if t := ch.base; t != 1 {
-		ch.end.base = float64(t)
+		ch.end.Base = float64(t)
 	}
 	return ch.end
 }
 
-func (ch Chapter) Timebase() timebase {
+func (ch Chapter) Timebase() timestamp.Timebase {
 	return ch.base
 }
 
-func (ch Chapter) Dur() (Time, error) {
-	if ch.end.time == 0 {
+func (ch Chapter) Dur() (timestamp.Time, error) {
+	if ch.end.Time == 0 {
 		return ch.end, fmt.Errorf("end time is needed to calculate duration")
 	}
-	t := ch.end.time - ch.start.time
-	return Time{time: t, base: float64(ch.base)}, nil
+	t := ch.end.Time - ch.start.Time
+	return timestamp.Time{Time: t, Base: float64(ch.base)}, nil
 }
 
 func (ch *Chapter) SetTitle(t string) *Chapter {
@@ -61,18 +63,18 @@ func (ch *Chapter) SetTitle(t string) *Chapter {
 	return ch
 }
 
-func (ch *Chapter) SetStart(t Time) *Chapter {
+func (ch *Chapter) SetStart(t timestamp.Time) *Chapter {
 	ch.start = t
 	return ch
 }
 
-func (ch *Chapter) SetEnd(t Time) *Chapter {
+func (ch *Chapter) SetEnd(t timestamp.Time) *Chapter {
 	ch.end = t
 	return ch
 }
 
 func (ch *Chapter) SetTimebase(t float64) *Chapter {
-	ch.base = timebase(t)
+	ch.base = timestamp.Timebase(t)
 	return ch
 }
 

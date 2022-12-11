@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools/chap"
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type Chapter struct {
@@ -50,7 +51,7 @@ func (ff Meta) LastChapterEnd() *chap.Chapter {
 	ch := ff.Chapters.LastChapter()
 	if ch.End().Secs() == 0 && ff.Duration().Secs() != 0 {
 		to := ff.Duration().Float() * 1000
-		end := chap.NewChapterTime(to)
+		end := timestamp.NewChapterTime(to)
 		ch.SetEnd(end)
 	}
 	return ch

@@ -6,6 +6,7 @@ import (
 
 	"github.com/ohzqq/avtools/chap"
 	"github.com/ohzqq/avtools/file"
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type JoinCmd struct {
@@ -71,9 +72,9 @@ func (j JoinCmd) CalculateChapters() chap.Chapters {
 		ch := chap.NewChapter()
 		ch.SetTitle(fmt.Sprintf("Chapter %d", idx))
 		ch.SetTimebase(1000)
-		ss := chap.NewChapterTime(start[idx] * 1000)
+		ss := timestamp.NewChapterTime(start[idx] * 1000)
 		ch.SetStart(ss)
-		to := chap.NewChapterTime(end[idx] * 1000)
+		to := timestamp.NewChapterTime(end[idx] * 1000)
 		ch.SetEnd(to)
 		chaps.Chapters = append(chaps.Chapters, ch)
 	}

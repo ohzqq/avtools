@@ -8,6 +8,7 @@ import (
 
 	"github.com/gosimple/slug"
 	"github.com/ohzqq/avtools/cue"
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type Chapters struct {
@@ -30,8 +31,8 @@ func (c Chapters) FromCue(name string) Chapters {
 	for _, t := range sheet.Tracks {
 		ch := NewChapter()
 		ch.SetTimebase(1000)
-		ch.SetStart(NewChapterTime(t.Start() * 1000))
-		ch.SetEnd(NewChapterTime(t.End() * 1000))
+		ch.SetStart(timestamp.NewChapterTime(t.Start() * 1000))
+		ch.SetEnd(timestamp.NewChapterTime(t.End() * 1000))
 		ch.SetTitle(t.Title())
 		c.Chapters = append(c.Chapters, ch)
 	}
