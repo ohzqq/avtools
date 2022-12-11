@@ -21,6 +21,14 @@ func NewChapters() Chapters {
 	return Chapters{}
 }
 
+func (c *Chapters) SetChapters(chaps []ChapMeta) *Chapters {
+	for _, ch := range chaps {
+		chap := NewChapter().SetMeta(ch)
+		c.AddChapter(chap)
+	}
+	return c
+}
+
 func (c *Chapters) AddChapter(ch *Chapter) *Chapters {
 	c.Chapters = append(c.Chapters, ch)
 	return c
