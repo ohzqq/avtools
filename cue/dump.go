@@ -6,8 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-
-	"github.com/ohzqq/avtools/file"
 )
 
 func (s Sheet) Dump() []byte {
@@ -17,7 +15,7 @@ func (s Sheet) Dump() []byte {
 	)
 
 	if s.Audio.Abs == "" {
-		s.Audio = file.New("tmp")
+		//s.Audio = file.New("tmp")
 	}
 
 	err := tmpl.Execute(&buf, s)
