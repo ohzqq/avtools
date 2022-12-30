@@ -66,42 +66,48 @@ func ReadEmbeddedMeta(input string) *ProbeMeta {
 
 	var chapters []*Chapter
 	for _, chapter := range meta.Chaps {
-		for key, val := range chapter {
-			var start int
-			var end int
-			var base int
-			var title string
-			switch key {
-			case "start":
-				err := json.Unmarshal(val, &start)
-				if err != nil {
-					log.Fatal(err)
-				}
-			case "end":
-				err := json.Unmarshal(val, &end)
-				if err != nil {
-					log.Fatal(err)
-				}
-			case "time_base":
-				var b string
-				err := json.Unmarshal(val, &b)
-				if err != nil {
-					log.Fatal(err)
-				}
-				b = strings.Split(b, "/")[1]
-				base = int(timestamp.StringToFloat(b))
-			case "tags":
-				tags := make(map[string]string)
-				err := json.Unmarshal(val, &tags)
-				if err != nil {
-					log.Fatal(err)
-				}
-				title = tags["title"]
+		var start int
+		if val, ok := chapter["start"]; ok {
+			err := json.Unmarshal(val, &start)
+			if err != nil {
+				log.Fatal(err)
 			}
-			ch := NewChapter(start, end, base)
-			ch.Title = title
-			chapters = append(chapters, ch)
 		}
+
+		var end int
+		if val, ok := chapter["end"]; ok {
+			err := json.Unmarshal(val, &end)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		var base int
+		if val, ok := chapter["time_base"]; ok {
+			var b string
+			err := json.Unmarshal(val, &b)
+			if err != nil {
+				log.Fatal(err)
+			}
+			b = strings.Split(b, "/")[1]
+			base = int(timestamp.StringToFloat(b))
+		}
+
+		var title string
+		if val, ok := chapter["tags"]; ok {
+			tags := make(map[string]string)
+			err := json.Unmarshal(val, &tags)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if t, ok := tags["title"]; ok {
+				title = t
+			}
+		}
+
+		ch := NewChapter(start, end, base)
+		ch.Title = title
+		chapters = append(chapters, ch)
 	}
 	meta.Chapters = chapters
 

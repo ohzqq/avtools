@@ -13,10 +13,22 @@ type Chapter struct {
 	Title string
 }
 
-func NewChapter[N Number](start, end N, base N) *Chapter {
-	if base == 0 {
-		base = 1
+func NewChapter[N Number](times ...N) *Chapter {
+	var base float64 = 1
+	var start float64 = 0
+	var end float64 = 0
+
+	switch t := len(times); t {
+	case 3:
+		base = float64(times[2])
+		fallthrough
+	case 2:
+		end = float64(times[1])
+		fallthrough
+	case 1:
+		start = float64(times[0])
 	}
+
 	return &Chapter{
 		base:  timestamp.Timebase(1),
 		start: timestamp.NewerTimeStamp(start, base),

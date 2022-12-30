@@ -16,7 +16,7 @@ var probeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		media := avtools.NewMedia(input)
-		fmt.Printf("media %+V\n", media)
+		fmt.Printf("media %+V\n", media.Chapters[0])
 	},
 }
 
