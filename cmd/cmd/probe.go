@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ohzqq/avtools"
 	"github.com/spf13/cobra"
 )
@@ -13,7 +15,8 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		avtools.Probe(input)
+		media := avtools.NewMedia(input)
+		fmt.Printf("media %+V\n", media)
 	},
 }
 

@@ -1,7 +1,7 @@
 package avtools
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -14,11 +14,24 @@ var probeArgs = []ffmpeg.KwArgs{
 	ffmpeg.KwArgs{"of": "json"},
 }
 
-func Probe(input string) {
+func Probe(input string) []byte {
 	args := ffmpeg.MergeKwArgs(probeArgs)
 	info, err := ffmpeg.ProbeWithTimeoutExec(input, 0, args)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(info)
+
+	return []byte(info)
+}
+
+func ReadEmbeddedMeta(input string) *Meta {
+	info := Probe(input)
+
+	var meta Meta
+	err := json.Unmarshal(info, &meta)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &meta
 }
