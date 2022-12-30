@@ -1,6 +1,10 @@
 package avtools
 
-import "github.com/ohzqq/avtools/timestamp"
+import (
+	"fmt"
+
+	"github.com/ohzqq/avtools/timestamp"
+)
 
 type Number interface {
 	int | int32 | int64 | float32 | float64
@@ -30,13 +34,29 @@ func NewChapter[N Number](times ...N) *Chapter {
 	}
 
 	return &Chapter{
-		base:  timestamp.Timebase(1),
+		base:  timestamp.Timebase(base),
 		start: timestamp.NewerTimeStamp(start, base),
 		end:   timestamp.NewerTimeStamp(end, base),
 	}
 }
 
-func ChapterStart[N Number](ch *Chapter, num N) *Chapter {
-	ch.start = timestamp.NewTimeStamp(num)
-	return ch
+func (ch Chapter) Start() timestamp.Time {
+	return ch.start
+}
+
+func (ch Chapter) End() timestamp.Time {
+	return ch.end
+}
+
+func (ch Chapter) Timebase() timestamp.Timebase {
+	return ch.base
+}
+
+func (ch Chapter) Dur() (timestamp.Time, error) {
+	if ch.end.Duration == 0 {
+		return ch.end, fmt.Errorf("end time is needed to calculate duration")
+	}
+	t := ch.end.Duration - ch.start.Duration
+	stamp := timestamp.NewerTimeStamp(t, float64(ch.base))
+	return stamp, nil
 }

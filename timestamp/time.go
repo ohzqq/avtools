@@ -37,7 +37,7 @@ func NewTimeStamp[N Number](num N) Time {
 func NewerTimeStamp[N Number](t, base N) Time {
 	return Time{
 		Duration: float64(t),
-		base:     float64(base),
+		Base:     Timebase(base),
 	}
 }
 
