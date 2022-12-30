@@ -3,7 +3,9 @@ package avtools
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
+	"github.com/ohzqq/avtools/timestamp"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -11,7 +13,8 @@ type ProbeMeta struct {
 	name        string
 	Streams     []*StreamEntry `json:"streams"`
 	FormatEntry `json:"format"`
-	Chaps       []ChapterEntry `json:"chapters"`
+	Chaps       []map[string]json.RawMessage `json:"chapters"`
+	Chapters    []*Chapter
 }
 
 type StreamEntry struct {
@@ -60,6 +63,47 @@ func ReadEmbeddedMeta(input string) *ProbeMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	var chapters []*Chapter
+	for _, chapter := range meta.Chaps {
+		for key, val := range chapter {
+			var start int
+			var end int
+			var base int
+			var title string
+			switch key {
+			case "start":
+				err := json.Unmarshal(val, &start)
+				if err != nil {
+					log.Fatal(err)
+				}
+			case "end":
+				err := json.Unmarshal(val, &end)
+				if err != nil {
+					log.Fatal(err)
+				}
+			case "time_base":
+				var b string
+				err := json.Unmarshal(val, &b)
+				if err != nil {
+					log.Fatal(err)
+				}
+				b = strings.Split(b, "/")[1]
+				base = int(timestamp.StringToFloat(b))
+			case "tags":
+				tags := make(map[string]string)
+				err := json.Unmarshal(val, &tags)
+				if err != nil {
+					log.Fatal(err)
+				}
+				title = tags["title"]
+			}
+			ch := NewChapter(start, end, base)
+			ch.Title = title
+			chapters = append(chapters, ch)
+		}
+	}
+	meta.Chapters = chapters
 
 	return &meta
 }

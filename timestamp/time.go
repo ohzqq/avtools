@@ -13,6 +13,7 @@ type Number interface {
 
 type Time struct {
 	Duration float64
+	base     float64
 	Base     Timebase
 }
 
@@ -33,12 +34,27 @@ func NewTimeStamp[N Number](num N) Time {
 	}
 }
 
+func NewerTimeStamp[N Number](t, base N) Time {
+	return Time{
+		Duration: float64(t),
+		base:     float64(base),
+	}
+}
+
 func ParseString(t string) Time {
 	i, err := strconv.ParseFloat(t, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return NewTimeStamp(i)
+}
+
+func StringToFloat(t string) float64 {
+	i, err := strconv.ParseFloat(t, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return i
 }
 
 func ParseNumber[N Number](num N, dig int) string {

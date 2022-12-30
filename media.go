@@ -10,8 +10,8 @@ type Media struct {
 
 func NewMedia(input string) *Media {
 	media := Media{
-		input: input,
-		Meta:  ReadEmbeddedMeta(input),
+		input:     input,
+		ProbeMeta: ReadEmbeddedMeta(input),
 	}
 	return &media
 }
