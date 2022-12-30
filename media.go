@@ -5,7 +5,7 @@ type Media struct {
 	//Input    MediaFile
 	//Files    RelatedFiles
 	//cueSheet *cue.Sheet
-	*Meta
+	*ProbeMeta
 }
 
 func NewMedia(input string) *Media {

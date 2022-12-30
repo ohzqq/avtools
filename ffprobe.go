@@ -24,10 +24,10 @@ func Probe(input string) []byte {
 	return []byte(info)
 }
 
-func ReadEmbeddedMeta(input string) *Meta {
+func ReadEmbeddedMeta(input string) *ProbeMeta {
 	info := Probe(input)
 
-	var meta Meta
+	var meta ProbeMeta
 	err := json.Unmarshal(info, &meta)
 	if err != nil {
 		log.Fatal(err)

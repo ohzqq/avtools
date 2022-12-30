@@ -1,18 +1,18 @@
 package avtools
 
-type Meta struct {
-	name    string
-	Streams []*Stream `json:"streams"`
-	Format  `json:"format"`
-	Chaps   []Chapter `json:"chapters"`
+type ProbeMeta struct {
+	name        string
+	Streams     []*StreamEntry `json:"streams"`
+	FormatEntry `json:"format"`
+	Chaps       []ChapterEntry `json:"chapters"`
 }
 
-type Stream struct {
+type StreamEntry struct {
 	CodecName string `json:"codec_name"`
 	CodecType string `json:"codec_type"`
 }
 
-type Format struct {
+type FormatEntry struct {
 	Filename string            `json:"filename"`
 	Dur      string            `json:"duration"`
 	Size     string            `json:"size"`
@@ -20,7 +20,7 @@ type Format struct {
 	Tags     map[string]string `json:"tags"`
 }
 
-type Chapter struct {
+type ChapterEntry struct {
 	Base         string            `json:"time_base",ini:"timebase"`
 	StartTime    int               `json:"start",ini:"start"`
 	EndTime      int               `json:"end",ini:"end"`
