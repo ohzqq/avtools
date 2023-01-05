@@ -13,7 +13,7 @@ type StreamEntry struct {
 	CodecType string `json:"codec_type"`
 }
 
-type ChapterEntry struct {
+type chapterEntry struct {
 	Base  string            `json:"time_base",ini:"timebase"`
 	Start int               `json:"start",ini:"start"`
 	End   int               `json:"end",ini:"end"`
@@ -38,7 +38,7 @@ func Probe(input string) []byte {
 	return []byte(info)
 }
 
-func (c ChapterEntry) ToChapter() *Chapter {
+func (c chapterEntry) ToChapter() *Chapter {
 	base := strings.Split(c.Base, "/")[1]
 	b := int(timestamp.StringToFloat(base))
 	ch := NewChapter(c.Start, c.End, b)

@@ -52,7 +52,7 @@ func (m *Media) Probe() *Media {
 }
 
 func UnmarshalChapters(data json.RawMessage) []*Chapter {
-	var chaps []ChapterEntry
+	var chaps []chapterEntry
 	err := json.Unmarshal(data, &chaps)
 	if err != nil {
 		log.Fatal(err)
