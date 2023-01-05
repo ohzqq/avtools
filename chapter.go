@@ -10,6 +10,8 @@ type Number interface {
 	int | int32 | int64 | float32 | float64
 }
 
+type Chapters []*Chapter
+
 type Chapter struct {
 	start timestamp.Time
 	end   timestamp.Time

@@ -1,7 +1,6 @@
 package avtools
 
 import (
-	"encoding/json"
 	"log"
 	"strings"
 
@@ -9,33 +8,17 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-type ProbeMeta struct {
-	name        string
-	Streams     []*StreamEntry `json:"streams"`
-	FormatEntry `json:"format"`
-	Chaps       []map[string]json.RawMessage `json:"chapters"`
-	Chapters    []*Chapter
-}
-
 type StreamEntry struct {
 	CodecName string `json:"codec_name"`
 	CodecType string `json:"codec_type"`
 }
 
-type FormatEntry struct {
-	Filename string            `json:"filename"`
-	Dur      string            `json:"duration"`
-	Size     string            `json:"size"`
-	BitRate  string            `json:"bit_rate"`
-	Tags     map[string]string `json:"tags"`
-}
-
 type ChapterEntry struct {
-	Base         string            `json:"time_base",ini:"timebase"`
-	StartTime    int               `json:"start",ini:"start"`
-	EndTime      int               `json:"end",ini:"end"`
-	ChapterTitle string            `json:"title", ini:"title"`
-	Tags         map[string]string `json:"tags"`
+	Base  string            `json:"time_base",ini:"timebase"`
+	Start int               `json:"start",ini:"start"`
+	End   int               `json:"end",ini:"end"`
+	Title string            `json:"title", ini:"title"`
+	Tags  map[string]string `json:"tags"`
 }
 
 var probeArgs = []ffmpeg.KwArgs{
@@ -55,61 +38,13 @@ func Probe(input string) []byte {
 	return []byte(info)
 }
 
-func ReadEmbeddedMeta(input string) *ProbeMeta {
-	info := Probe(input)
+func (c ChapterEntry) ToChapter() *Chapter {
+	base := strings.Split(c.Base, "/")[1]
+	b := int(timestamp.StringToFloat(base))
+	ch := NewChapter(c.Start, c.End, b)
 
-	var meta ProbeMeta
-	err := json.Unmarshal(info, &meta)
-	if err != nil {
-		log.Fatal(err)
+	if t, ok := c.Tags["title"]; ok {
+		ch.Title = t
 	}
-
-	var chapters []*Chapter
-	for _, chapter := range meta.Chaps {
-		var start int
-		if val, ok := chapter["start"]; ok {
-			err := json.Unmarshal(val, &start)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		var end int
-		if val, ok := chapter["end"]; ok {
-			err := json.Unmarshal(val, &end)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		var base int
-		if val, ok := chapter["time_base"]; ok {
-			var b string
-			err := json.Unmarshal(val, &b)
-			if err != nil {
-				log.Fatal(err)
-			}
-			b = strings.Split(b, "/")[1]
-			base = int(timestamp.StringToFloat(b))
-		}
-
-		var title string
-		if val, ok := chapter["tags"]; ok {
-			tags := make(map[string]string)
-			err := json.Unmarshal(val, &tags)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if t, ok := tags["title"]; ok {
-				title = t
-			}
-		}
-
-		ch := NewChapter(start, end, base)
-		ch.Title = title
-		chapters = append(chapters, ch)
-	}
-	meta.Chapters = chapters
-
-	return &meta
+	return ch
 }
