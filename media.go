@@ -8,9 +8,6 @@ type Media struct {
 	Tags     map[string]string
 	Chapters []*Chapter
 	streams  []map[string]string
-	//Input    MediaFile
-	//Files    RelatedFiles
-	//cueSheet *cue.Sheet
 }
 
 type Meta interface {

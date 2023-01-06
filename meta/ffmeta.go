@@ -13,7 +13,7 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-const ffmetaComment = ";FFMETADATA1\n"
+const FFmetaComment = ";FFMETADATA1\n"
 
 type FFMeta struct {
 	tags     map[string]string
@@ -109,7 +109,7 @@ func (ff FFMeta) Dump() []byte {
 	}
 
 	var buf bytes.Buffer
-	_, err := buf.WriteString(ffmetaComment)
+	_, err := buf.WriteString(FFmetaComment)
 	_, err = ffmeta.WriteTo(&buf)
 	if err != nil {
 		log.Fatal(err)
