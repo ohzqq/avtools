@@ -9,14 +9,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ohzqq/avtools"
 	"gopkg.in/ini.v1"
 )
 
 const ffmetaComment = ";FFMETADATA1\n"
 
 type FFMeta struct {
-	Tags     map[string]string
-	Chapters []FFMetaChapter
+	tags     map[string]string
+	chapters []avtools.ChapterMeta
 }
 
 type FFMetaChapter struct {
@@ -24,6 +25,20 @@ type FFMetaChapter struct {
 	StartTime    float64 `ini:"START"`
 	EndTime      float64 `ini:"END"`
 	ChapterTitle string  `ini:"title"`
+}
+
+//func (ff FFmeta) Each() []FF
+
+func (ff FFMeta) Chapters() []avtools.ChapterMeta {
+	return ff.chapters
+}
+
+func (ff FFMeta) Tags() map[string]string {
+	return ff.tags
+}
+
+func (ff FFMeta) Streams() []map[string]string {
+	return []map[string]string{}
 }
 
 func (ch FFMetaChapter) Start() float64 {
@@ -60,7 +75,7 @@ func LoadIni(input string) *FFMeta {
 	}
 
 	ffmeta := &FFMeta{}
-	ffmeta.Tags = f.Section("").KeysHash()
+	ffmeta.tags = f.Section("").KeysHash()
 
 	if f.HasSection("chapter") {
 		sections, err := f.SectionsByName("chapter")
@@ -71,7 +86,7 @@ func LoadIni(input string) *FFMeta {
 		for _, ch := range sections {
 			var chap FFMetaChapter
 			ch.MapTo(&chap)
-			ffmeta.Chapters = append(ffmeta.Chapters, chap)
+			ffmeta.chapters = append(ffmeta.chapters, chap)
 		}
 	}
 
@@ -88,7 +103,7 @@ func (ff FFMeta) Dump() []byte {
 
 	ffmeta := ini.Empty(opts)
 
-	for k, v := range ff.Tags {
+	for k, v := range ff.tags {
 		_, err := ffmeta.Section("").NewKey(k, v)
 		if err != nil {
 			log.Fatal(err)

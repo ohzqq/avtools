@@ -6,6 +6,13 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+type Metadata interface {
+	//Chapters() Chapters
+	Chapters() []ChapterMeta
+	Tags() map[string]string
+	Streams() []map[string]string
+}
+
 type Meta struct {
 	Filename string            `json:"filename"`
 	Dur      string            `json:"duration"`
@@ -14,6 +21,12 @@ type Meta struct {
 	Tags     map[string]string `json:"tags"`
 	Streams  []*Stream
 	Chapters []*Chapter
+	streams  []map[string]string
+}
+
+type StreamMeta interface {
+	CodecName() string
+	CodecType() string
 }
 
 type Stream struct {
@@ -22,7 +35,9 @@ type Stream struct {
 	stream    *ffmpeg.Stream
 }
 
-type Chapters []*Chapter
+type Chapters interface {
+	Each() []ChapterMeta
+}
 
 type Chapter struct {
 	start timestamp.Time
