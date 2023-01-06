@@ -3,8 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/avtools"
-	"github.com/ohzqq/avtools/meta"
+	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
 
@@ -16,12 +15,11 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		media := avtools.NewMedia(input)
+		m := media.New(input).Probe()
+		//m.SetMeta(meta)
 		//meta := meta.FFProbe(input)
-		meta := meta.LoadCueSheet(input)
 		//meta := meta.LoadIni(input)
-		media.SetMeta(meta)
-		fmt.Printf("meta %+V\n", media)
+		fmt.Printf("meta %+V\n", m)
 	},
 }
 

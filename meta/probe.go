@@ -32,6 +32,24 @@ type ProbeChapter struct {
 	Tags         map[string]string `json:"tags"`
 }
 
+func FFProbe(input string) ProbeMeta {
+	args := ffmpeg.MergeKwArgs(probeArgs)
+	info, err := ffmpeg.ProbeWithTimeoutExec(input, 0, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := []byte(info)
+
+	var meta ProbeMeta
+	err = json.Unmarshal(data, &meta)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return meta
+}
+
 func (m ProbeMeta) Chapters() []avtools.ChapterMeta {
 	var chaps []avtools.ChapterMeta
 	for _, ch := range m.ChapterEntry {
@@ -50,24 +68,6 @@ func (m ProbeMeta) Tags() map[string]string {
 	m.Format.Tags["size"] = m.Format.Size
 	m.Format.Tags["bit_rate"] = m.Format.BitRate
 	return m.Format.Tags
-}
-
-func FFProbe(input string) ProbeMeta {
-	args := ffmpeg.MergeKwArgs(probeArgs)
-	info, err := ffmpeg.ProbeWithTimeoutExec(input, 0, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	data := []byte(info)
-
-	var meta ProbeMeta
-	err = json.Unmarshal(data, &meta)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return meta
 }
 
 func UnmarshalJSON(d []byte) ProbeMeta {

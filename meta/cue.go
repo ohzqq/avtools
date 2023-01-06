@@ -29,32 +29,6 @@ type CueTrack struct {
 	end   float64
 }
 
-func (cue CueSheet) Chapters() []avtools.ChapterMeta {
-	var chaps []avtools.ChapterMeta
-	for _, track := range cue.Tracks {
-		chaps = append(chaps, track)
-	}
-	return chaps
-}
-
-func (cue CueSheet) Tags() map[string]string {
-	return map[string]string{
-		"filename": cue.Audio,
-	}
-}
-
-func (cue CueSheet) Streams() []map[string]string {
-	return []map[string]string{}
-}
-
-func NewCueSheet(f string) *CueSheet {
-	return &CueSheet{file: f}
-}
-
-func NewTrack() CueTrack {
-	return CueTrack{}
-}
-
 func LoadCueSheet(file string) *CueSheet {
 	var sheet CueSheet
 
@@ -88,6 +62,32 @@ func LoadCueSheet(file string) *CueSheet {
 	}
 
 	return &sheet
+}
+
+func (cue CueSheet) Chapters() []avtools.ChapterMeta {
+	var chaps []avtools.ChapterMeta
+	for _, track := range cue.Tracks {
+		chaps = append(chaps, track)
+	}
+	return chaps
+}
+
+func (cue CueSheet) Tags() map[string]string {
+	return map[string]string{
+		"filename": cue.Audio,
+	}
+}
+
+func (cue CueSheet) Streams() []map[string]string {
+	return []map[string]string{}
+}
+
+func NewCueSheet(f string) *CueSheet {
+	return &CueSheet{file: f}
+}
+
+func NewTrack() CueTrack {
+	return CueTrack{}
 }
 
 func (s *CueSheet) SetAudio(name string) *CueSheet {

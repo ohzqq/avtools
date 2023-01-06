@@ -27,7 +27,37 @@ type FFMetaChapter struct {
 	ChapterTitle string  `ini:"title"`
 }
 
-//func (ff FFmeta) Each() []FF
+func LoadIni(input string) *FFMeta {
+	opts := ini.LoadOptions{}
+	opts.Insensitive = true
+	opts.InsensitiveSections = true
+	opts.IgnoreInlineComment = true
+	opts.AllowNonUniqueSections = true
+
+	abs, _ := filepath.Abs(input)
+	f, err := ini.LoadSources(opts, abs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ffmeta := &FFMeta{}
+	ffmeta.tags = f.Section("").KeysHash()
+
+	if f.HasSection("chapter") {
+		sections, err := f.SectionsByName("chapter")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, ch := range sections {
+			var chap FFMetaChapter
+			ch.MapTo(&chap)
+			ffmeta.chapters = append(ffmeta.chapters, chap)
+		}
+	}
+
+	return ffmeta
+}
 
 func (ff FFMeta) Chapters() []avtools.ChapterMeta {
 	return ff.chapters
@@ -59,38 +89,6 @@ func (ch FFMetaChapter) Timebase() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(ch.Base, 64)
 	return baseFloat
-}
-
-func LoadIni(input string) *FFMeta {
-	opts := ini.LoadOptions{}
-	opts.Insensitive = true
-	opts.InsensitiveSections = true
-	opts.IgnoreInlineComment = true
-	opts.AllowNonUniqueSections = true
-
-	abs, _ := filepath.Abs(input)
-	f, err := ini.LoadSources(opts, abs)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ffmeta := &FFMeta{}
-	ffmeta.tags = f.Section("").KeysHash()
-
-	if f.HasSection("chapter") {
-		sections, err := f.SectionsByName("chapter")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, ch := range sections {
-			var chap FFMetaChapter
-			ch.MapTo(&chap)
-			ffmeta.chapters = append(ffmeta.chapters, chap)
-		}
-	}
-
-	return ffmeta
 }
 
 func (ff FFMeta) Dump() []byte {
