@@ -18,10 +18,11 @@ var probeCmd = &cobra.Command{
 		//m := media.New(input).LoadCue(input)
 		//m := media.New(input).LoadIni(input)
 		m := media.New(input).Probe()
+		fmt.Printf("meta %+V\n", m.Filename)
+		media.ExtractCover(m)
 		//m.SetMeta(meta)
 		//meta := meta.FFProbe(input)
 		//meta := meta.LoadIni(input)
-		fmt.Printf("meta %+V\n", m.Streams)
 	},
 }
 
