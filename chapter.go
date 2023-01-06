@@ -10,15 +10,6 @@ type Number interface {
 	int | int32 | int64 | float32 | float64
 }
 
-type Chapters []*Chapter
-
-type Chapter struct {
-	start timestamp.Time
-	end   timestamp.Time
-	base  timestamp.Timebase
-	Title string
-}
-
 func NewChapter[N Number](times ...N) *Chapter {
 	var base float64 = 1
 	var start float64 = 0

@@ -76,12 +76,13 @@ func (s *CueSheet) SetAudio(name string) *CueSheet {
 }
 
 func (s CueSheet) File() string {
-	return s.Audio.Abs
+	return s.Audio
 }
 
 func (s CueSheet) Ext() string {
-	ext := strings.TrimPrefix(s.Audio.Ext, ".")
-	return strings.ToUpper(ext)
+	//ext := strings.TrimPrefix(s.Audio.Ext, ".")
+	//return strings.ToUpper(ext)
+	return ""
 }
 
 func cueFile(line string) string {
@@ -114,7 +115,7 @@ func (s CueSheet) Dump() []byte {
 		buf  bytes.Buffer
 	)
 
-	if s.Audio.Abs == "" {
+	if s.Audio == "" {
 		//s.Audio = file.New("tmp")
 	}
 
@@ -135,11 +136,11 @@ func (s CueSheet) Write(wr io.Writer) error {
 }
 
 func (s CueSheet) Save() error {
-	return s.SaveAs(s.Audio.Abs)
+	return s.SaveAs(s.Audio)
 }
 
 func (s CueSheet) SaveAs(name string) error {
-	if name == "" || s.Audio.Abs == "" {
+	if name == "" || s.Audio == "" {
 		name = "tmp"
 	}
 

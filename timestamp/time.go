@@ -5,10 +5,16 @@ import (
 	"log"
 	"math"
 	"strconv"
+
+	"golang.org/x/exp/constraints"
 )
 
 type Number interface {
 	int | int32 | int64 | float32 | float64
+}
+
+type Num interface {
+	constraints.Integer | constraints.Float
 }
 
 type Time struct {
@@ -34,7 +40,7 @@ func NewTimeStamp[N Number](num N) Time {
 	}
 }
 
-func NewerTimeStamp[N Number](t, base N) Time {
+func NewerTimeStamp[N Num](t, base N) Time {
 	return Time{
 		Duration: float64(t),
 		Base:     Timebase(base),

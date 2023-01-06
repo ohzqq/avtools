@@ -18,7 +18,8 @@ var probeCmd = &cobra.Command{
 		//media := avtools.NewMedia(input)
 		//fmt.Printf("media %+V\n", media.FFmeta.Chapters[0])
 		//fmt.Println(c.String())
-		meta := meta.FFProbe(input)
+		//meta := meta.FFProbe(input)
+		meta := meta.LoadIni(input)
 		fmt.Printf("meta %+V\n", meta)
 	},
 }

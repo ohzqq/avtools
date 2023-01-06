@@ -8,7 +8,7 @@ import (
 
 type Media struct {
 	input string
-	FFmeta
+	Meta
 	//Input    MediaFile
 	//Files    RelatedFiles
 	//cueSheet *cue.Sheet
@@ -31,7 +31,7 @@ func (m *Media) Probe() *Media {
 		log.Fatal(err)
 	}
 
-	var meta FFmeta
+	var meta Meta
 	err = json.Unmarshal(raw["format"], &meta)
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +44,7 @@ func (m *Media) Probe() *Media {
 
 	meta.Chapters = UnmarshalChapters(raw["chapters"])
 
-	m.FFmeta = meta
+	m.Meta = meta
 
 	fmt.Printf("%+V\n", meta)
 
