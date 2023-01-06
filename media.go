@@ -7,7 +7,7 @@ type Media struct {
 	BitRate  string
 	Tags     map[string]string
 	Chapters []*Chapter
-	streams  []map[string]string
+	Streams  []map[string]string
 }
 
 type Meta interface {
@@ -39,7 +39,7 @@ func (m *Media) SetMeta(meta Meta) *Media {
 		}
 	}
 	//if streams := meta.Streams(); len(streams) > 0 {
-	m.streams = meta.Streams()
+	m.Streams = meta.Streams()
 	//}
 	return m
 }

@@ -15,13 +15,13 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		m := media.New(input).LoadCue(input)
+		//m := media.New(input).LoadCue(input)
 		//m := media.New(input).LoadIni(input)
-		//m := media.New(input).Probe()
+		m := media.New(input).Probe()
 		//m.SetMeta(meta)
 		//meta := meta.FFProbe(input)
 		//meta := meta.LoadIni(input)
-		fmt.Printf("meta %+V\n", m)
+		fmt.Printf("meta %+V\n", m.VideoStreams())
 	},
 }
 

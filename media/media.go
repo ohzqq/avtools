@@ -15,11 +15,19 @@ import (
 
 type Media struct {
 	*avtools.Media
-	Input  File
-	Output File
-	FFmeta File
-	Cue    File
-	Cover  File
+	Streams []Stream
+	Input   File
+	Output  File
+	FFmeta  File
+	Cue     File
+	Cover   File
+}
+
+type Stream struct {
+	CodecType string
+	CodecName string
+	Index     string
+	IsCover   bool
 }
 
 func New(input string) *Media {
@@ -28,6 +36,26 @@ func New(input string) *Media {
 		Media: m,
 		Input: NewFile(input),
 	}
+}
+
+func (m Media) AudioStreams() []Stream {
+	var streams []Stream
+	for _, stream := range m.Streams {
+		if stream.CodecType == "audio" {
+			streams = append(streams, stream)
+		}
+	}
+	return streams
+}
+
+func (m Media) VideoStreams() []Stream {
+	var streams []Stream
+	for _, stream := range m.Streams {
+		if stream.CodecType == "video" {
+			streams = append(streams, stream)
+		}
+	}
+	return streams
 }
 
 func (m *Media) LoadIni(name string) *Media {
@@ -67,6 +95,28 @@ func (m *Media) LoadCue(name string) *Media {
 func (m *Media) Probe() *Media {
 	p := meta.FFProbe(m.Input.Abs)
 	m.SetMeta(p)
+
+	if len(m.Media.Streams) > 0 {
+		for _, stream := range m.Media.Streams {
+			s := Stream{}
+			for key, val := range stream {
+				switch key {
+				case "codec_type":
+					s.CodecType = val
+				case "codec_name":
+					s.CodecName = val
+				case "index":
+					s.Index = val
+				case "cover":
+					if val == "true" {
+						s.IsCover = true
+					}
+				}
+			}
+			m.Streams = append(m.Streams, s)
+		}
+	}
+
 	return m
 }
 

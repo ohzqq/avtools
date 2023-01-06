@@ -11,9 +11,9 @@ import (
 )
 
 type ProbeMeta struct {
-	StreamEntry  []map[string]string `json:"streams"`
-	Format       ProbeFormat         `json:"format"`
-	ChapterEntry []ProbeChapter      `json:"chapters"`
+	StreamEntry  []map[string]any `json:"streams"`
+	Format       ProbeFormat      `json:"format"`
+	ChapterEntry []ProbeChapter   `json:"chapters"`
 }
 
 type ProbeFormat struct {
@@ -59,7 +59,28 @@ func (m ProbeMeta) Chapters() []avtools.ChapterMeta {
 }
 
 func (m ProbeMeta) Streams() []map[string]string {
-	return m.StreamEntry
+	var streams []map[string]string
+	for _, stream := range m.StreamEntry {
+		meta := make(map[string]string)
+		for key, raw := range stream {
+			switch val := raw.(type) {
+			case float64:
+				meta[key] = strconv.Itoa(int(val))
+			case string:
+				meta[key] = val
+			case map[string]any:
+				if key == "disposition" {
+					if val["attached_pic"].(float64) == 0 {
+						meta["cover"] = "false"
+					} else {
+						meta["cover"] = "true"
+					}
+				}
+			}
+		}
+		streams = append(streams, meta)
+	}
+	return streams
 }
 
 func (m ProbeMeta) Tags() map[string]string {
@@ -68,15 +89,6 @@ func (m ProbeMeta) Tags() map[string]string {
 	m.Format.Tags["size"] = m.Format.Size
 	m.Format.Tags["bit_rate"] = m.Format.BitRate
 	return m.Format.Tags
-}
-
-func UnmarshalJSON(d []byte) ProbeMeta {
-	var meta ProbeMeta
-	err := json.Unmarshal(d, &meta)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return meta
 }
 
 func (c ProbeChapter) Title() string {
@@ -104,7 +116,7 @@ func (c ProbeChapter) Timebase() float64 {
 
 var probeArgs = []ffmpeg.KwArgs{
 	ffmpeg.KwArgs{"show_chapters": ""},
-	ffmpeg.KwArgs{"select_streams": "a"},
-	ffmpeg.KwArgs{"show_entries": "stream=codec_type,codec_name:format=filename, start_time, duration, size, bit_rate:format_tags"},
+	//ffmpeg.KwArgs{"select_streams": "a"},
+	ffmpeg.KwArgs{"show_entries": "stream:format=filename, start_time, duration, size, bit_rate:format_tags"},
 	ffmpeg.KwArgs{"of": "json"},
 }
