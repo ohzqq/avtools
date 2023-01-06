@@ -7,19 +7,14 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type Number interface {
-	int | int32 | int64 | float32 | float64
-}
-
 type Chapter struct {
 	start timestamp.Time
 	end   timestamp.Time
 	base  timestamp.Timebase
-	Title string
 	title string
 }
 
-type Num interface {
+type Number interface {
 	constraints.Integer | constraints.Float
 }
 
@@ -63,6 +58,10 @@ func (ch Chapter) End() timestamp.Time {
 
 func (ch Chapter) Timebase() timestamp.Timebase {
 	return ch.base
+}
+
+func (ch Chapter) Title() string {
+	return ch.title
 }
 
 func (ch Chapter) Dur() (timestamp.Time, error) {

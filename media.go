@@ -1,14 +1,13 @@
 package avtools
 
 type Media struct {
-	input string
-	Meta
-	Filename string            `json:"filename"`
-	Dur      string            `json:"duration"`
-	Size     string            `json:"size"`
-	BitRate  string            `json:"bit_rate"`
-	Tags     map[string]string `json:"tags"`
+	Filename string
+	Dur      string
+	Size     string
+	BitRate  string
+	Tags     map[string]string
 	Chapters []*Chapter
+	streams  []map[string]string
 	//Input    MediaFile
 	//Files    RelatedFiles
 	//cueSheet *cue.Sheet
@@ -22,7 +21,7 @@ type Metadata interface {
 
 func NewMedia(input string) *Media {
 	media := Media{
-		input: input,
+		Filename: input,
 	}
 	return &media
 }

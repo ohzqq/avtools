@@ -32,7 +32,6 @@ type CueTrack struct {
 func (cue CueSheet) Chapters() []avtools.ChapterMeta {
 	var chaps []avtools.ChapterMeta
 	for _, track := range cue.Tracks {
-		fmt.Printf("end %v\n", track.Start())
 		chaps = append(chaps, track)
 	}
 	return chaps
