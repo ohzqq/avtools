@@ -66,6 +66,7 @@ func (out Output) Merge(kwargs ffmpeg.KwArgs) Output {
 	out.Args = ffmpeg.MergeKwArgs(args)
 	return out
 }
+
 func (out Output) KwArgs() ffmpeg.KwArgs {
 	args := make(ffmpeg.KwArgs)
 	for key, val := range out.Args {

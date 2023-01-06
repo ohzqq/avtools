@@ -73,6 +73,7 @@ func (f Filter) Merge(filter Filter) Filter {
 }
 
 var filterOrder = []string{
+	"ffmetadata",
 	"yadif",
 	"fps",
 	"setpts",
@@ -98,6 +99,7 @@ func (f Filters) Compile() []filter {
 			case "palette":
 				filter = Palette(ffmpeg.KwArgs(args))
 			default:
+				println(name)
 				filter = newFilter(name, args.Args())
 			}
 			filters = append(filters, filter)

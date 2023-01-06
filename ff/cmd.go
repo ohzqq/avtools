@@ -1,6 +1,7 @@
 package ff
 
 import (
+	"fmt"
 	"log"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -42,6 +43,7 @@ func (cmd *Cmd) Compile() *ffmpeg.Stream {
 	in := input.Compile(cmd.File)
 
 	for _, filter := range cmd.Filters.Compile() {
+		fmt.Printf("filter %+V\n", filter)
 		in = filter(in)
 	}
 
