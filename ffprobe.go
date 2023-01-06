@@ -8,19 +8,6 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-type StreamEntry struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
-}
-
-type chapterEntry struct {
-	Base  string            `json:"time_base",ini:"timebase"`
-	Start int               `json:"start",ini:"start"`
-	End   int               `json:"end",ini:"end"`
-	Title string            `json:"title", ini:"title"`
-	Tags  map[string]string `json:"tags"`
-}
-
 var probeArgs = []ffmpeg.KwArgs{
 	ffmpeg.KwArgs{"show_chapters": ""},
 	ffmpeg.KwArgs{"select_streams": "a"},
