@@ -2,12 +2,10 @@ package avtools
 
 import (
 	"github.com/ohzqq/avtools/timestamp"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"golang.org/x/exp/constraints"
 )
 
 type Metadata interface {
-	//Chapters() Chapters
 	Chapters() []ChapterMeta
 	Tags() map[string]string
 	Streams() []map[string]string
@@ -19,24 +17,8 @@ type Meta struct {
 	Size     string            `json:"size"`
 	BitRate  string            `json:"bit_rate"`
 	Tags     map[string]string `json:"tags"`
-	Streams  []*Stream
 	Chapters []*Chapter
 	streams  []map[string]string
-}
-
-type StreamMeta interface {
-	CodecName() string
-	CodecType() string
-}
-
-type Stream struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
-	stream    *ffmpeg.Stream
-}
-
-type Chapters interface {
-	Each() []ChapterMeta
 }
 
 type Chapter struct {
@@ -56,13 +38,4 @@ type ChapterMeta interface {
 	End() float64
 	Timebase() float64
 	Title() string
-}
-
-func NewerChapter(meta ChapterMeta) *Chapter {
-	return &Chapter{
-		base:  timestamp.Timebase(meta.Timebase()),
-		start: timestamp.NewerTimeStamp(meta.Start(), meta.Timebase()),
-		end:   timestamp.NewerTimeStamp(meta.End(), meta.Timebase()),
-		title: meta.Title(),
-	}
 }

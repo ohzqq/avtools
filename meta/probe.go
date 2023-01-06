@@ -6,18 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ohzqq/avtools"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 type ProbeMeta struct {
-	Streams  []*ProbeStream `json:"streams"`
-	Format   ProbeFormat    `json:"format"`
-	Chapters []ProbeChapter `json:"chapters"`
-}
-
-type ProbeStream struct {
-	CodecName string `json:"codec_name"`
-	CodecType string `json:"codec_type"`
+	StreamEntry  []map[string]string `json:"streams"`
+	Format       ProbeFormat         `json:"format"`
+	ChapterEntry []ProbeChapter      `json:"chapters"`
 }
 
 type ProbeFormat struct {
@@ -30,17 +26,30 @@ type ProbeFormat struct {
 
 type ProbeChapter struct {
 	Base         string            `json:"time_base"`
-	StartTime    int               `json:"start"`
-	EndTime      int               `json:"end"`
+	StartTime    float64           `json:"start"`
+	EndTime      float64           `json:"end"`
 	ChapterTitle string            `json:"title"`
 	Tags         map[string]string `json:"tags"`
 }
 
-var probeArgs = []ffmpeg.KwArgs{
-	ffmpeg.KwArgs{"show_chapters": ""},
-	ffmpeg.KwArgs{"select_streams": "a"},
-	ffmpeg.KwArgs{"show_entries": "stream=codec_type,codec_name:format=filename, start_time, duration, size, bit_rate:format_tags"},
-	ffmpeg.KwArgs{"of": "json"},
+func (m ProbeMeta) Chapters() []avtools.ChapterMeta {
+	var chaps []avtools.ChapterMeta
+	for _, ch := range m.ChapterEntry {
+		chaps = append(chaps, ch)
+	}
+	return chaps
+}
+
+func (m ProbeMeta) Streams() []map[string]string {
+	return m.StreamEntry
+}
+
+func (m ProbeMeta) Tags() map[string]string {
+	m.Format.Tags["filename"] = m.Format.Filename
+	m.Format.Tags["duration"] = m.Format.Dur
+	m.Format.Tags["size"] = m.Format.Size
+	m.Format.Tags["bit_rate"] = m.Format.BitRate
+	return m.Format.Tags
 }
 
 func FFProbe(input string) ProbeMeta {
@@ -77,11 +86,11 @@ func (c ProbeChapter) Title() string {
 	return c.ChapterTitle
 }
 
-func (c ProbeChapter) Start() int {
+func (c ProbeChapter) Start() float64 {
 	return c.StartTime
 }
 
-func (c ProbeChapter) End() int {
+func (c ProbeChapter) End() float64 {
 	return c.EndTime
 }
 
@@ -91,4 +100,11 @@ func (c ProbeChapter) Timebase() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(c.Base, 64)
 	return baseFloat
+}
+
+var probeArgs = []ffmpeg.KwArgs{
+	ffmpeg.KwArgs{"show_chapters": ""},
+	ffmpeg.KwArgs{"select_streams": "a"},
+	ffmpeg.KwArgs{"show_entries": "stream=codec_type,codec_name:format=filename, start_time, duration, size, bit_rate:format_tags"},
+	ffmpeg.KwArgs{"of": "json"},
 }
