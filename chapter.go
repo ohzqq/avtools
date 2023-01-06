@@ -4,10 +4,30 @@ import (
 	"fmt"
 
 	"github.com/ohzqq/avtools/timestamp"
+	"golang.org/x/exp/constraints"
 )
 
 type Number interface {
 	int | int32 | int64 | float32 | float64
+}
+
+type Chapter struct {
+	start timestamp.Time
+	end   timestamp.Time
+	base  timestamp.Timebase
+	Title string
+	title string
+}
+
+type Num interface {
+	constraints.Integer | constraints.Float
+}
+
+type ChapterMeta interface {
+	Start() float64
+	End() float64
+	Timebase() float64
+	Title() string
 }
 
 func NewChapter[N Number](times ...N) *Chapter {

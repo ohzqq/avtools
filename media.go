@@ -14,6 +14,12 @@ type Media struct {
 	//cueSheet *cue.Sheet
 }
 
+type Metadata interface {
+	Chapters() []ChapterMeta
+	Tags() map[string]string
+	Streams() []map[string]string
+}
+
 func NewMedia(input string) *Media {
 	media := Media{
 		input: input,
