@@ -10,7 +10,9 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
+
+	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/avtools/timestamp"
 )
 
 type CueSheet struct {
@@ -18,13 +20,32 @@ type CueSheet struct {
 	Audio      string
 	Tracks     []CueTrack
 	titles     []string
-	startTimes []int
+	startTimes []float64
 }
 
 type CueTrack struct {
 	title string
-	start int
-	end   int
+	start float64
+	end   float64
+}
+
+func (cue CueSheet) Chapters() []avtools.ChapterMeta {
+	var chaps []avtools.ChapterMeta
+	for _, track := range cue.Tracks {
+		fmt.Printf("end %v\n", track.Start())
+		chaps = append(chaps, track)
+	}
+	return chaps
+}
+
+func (cue CueSheet) Tags() map[string]string {
+	return map[string]string{
+		"filename": cue.Audio,
+	}
+}
+
+func (cue CueSheet) Streams() []map[string]string {
+	return []map[string]string{}
 }
 
 func NewCueSheet(f string) *CueSheet {
@@ -99,14 +120,9 @@ func title(line string) string {
 	return t
 }
 
-func start(line string) int {
+func start(line string) float64 {
 	stamp := strings.TrimPrefix(line, "INDEX 01 ")
-	split := strings.Split(stamp, ":")
-	dur, err := time.ParseDuration(split[0] + "m" + split[1] + "s")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return int(dur.Seconds())
+	return timestamp.ParseHHSS(stamp)
 }
 
 func (s CueSheet) Dump() []byte {
@@ -168,23 +184,23 @@ func (t *CueTrack) SetTitle(title string) *CueTrack {
 	return t
 }
 
-func (t CueTrack) Start() int {
+func (t CueTrack) Start() float64 {
 	return t.start
 }
 
 func (t CueTrack) Stamp() string {
-	mm := t.start / 60
-	ss := t.start % 60
+	mm := int(t.start) / 60
+	ss := int(t.start) % 60
 	start := fmt.Sprintf("%02d:%02d:00", mm, ss)
 	return start
 }
 
-func (t *CueTrack) SetStart(secs int) *CueTrack {
+func (t *CueTrack) SetStart(secs float64) *CueTrack {
 	t.start = secs
 	return t
 }
 
-func (t CueTrack) End() int {
+func (t CueTrack) End() float64 {
 	return t.end
 }
 

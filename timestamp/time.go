@@ -5,6 +5,8 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
+	"time"
 
 	"golang.org/x/exp/constraints"
 )
@@ -40,9 +42,20 @@ func NewTimeStamp[N Number](num N) Time {
 	}
 }
 
-func NewerTimeStamp[N Num](t, base N) Time {
+func NewerTimeStamp[N Num](times ...N) Time {
+	var base float64 = 1
+	var dur float64 = 0
+
+	switch t := len(times); t {
+	case 2:
+		base = float64(times[1])
+		fallthrough
+	case 1:
+		dur = float64(times[0])
+	}
+
 	return Time{
-		Duration: float64(t),
+		Duration: float64(dur),
 		Base:     Timebase(base),
 	}
 }
@@ -61,6 +74,16 @@ func StringToFloat(t string) float64 {
 		log.Fatal(err)
 	}
 	return i
+}
+
+func ParseHHSS(stamp string) float64 {
+	split := strings.Split(stamp, ":")
+	d := split[0] + "m" + split[1] + "s"
+	dur, err := time.ParseDuration(d)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return float64(dur)
 }
 
 func ParseNumber[N Number](num N, dig int) string {

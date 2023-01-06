@@ -17,7 +17,8 @@ var probeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		media := avtools.NewMedia(input)
-		meta := meta.FFProbe(input)
+		//meta := meta.FFProbe(input)
+		meta := meta.LoadCueSheet(input)
 		//meta := meta.LoadIni(input)
 		media.SetMeta(meta)
 		fmt.Printf("meta %+V\n", media)
