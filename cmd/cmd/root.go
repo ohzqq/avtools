@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"mime"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -37,6 +38,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	mime.AddExtensionType(".ini", "text/plain")
+	mime.AddExtensionType(".cue", "text/plain")
+	mime.AddExtensionType(".m4b", "audio/mp4")
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.

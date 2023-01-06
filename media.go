@@ -13,7 +13,7 @@ type Media struct {
 	//cueSheet *cue.Sheet
 }
 
-type Metadata interface {
+type Meta interface {
 	Chapters() []ChapterMeta
 	Tags() map[string]string
 	Streams() []map[string]string
@@ -26,7 +26,7 @@ func NewMedia(input string) *Media {
 	return &media
 }
 
-func (m *Media) SetMeta(meta Metadata) *Media {
+func (m *Media) SetMeta(meta Meta) *Media {
 	if tags := meta.Tags(); tags != nil {
 		m.Tags = tags
 	}
