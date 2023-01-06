@@ -21,7 +21,7 @@ var probeCmd = &cobra.Command{
 		//m.SetMeta(meta)
 		//meta := meta.FFProbe(input)
 		//meta := meta.LoadIni(input)
-		fmt.Printf("meta %+V\n", m.VideoStreams())
+		fmt.Printf("meta %+V\n", m.Streams)
 	},
 }
 

@@ -15,12 +15,13 @@ import (
 
 type Media struct {
 	*avtools.Media
-	Streams []Stream
-	Input   File
-	Output  File
-	FFmeta  File
-	Cue     File
-	Cover   File
+	Streams  []Stream
+	Input    File
+	Output   File
+	FFmeta   File
+	Cue      File
+	Cover    File
+	HasCover bool
 }
 
 type Stream struct {
@@ -110,6 +111,7 @@ func (m *Media) Probe() *Media {
 				case "cover":
 					if val == "true" {
 						s.IsCover = true
+						m.HasCover = true
 					}
 				}
 			}
