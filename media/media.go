@@ -39,6 +39,10 @@ func New(input string) *Media {
 	}
 }
 
+func (m Media) HasChapters() bool {
+	return len(m.Chapters) > 0
+}
+
 func (m Media) AudioStreams() []Stream {
 	var streams []Stream
 	for _, stream := range m.Streams {
