@@ -60,7 +60,7 @@ func (m Media) DumpIni() []byte {
 		if err != nil {
 			log.Fatal(err)
 		}
-		sec.NewKey("TIMEBASE", chapter.Timebase().String())
+		sec.NewKey("TIMEBASE", chapter.Timebase())
 		sec.NewKey("START", chapter.Start().String())
 		sec.NewKey("END", chapter.End().String())
 		sec.NewKey("title", chapter.Title())

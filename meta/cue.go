@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ohzqq/avtools"
 )
@@ -19,13 +20,13 @@ type CueSheet struct {
 	Audio      string
 	Tracks     []CueTrack
 	titles     []string
-	startTimes []float64
+	startTimes []time.Duration
 }
 
 type CueTrack struct {
 	title string
-	start float64
-	end   float64
+	start time.Duration
+	end   time.Duration
 }
 
 func LoadCueSheet(file string) *CueSheet {
@@ -118,9 +119,9 @@ func title(line string) string {
 	return t
 }
 
-func start(line string) float64 {
+func start(line string) time.Duration {
 	stamp := strings.TrimPrefix(line, "INDEX 01 ")
-	return avtools.ParseStamp(stamp).Seconds()
+	return avtools.ParseStamp(stamp)
 }
 
 func (s CueSheet) Dump() []byte {
@@ -182,10 +183,6 @@ func (t *CueTrack) SetTitle(title string) *CueTrack {
 	return t
 }
 
-func (t CueTrack) Start() float64 {
-	return t.start
-}
-
 func (t CueTrack) Stamp() string {
 	mm := int(t.start) / 60
 	ss := int(t.start) % 60
@@ -194,11 +191,15 @@ func (t CueTrack) Stamp() string {
 }
 
 func (t *CueTrack) SetStart(secs float64) *CueTrack {
-	t.start = secs
+	//t.start = secs
 	return t
 }
 
-func (t CueTrack) End() float64 {
+func (t CueTrack) Start() time.Duration {
+	return t.start
+}
+
+func (t CueTrack) End() time.Duration {
 	return t.end
 }
 

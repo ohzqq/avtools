@@ -1,7 +1,7 @@
 package avtools
 
 import (
-	"fmt"
+	"time"
 )
 
 type Media struct {
@@ -17,14 +17,12 @@ type Media struct {
 type Chapter struct {
 	start Time
 	end   Time
-	base  Timebase
 	title string
 }
 
 type ChapterMeta interface {
-	Start() float64
-	End() float64
-	Timebase() float64
+	Start() time.Duration
+	End() time.Duration
 	Title() string
 }
 
@@ -59,9 +57,8 @@ func (m *Media) SetMeta(meta Meta) *Media {
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
 		title: chap.Title(),
-		start: Timestamp(chap.Start(), chap.Timebase()),
-		end:   Timestamp(chap.End(), chap.Timebase()),
-		base:  Timebase(chap.Timebase()),
+		start: Timestamp(chap.Start()),
+		end:   Timestamp(chap.End()),
 	}
 }
 
@@ -73,19 +70,19 @@ func (ch Chapter) End() Time {
 	return ch.end
 }
 
-func (ch Chapter) Timebase() Timebase {
-	return ch.base
+func (ch Chapter) Timebase() string {
+	return "1/1000"
 }
 
 func (ch Chapter) Title() string {
 	return ch.title
 }
 
-func (ch Chapter) Dur() (Time, error) {
-	if ch.end.Duration == 0 {
-		return ch.end, fmt.Errorf("end time is needed to calculate duration")
-	}
-	t := ch.end.Duration - ch.start.Duration
-	stamp := Timestamp(t, float64(ch.base))
-	return stamp, nil
-}
+//func (ch Chapter) Dur() (Time, error) {
+//  if ch.end.Duration == 0 {
+//    return ch.end, fmt.Errorf("end time is needed to calculate duration")
+//  }
+//  t := ch.end.Duration - ch.start.Duration
+//  stamp := NewTime(t, float64(ch.base))
+//  return stamp, nil
+//}

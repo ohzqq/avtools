@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ohzqq/avtools"
 	"gopkg.in/ini.v1"
@@ -71,12 +72,12 @@ func (ff FFMeta) Streams() []map[string]string {
 	return []map[string]string{}
 }
 
-func (ch FFMetaChapter) Start() float64 {
-	return ch.StartTime
+func (ch FFMetaChapter) Start() time.Duration {
+	return avtools.ParseStampDuration(ch.StartTime, ch.Timebase())
 }
 
-func (ch FFMetaChapter) End() float64 {
-	return ch.EndTime
+func (ch FFMetaChapter) End() time.Duration {
+	return avtools.ParseStampDuration(ch.EndTime, ch.Timebase())
 }
 
 func (ch FFMetaChapter) Title() string {

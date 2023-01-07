@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 )
 
@@ -16,55 +17,38 @@ type Number interface {
 }
 
 type Time struct {
-	Duration float64
-	Dur      time.Duration
-	base     float64
-	Tbase    Timebase
-	Base
+	hh  int
+	mm  int
+	ss  float64
+	Dur time.Duration
 }
 
-type Timebase float64
+func Timestamp(d time.Duration) Time {
+	stamp := Time{Dur: d}
 
-type Base struct {
-	time float64
-}
+	t := strings.SplitAfter(d.String(), "m")
+	ss := strings.TrimSuffix(t[len(t)-1], "s")
+	stamp.ss = StringToFloat(ss)
 
-func (t Base) String() string {
-	return "1/" + ParseNumber(t.time, 0)
-}
+	t = lo.DropRight(t, 1)
 
-func (t Base) Float() float64 {
-	return t.time
-}
+	if len(t) > 0 {
+		t = strings.SplitAfter(t[0], "h")
+		mm := strings.TrimSuffix(t[len(t)-1], "m")
+		stamp.mm, _ = strconv.Atoi(mm)
+		t = lo.DropRight(t, 1)
 
-func (t Timebase) String() string {
-	return "1/" + ParseNumber(t.Float(), 0)
-}
-
-func (t Timebase) Float() float64 {
-	return float64(t)
-}
-
-func Timestamp[N Number](t N, b ...N) Time {
-	var base float64 = 1
-	if len(b) > 0 {
-		base = float64(b[0])
-	} else {
-		b = []N{1}
+		if len(t) > 0 {
+			hh := strings.TrimSuffix(t[len(t)-1], "h")
+			stamp.hh, _ = strconv.Atoi(hh)
+		}
 	}
-	dur := float64(t)
 
-	return Time{
-		Duration: float64(dur),
-		Tbase:    Timebase(base),
-		Base: Base{
-			time: base,
-		},
-	}
+	return stamp
 }
 
 func ParseString(t string) Time {
-	return Timestamp(ParseStamp(t).Milliseconds(), 1000)
+	return Timestamp(ParseStamp(t))
 }
 
 func StringToFloat(t string) float64 {
@@ -78,26 +62,35 @@ func StringToFloat(t string) float64 {
 func ParseStamp(t string) time.Duration {
 	var hh string
 	var mm string
-	var ss float64
+	var ss string
 	switch split := strings.Split(t, ":"); len(split) {
 	case 3:
 		hh = split[0] + "h"
 		mm = split[1] + "m"
-		ss = StringToFloat(split[2])
+		ss = split[2] + "s"
 	case 2:
 		mm = split[0] + "m"
-		ss = StringToFloat(split[1])
+		ss = split[1] + "s"
 	case 1:
-		ss = StringToFloat(split[0])
+		ss = split[0] + "s"
 	}
-	ms := strconv.Itoa(int(ss*1000)) + "ms"
-	stamp := fmt.Sprintf("%s%s%s", hh, mm, ms)
-	dur, err := time.ParseDuration(stamp)
+	stamp := fmt.Sprintf("%s%s%s", hh, mm, ss)
+
+	return parseDur(stamp)
+}
+
+func ParseStampDuration[N Number](t, b N) time.Duration {
+	secs := float64(t) / float64(b)
+	ms := secs * 1000
+	d := strconv.Itoa(int(ms)) + "ms"
+	return parseDur(d)
+}
+
+func parseDur(d string) time.Duration {
+	dur, err := time.ParseDuration(d)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	println(stamp)
 	return dur
 }
 
@@ -105,38 +98,25 @@ func ParseNumber[N Number](num N, dig int) string {
 	return strconv.FormatFloat(float64(num), 'f', dig, 64)
 }
 
-func (ch *Time) SetTimebase(base float64) {
-	ch.Tbase = Timebase(base)
+func (ch Time) secs() int {
+	ss := int(math.Round(ch.ss))
+	return ss
 }
 
-func (ch Time) Secs() int {
-	secs := ch.Duration / ch.Tbase.Float()
-	return int(math.Round(secs))
+func (c Time) String() string {
+	return fmt.Sprintf("%02d:%02d:%06.3f", c.hh, c.mm, c.ss)
 }
 
-func (ch Time) Float() float64 {
-	return ch.Duration
-}
-
-func (ch Time) String() string {
-	return ParseNumber(ch.Duration, 0)
-}
-
-func (ch Time) SecsString() string {
-	return ParseNumber(ch.Duration/ch.Tbase.Float(), 3)
+func (ch Time) Min() int {
+	min := ch.Dur.Minutes()
+	mm := int(math.Round(min))
+	return mm
 }
 
 func (c Time) HHMMSS() string {
-	secs := c.Secs()
-	hh := secs / 3600
-	mm := secs % 3600 / 60
-	ss := secs % 3600 % 60
-	return fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss)
+	return fmt.Sprintf("%02d:%02d:%02d", c.hh, c.mm, c.secs())
 }
 
 func (c Time) MMSS() string {
-	secs := c.Secs()
-	mm := secs / 60
-	ss := secs % 60
-	return fmt.Sprintf("%02d:%02d", mm, ss)
+	return fmt.Sprintf("%02d:%02d", c.Min(), c.secs())
 }

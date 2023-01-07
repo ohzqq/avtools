@@ -2,10 +2,10 @@ package meta
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ohzqq/avtools"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -26,9 +26,11 @@ type ProbeFormat struct {
 }
 
 type ProbeChapter struct {
-	Base         string            `json:"time_base"`
-	StartTime    float64           `json:"start"`
-	EndTime      float64           `json:"end"`
+	Base      string `json:"time_base"`
+	StartTime string `json:"start_time"`
+	//StartTime    float64           `json:"start"`
+	//EndTime      float64           `json:"end"`
+	EndTime      string            `json:"end_time"`
 	ChapterTitle string            `json:"title"`
 	Tags         map[string]string `json:"tags"`
 }
@@ -39,7 +41,7 @@ func FFProbe(input string) ProbeMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(info)
+	//fmt.Println(info)
 
 	data := []byte(info)
 
@@ -100,12 +102,22 @@ func (c ProbeChapter) Title() string {
 	return c.ChapterTitle
 }
 
-func (c ProbeChapter) Start() float64 {
-	return c.StartTime
+func (ch ProbeChapter) Start() time.Duration {
+	dur, err := time.ParseDuration(ch.StartTime + "s")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dur
+	//return avtools.ParseStampDuration(ch.StartTime, ch.Timebase())
 }
 
-func (c ProbeChapter) End() float64 {
-	return c.EndTime
+func (ch ProbeChapter) End() time.Duration {
+	dur, err := time.ParseDuration(ch.EndTime + "s")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dur
+	//return avtools.ParseStampDuration(ch.EndTime, ch.Timebase())
 }
 
 func (c ProbeChapter) Timebase() float64 {

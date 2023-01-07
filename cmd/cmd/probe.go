@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
@@ -19,10 +18,11 @@ var probeCmd = &cobra.Command{
 		//m := media.New(input).LoadCue(input)
 		//m := media.New(input).LoadIni(input)
 		m := media.New(input).Probe()
+		fmt.Printf("meta %+V\n", m.Chapters[0].Start().String())
 		fmt.Printf("meta %+V\n", m.Chapters[0].Start().HHMMSS())
-		fmt.Printf("meta %+V\n", m.Chapters[0].End().Dur.Seconds())
-		stamp := avtools.ParseString("60:01:10.998")
-		fmt.Printf("%v\n", stamp.HHMMSS())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start().String())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start().HHMMSS())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start().MMSS())
 		//cue := m.DumpFFMeta()
 		//cue.Compile().Run()
 		//fmt.Printf("cue %+V\n", string(cue))
