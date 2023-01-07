@@ -2,8 +2,6 @@ package avtools
 
 import (
 	"fmt"
-
-	"github.com/ohzqq/avtools/timestamp"
 )
 
 type Media struct {
@@ -17,9 +15,9 @@ type Media struct {
 }
 
 type Chapter struct {
-	start timestamp.Time
-	end   timestamp.Time
-	base  timestamp.Timebase
+	start Time
+	end   Time
+	base  Timebase
 	title string
 }
 
@@ -49,13 +47,7 @@ func (m *Media) SetMeta(meta Meta) *Media {
 	}
 	if chaps := meta.Chapters(); len(chaps) > 0 {
 		for _, chap := range chaps {
-			ch := NewChapter(
-				chap.Start(),
-				chap.End(),
-				chap.Timebase(),
-			)
-			ch.title = chap.Title()
-			m.Chapters = append(m.Chapters, ch)
+			m.Chapters = append(m.Chapters, NewChapter(chap))
 		}
 	}
 	//if streams := meta.Streams(); len(streams) > 0 {
@@ -64,35 +56,24 @@ func (m *Media) SetMeta(meta Meta) *Media {
 	return m
 }
 
-func NewChapter[N Number](times ...N) *Chapter {
-	var base float64 = 1
-
-	var chapter Chapter
-
-	switch t := len(times); t {
-	case 3:
-		base = float64(times[2])
-		chapter.base = timestamp.Timebase(base)
-		fallthrough
-	case 2:
-		chapter.end = timestamp.NewerTimeStamp(times[1], base)
-		fallthrough
-	case 1:
-		chapter.start = timestamp.NewerTimeStamp(times[0], base)
+func NewChapter(chap ChapterMeta) *Chapter {
+	return &Chapter{
+		title: chap.Title(),
+		start: NewerTimeStamp(chap.Start()),
+		end:   NewerTimeStamp(chap.End()),
+		base:  Timebase(chap.Timebase()),
 	}
-
-	return &chapter
 }
 
-func (ch Chapter) Start() timestamp.Time {
+func (ch Chapter) Start() Time {
 	return ch.start
 }
 
-func (ch Chapter) End() timestamp.Time {
+func (ch Chapter) End() Time {
 	return ch.end
 }
 
-func (ch Chapter) Timebase() timestamp.Timebase {
+func (ch Chapter) Timebase() Timebase {
 	return ch.base
 }
 
@@ -100,11 +81,11 @@ func (ch Chapter) Title() string {
 	return ch.title
 }
 
-func (ch Chapter) Dur() (timestamp.Time, error) {
+func (ch Chapter) Dur() (Time, error) {
 	if ch.end.Duration == 0 {
 		return ch.end, fmt.Errorf("end time is needed to calculate duration")
 	}
 	t := ch.end.Duration - ch.start.Duration
-	stamp := timestamp.NewerTimeStamp(t, float64(ch.base))
+	stamp := NewerTimeStamp(t, float64(ch.base))
 	return stamp, nil
 }
