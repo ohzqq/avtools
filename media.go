@@ -59,8 +59,8 @@ func (m *Media) SetMeta(meta Meta) *Media {
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
 		title: chap.Title(),
-		start: Timestamp(chap.Start()),
-		end:   Timestamp(chap.End()),
+		start: Timestamp(chap.Start(), chap.Timebase()),
+		end:   Timestamp(chap.End(), chap.Timebase()),
 		base:  Timebase(chap.Timebase()),
 	}
 }

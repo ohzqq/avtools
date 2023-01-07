@@ -17,7 +17,7 @@ type Number interface {
 
 type Time struct {
 	Duration float64
-	dur      time.Duration
+	Dur      time.Duration
 	base     float64
 	Tbase    Timebase
 	Base
@@ -34,7 +34,7 @@ func (t Base) String() string {
 }
 
 func (t Base) Float() float64 {
-	return float64(t)
+	return t.time
 }
 
 func (t Timebase) String() string {
@@ -49,6 +49,8 @@ func Timestamp[N Number](t N, b ...N) Time {
 	var base float64 = 1
 	if len(b) > 0 {
 		base = float64(b[0])
+	} else {
+		b = []N{1}
 	}
 	dur := float64(t)
 
@@ -95,6 +97,7 @@ func ParseStamp(t string) time.Duration {
 		log.Fatal(err)
 	}
 
+	println(stamp)
 	return dur
 }
 
