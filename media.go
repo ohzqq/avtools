@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ohzqq/avtools/timestamp"
-	"golang.org/x/exp/constraints"
 )
 
 type Media struct {
@@ -29,10 +28,6 @@ type ChapterMeta interface {
 	End() float64
 	Timebase() float64
 	Title() string
-}
-
-type Number interface {
-	constraints.Integer | constraints.Float
 }
 
 type Meta interface {
@@ -71,25 +66,22 @@ func (m *Media) SetMeta(meta Meta) *Media {
 
 func NewChapter[N Number](times ...N) *Chapter {
 	var base float64 = 1
-	var start float64 = 0
-	var end float64 = 0
+
+	var chapter Chapter
 
 	switch t := len(times); t {
 	case 3:
 		base = float64(times[2])
+		chapter.base = timestamp.Timebase(base)
 		fallthrough
 	case 2:
-		end = float64(times[1])
+		chapter.end = timestamp.NewerTimeStamp(times[1], base)
 		fallthrough
 	case 1:
-		start = float64(times[0])
+		chapter.start = timestamp.NewerTimeStamp(times[0], base)
 	}
 
-	return &Chapter{
-		base:  timestamp.Timebase(base),
-		start: timestamp.NewerTimeStamp(start, base),
-		end:   timestamp.NewerTimeStamp(end, base),
-	}
+	return &chapter
 }
 
 func (ch Chapter) Start() timestamp.Time {
