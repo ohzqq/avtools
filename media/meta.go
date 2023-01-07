@@ -3,7 +3,6 @@ package media
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -27,13 +26,11 @@ func (m *Media) LoadIni(name string) *Media {
 		line := 0
 		for scanner.Scan() {
 			if line == 0 && scanner.Text() == ";FFMETADATA1" {
-				fmt.Println(scanner.Text())
 				ini := meta.LoadIni(file.Abs)
 				m.SetMeta(ini)
 				m.FFmeta = file
 				break
 			} else {
-				fmt.Println(scanner.Text())
 				log.Fatalln("ffmpeg metadata files need to have ';FFMETADATA1' as the first line")
 			}
 		}
@@ -64,8 +61,8 @@ func (m Media) DumpIni() []byte {
 			log.Fatal(err)
 		}
 		sec.NewKey("TIMEBASE", chapter.Timebase())
-		sec.NewKey("START", chapter.Start().String())
-		sec.NewKey("END", chapter.End().String())
+		sec.NewKey("START", chapter.Start().MS())
+		sec.NewKey("END", chapter.End().MS())
 		sec.NewKey("title", chapter.Title())
 	}
 

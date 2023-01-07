@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ohzqq/avtools"
 	"gopkg.in/ini.v1"
@@ -17,9 +16,8 @@ import (
 const FFmetaComment = ";FFMETADATA1\n"
 
 type FFMeta struct {
-	tags     map[string]string
-	chapters []avtools.ChapterMeta
-	chaps    []*avtools.Chapter
+	tags  map[string]string
+	chaps []*avtools.Chapter
 }
 
 type FFMetaChapter struct {
@@ -54,40 +52,19 @@ func LoadIni(input string) *FFMeta {
 		for _, ch := range sections {
 			var chap FFMetaChapter
 			ch.MapTo(&chap)
-			ffmeta.chapters = append(ffmeta.chapters, chap)
-			ffmeta.chaps = append(ffmeta.chaps, chap.Chap())
+			ffmeta.chaps = append(ffmeta.chaps, chap.chap())
 		}
 	}
 
 	return ffmeta
 }
 
-func (ch FFMetaChapter) Chap() *avtools.Chapter {
+func (ch FFMetaChapter) chap() *avtools.Chapter {
 	return &avtools.Chapter{
 		StartTime: avtools.Timestamp(avtools.ParseStampDuration(ch.StartTime, ch.Timebase())),
 		EndTime:   avtools.Timestamp(avtools.ParseStampDuration(ch.EndTime, ch.Timebase())),
 		ChTitle:   ch.ChapterTitle,
 	}
-}
-
-func (ch FFMetaChapter) Start() time.Duration {
-	return avtools.ParseStampDuration(ch.StartTime, ch.Timebase())
-}
-
-func (ch FFMetaChapter) End() time.Duration {
-	return avtools.ParseStampDuration(ch.EndTime, ch.Timebase())
-}
-
-func (ch FFMetaChapter) Title() string {
-	return ch.ChapterTitle
-}
-
-func (ch FFMetaChapter) Timebase() float64 {
-	if tb := ch.Base; tb != "" {
-		ch.Base = strings.TrimPrefix(tb, "1/")
-	}
-	baseFloat, _ := strconv.ParseFloat(ch.Base, 64)
-	return baseFloat
 }
 
 func (ff FFMeta) Chapters() []*avtools.Chapter {
@@ -100,6 +77,14 @@ func (ff FFMeta) Tags() map[string]string {
 
 func (ff FFMeta) Streams() []map[string]string {
 	return []map[string]string{}
+}
+
+func (ch FFMetaChapter) Timebase() float64 {
+	if tb := ch.Base; tb != "" {
+		ch.Base = strings.TrimPrefix(tb, "1/")
+	}
+	baseFloat, _ := strconv.ParseFloat(ch.Base, 64)
+	return baseFloat
 }
 
 func (ff FFMeta) Dump() []byte {

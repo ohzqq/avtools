@@ -5,7 +5,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ohzqq/avtools"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -58,15 +57,11 @@ func (ch ProbeChapter) Chap() *avtools.Chapter {
 	return &avtools.Chapter{
 		StartTime: avtools.Timestamp(avtools.ParseDuration(ch.StartTime + "s")),
 		EndTime:   avtools.Timestamp(avtools.ParseDuration(ch.EndTime + "s")),
-		ChTitle:   ch.ChapterTitle,
+		ChTitle:   ch.Title(),
 	}
 }
 
 func (m ProbeMeta) Chapters() []*avtools.Chapter {
-	var chaps []avtools.ChapterMeta
-	for _, ch := range m.ChapterEntry {
-		chaps = append(chaps, ch)
-	}
 	var ch []*avtools.Chapter
 	for _, c := range m.ChapterEntry {
 		ch = append(ch, c.Chap())
@@ -112,24 +107,6 @@ func (c ProbeChapter) Title() string {
 		return t
 	}
 	return c.ChapterTitle
-}
-
-func (ch ProbeChapter) Start() time.Duration {
-	dur, err := time.ParseDuration(ch.StartTime + "s")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return dur
-	//return avtools.ParseStampDuration(ch.StartTime, ch.Timebase())
-}
-
-func (ch ProbeChapter) End() time.Duration {
-	dur, err := time.ParseDuration(ch.EndTime + "s")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return dur
-	//return avtools.ParseStampDuration(ch.EndTime, ch.Timebase())
 }
 
 func (c ProbeChapter) Timebase() float64 {

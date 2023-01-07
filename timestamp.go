@@ -107,6 +107,11 @@ func (c Time) String() string {
 	return fmt.Sprintf("%02d:%02d:%06.3f", c.hh, c.mm, c.ss)
 }
 
+func (c Time) MS() string {
+	ms := strconv.Itoa(c.Dur.Milliseconds())
+	return ms
+}
+
 func (ch Time) Min() int {
 	min := ch.Dur.Minutes()
 	mm := int(math.Round(min))

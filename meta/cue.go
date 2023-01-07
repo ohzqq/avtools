@@ -3,7 +3,6 @@ package meta
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -22,12 +21,6 @@ type CueSheet struct {
 	Tracks     []*avtools.Chapter
 	titles     []string
 	startTimes []time.Duration
-}
-
-type CueTrack struct {
-	title string
-	start time.Duration
-	end   time.Duration
 }
 
 func LoadCueSheet(file string) *CueSheet {
@@ -82,10 +75,6 @@ func (cue CueSheet) Streams() []map[string]string {
 
 func NewCueSheet(f string) *CueSheet {
 	return &CueSheet{file: f}
-}
-
-func NewTrack() CueTrack {
-	return CueTrack{}
 }
 
 func (s *CueSheet) SetAudio(name string) *CueSheet {
@@ -173,40 +162,6 @@ func (s CueSheet) SaveAs(name string) error {
 	}
 
 	return nil
-}
-
-// cue tracks
-func (t CueTrack) Title() string {
-	return t.title
-}
-
-func (t *CueTrack) SetTitle(title string) *CueTrack {
-	t.title = title
-	return t
-}
-
-func (t CueTrack) Stamp() string {
-	mm := int(t.start) / 60
-	ss := int(t.start) % 60
-	start := fmt.Sprintf("%02d:%02d:00", mm, ss)
-	return start
-}
-
-func (t *CueTrack) SetStart(secs float64) *CueTrack {
-	//t.start = secs
-	return t
-}
-
-func (t CueTrack) Start() time.Duration {
-	return t.start
-}
-
-func (t CueTrack) End() time.Duration {
-	return t.end
-}
-
-func (t CueTrack) Timebase() float64 {
-	return 1
 }
 
 var tmplFuncs = template.FuncMap{
