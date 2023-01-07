@@ -13,12 +13,13 @@ import (
 	"time"
 
 	"github.com/ohzqq/avtools"
+	"github.com/samber/lo"
 )
 
 type CueSheet struct {
 	file       string
 	Audio      string
-	Tracks     []CueTrack
+	Tracks     []*avtools.Chapter
 	titles     []string
 	startTimes []time.Duration
 }
@@ -51,11 +52,12 @@ func LoadCueSheet(file string) *CueSheet {
 
 	e := 1
 	for i := 0; i < len(sheet.titles); i++ {
-		var t CueTrack
-		t.title = sheet.titles[i]
-		t.start = sheet.startTimes[i]
+		//var t CueTrack
+		t := &avtools.Chapter{}
+		t.ChTitle = sheet.titles[i]
+		t.StartTime = avtools.Timestamp(sheet.startTimes[i])
 		if e < len(sheet.titles) {
-			t.end = sheet.startTimes[e]
+			t.EndTime = avtools.Timestamp(sheet.startTimes[e])
 		}
 		e++
 		sheet.Tracks = append(sheet.Tracks, t)
@@ -64,12 +66,8 @@ func LoadCueSheet(file string) *CueSheet {
 	return &sheet
 }
 
-func (cue CueSheet) Chapters() []avtools.ChapterMeta {
-	var chaps []avtools.ChapterMeta
-	for _, track := range cue.Tracks {
-		chaps = append(chaps, track)
-	}
-	return chaps
+func (cue CueSheet) Chapters() []*avtools.Chapter {
+	return cue.Tracks
 }
 
 func (cue CueSheet) Tags() map[string]string {
@@ -121,7 +119,11 @@ func title(line string) string {
 
 func start(line string) time.Duration {
 	stamp := strings.TrimPrefix(line, "INDEX 01 ")
-	return avtools.ParseStamp(stamp)
+	split := strings.Split(stamp, ":")
+	split = lo.DropRight(split, 1)
+	stamp = strings.Join(split, ":")
+	s := avtools.ParseStamp(stamp)
+	return s
 }
 
 func (s CueSheet) Dump() []byte {

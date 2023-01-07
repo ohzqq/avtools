@@ -15,9 +15,9 @@ type Media struct {
 }
 
 type Chapter struct {
-	start Time
-	end   Time
-	title string
+	StartTime Time
+	EndTime   Time
+	ChTitle   string
 }
 
 type ChapterMeta interface {
@@ -27,7 +27,7 @@ type ChapterMeta interface {
 }
 
 type Meta interface {
-	Chapters() []ChapterMeta
+	Chapters() []*Chapter
 	Tags() map[string]string
 	Streams() []map[string]string
 }
@@ -43,11 +43,8 @@ func (m *Media) SetMeta(meta Meta) *Media {
 	if tags := meta.Tags(); tags != nil {
 		m.Tags = tags
 	}
-	if chaps := meta.Chapters(); len(chaps) > 0 {
-		for _, chap := range chaps {
-			m.Chapters = append(m.Chapters, NewChapter(chap))
-		}
-	}
+	m.Chapters = meta.Chapters()
+
 	//if streams := meta.Streams(); len(streams) > 0 {
 	m.Streams = meta.Streams()
 	//}
@@ -56,18 +53,18 @@ func (m *Media) SetMeta(meta Meta) *Media {
 
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
-		title: chap.Title(),
-		start: Timestamp(chap.Start()),
-		end:   Timestamp(chap.End()),
+		ChTitle:   chap.Title(),
+		StartTime: Timestamp(chap.Start()),
+		EndTime:   Timestamp(chap.End()),
 	}
 }
 
 func (ch Chapter) Start() Time {
-	return ch.start
+	return ch.StartTime
 }
 
 func (ch Chapter) End() Time {
-	return ch.end
+	return ch.EndTime
 }
 
 func (ch Chapter) Timebase() string {
@@ -75,7 +72,7 @@ func (ch Chapter) Timebase() string {
 }
 
 func (ch Chapter) Title() string {
-	return ch.title
+	return ch.ChTitle
 }
 
 //func (ch Chapter) Dur() (Time, error) {

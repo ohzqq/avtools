@@ -54,12 +54,24 @@ func FFProbe(input string) ProbeMeta {
 	return meta
 }
 
-func (m ProbeMeta) Chapters() []avtools.ChapterMeta {
+func (ch ProbeChapter) Chap() *avtools.Chapter {
+	return &avtools.Chapter{
+		StartTime: avtools.Timestamp(avtools.ParseDuration(ch.StartTime + "s")),
+		EndTime:   avtools.Timestamp(avtools.ParseDuration(ch.EndTime + "s")),
+		ChTitle:   ch.ChapterTitle,
+	}
+}
+
+func (m ProbeMeta) Chapters() []*avtools.Chapter {
 	var chaps []avtools.ChapterMeta
 	for _, ch := range m.ChapterEntry {
 		chaps = append(chaps, ch)
 	}
-	return chaps
+	var ch []*avtools.Chapter
+	for _, c := range m.ChapterEntry {
+		ch = append(ch, c.Chap())
+	}
+	return ch
 }
 
 func (m ProbeMeta) Streams() []map[string]string {

@@ -19,6 +19,7 @@ const FFmetaComment = ";FFMETADATA1\n"
 type FFMeta struct {
 	tags     map[string]string
 	chapters []avtools.ChapterMeta
+	chaps    []*avtools.Chapter
 }
 
 type FFMetaChapter struct {
@@ -54,22 +55,19 @@ func LoadIni(input string) *FFMeta {
 			var chap FFMetaChapter
 			ch.MapTo(&chap)
 			ffmeta.chapters = append(ffmeta.chapters, chap)
+			ffmeta.chaps = append(ffmeta.chaps, chap.Chap())
 		}
 	}
 
 	return ffmeta
 }
 
-func (ff FFMeta) Chapters() []avtools.ChapterMeta {
-	return ff.chapters
-}
-
-func (ff FFMeta) Tags() map[string]string {
-	return ff.tags
-}
-
-func (ff FFMeta) Streams() []map[string]string {
-	return []map[string]string{}
+func (ch FFMetaChapter) Chap() *avtools.Chapter {
+	return &avtools.Chapter{
+		StartTime: avtools.Timestamp(avtools.ParseStampDuration(ch.StartTime, ch.Timebase())),
+		EndTime:   avtools.Timestamp(avtools.ParseStampDuration(ch.EndTime, ch.Timebase())),
+		ChTitle:   ch.ChapterTitle,
+	}
 }
 
 func (ch FFMetaChapter) Start() time.Duration {
@@ -90,6 +88,18 @@ func (ch FFMetaChapter) Timebase() float64 {
 	}
 	baseFloat, _ := strconv.ParseFloat(ch.Base, 64)
 	return baseFloat
+}
+
+func (ff FFMeta) Chapters() []*avtools.Chapter {
+	return ff.chaps
+}
+
+func (ff FFMeta) Tags() map[string]string {
+	return ff.tags
+}
+
+func (ff FFMeta) Streams() []map[string]string {
+	return []map[string]string{}
 }
 
 func (ff FFMeta) Dump() []byte {

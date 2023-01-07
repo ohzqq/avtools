@@ -76,17 +76,17 @@ func ParseStamp(t string) time.Duration {
 	}
 	stamp := fmt.Sprintf("%s%s%s", hh, mm, ss)
 
-	return parseDur(stamp)
+	return ParseDuration(stamp)
 }
 
 func ParseStampDuration[N Number](t, b N) time.Duration {
 	secs := float64(t) / float64(b)
 	ms := secs * 1000
 	d := strconv.Itoa(int(ms)) + "ms"
-	return parseDur(d)
+	return ParseDuration(d)
 }
 
-func parseDur(d string) time.Duration {
+func ParseDuration(d string) time.Duration {
 	dur, err := time.ParseDuration(d)
 	if err != nil {
 		log.Fatal(err)
