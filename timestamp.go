@@ -12,20 +12,30 @@ import (
 )
 
 type Number interface {
-	int | int32 | int64 | float32 | float64
-}
-
-type Num interface {
 	constraints.Integer | constraints.Float
 }
 
 type Time struct {
 	Duration float64
+	dur      time.Duration
 	base     float64
-	Base     Timebase
+	Tbase    Timebase
+	Base
 }
 
 type Timebase float64
+
+type Base struct {
+	time float64
+}
+
+func (t Base) String() string {
+	return "1/" + ParseNumber(t.time, 0)
+}
+
+func (t Base) Float() float64 {
+	return float64(t)
+}
 
 func (t Timebase) String() string {
 	return "1/" + ParseNumber(t.Float(), 0)
@@ -35,37 +45,24 @@ func (t Timebase) Float() float64 {
 	return float64(t)
 }
 
-func NewTimeStamp[N Number](num N) Time {
-	return Time{
-		Duration: float64(num),
-		Base:     1,
-	}
-}
-
-func NewerTimeStamp[N Num](times ...N) Time {
+func Timestamp[N Number](t N, b ...N) Time {
 	var base float64 = 1
-	var dur float64 = 0
-
-	switch t := len(times); t {
-	case 2:
-		base = float64(times[1])
-		fallthrough
-	case 1:
-		dur = float64(times[0])
+	if len(b) > 0 {
+		base = float64(b[0])
 	}
+	dur := float64(t)
 
 	return Time{
 		Duration: float64(dur),
-		Base:     Timebase(base),
+		Tbase:    Timebase(base),
+		Base: Base{
+			time: base,
+		},
 	}
 }
 
 func ParseString(t string) Time {
-	i, err := strconv.ParseFloat(t, 64)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return NewTimeStamp(i)
+	return Timestamp(ParseStamp(t).Milliseconds(), 1000)
 }
 
 func StringToFloat(t string) float64 {
@@ -76,14 +73,29 @@ func StringToFloat(t string) float64 {
 	return i
 }
 
-func ParseHHSS(stamp string) float64 {
-	split := strings.Split(stamp, ":")
-	d := split[0] + "m" + split[1] + "s"
-	dur, err := time.ParseDuration(d)
+func ParseStamp(t string) time.Duration {
+	var hh string
+	var mm string
+	var ss float64
+	switch split := strings.Split(t, ":"); len(split) {
+	case 3:
+		hh = split[0] + "h"
+		mm = split[1] + "m"
+		ss = StringToFloat(split[2])
+	case 2:
+		mm = split[0] + "m"
+		ss = StringToFloat(split[1])
+	case 1:
+		ss = StringToFloat(split[0])
+	}
+	ms := strconv.Itoa(int(ss*1000)) + "ms"
+	stamp := fmt.Sprintf("%s%s%s", hh, mm, ms)
+	dur, err := time.ParseDuration(stamp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return float64(dur)
+
+	return dur
 }
 
 func ParseNumber[N Number](num N, dig int) string {
@@ -91,11 +103,11 @@ func ParseNumber[N Number](num N, dig int) string {
 }
 
 func (ch *Time) SetTimebase(base float64) {
-	ch.Base = Timebase(base)
+	ch.Tbase = Timebase(base)
 }
 
 func (ch Time) Secs() int {
-	secs := ch.Duration / ch.Base.Float()
+	secs := ch.Duration / ch.Tbase.Float()
 	return int(math.Round(secs))
 }
 
@@ -108,7 +120,7 @@ func (ch Time) String() string {
 }
 
 func (ch Time) SecsString() string {
-	return ParseNumber(ch.Duration/ch.Base.Float(), 3)
+	return ParseNumber(ch.Duration/ch.Tbase.Float(), 3)
 }
 
 func (c Time) HHMMSS() string {

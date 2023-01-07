@@ -59,8 +59,8 @@ func (m *Media) SetMeta(meta Meta) *Media {
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
 		title: chap.Title(),
-		start: NewerTimeStamp(chap.Start()),
-		end:   NewerTimeStamp(chap.End()),
+		start: Timestamp(chap.Start()),
+		end:   Timestamp(chap.End()),
 		base:  Timebase(chap.Timebase()),
 	}
 }
@@ -86,6 +86,6 @@ func (ch Chapter) Dur() (Time, error) {
 		return ch.end, fmt.Errorf("end time is needed to calculate duration")
 	}
 	t := ch.end.Duration - ch.start.Duration
-	stamp := NewerTimeStamp(t, float64(ch.base))
+	stamp := Timestamp(t, float64(ch.base))
 	return stamp, nil
 }

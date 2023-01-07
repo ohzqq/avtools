@@ -2,6 +2,7 @@ package meta
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -38,6 +39,7 @@ func FFProbe(input string) ProbeMeta {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(info)
 
 	data := []byte(info)
 

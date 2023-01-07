@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools"
-	"github.com/ohzqq/avtools/timestamp"
 )
 
 type CueSheet struct {
@@ -121,7 +120,7 @@ func title(line string) string {
 
 func start(line string) float64 {
 	stamp := strings.TrimPrefix(line, "INDEX 01 ")
-	return timestamp.ParseHHSS(stamp)
+	return avtools.ParseStamp(stamp).Seconds()
 }
 
 func (s CueSheet) Dump() []byte {
