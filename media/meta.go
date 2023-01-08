@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -86,6 +87,9 @@ func (m *Media) LoadCue(name string) *Media {
 	if IsPlainText(file.Mimetype) {
 		cue := meta.LoadCueSheet(file.Abs)
 		m.Media.SetMeta(cue)
+		dur := m.GetTag("duration")
+		last := m.Chapters[len(m.Chapters)-1]
+		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
 	}
 	return m
 }
