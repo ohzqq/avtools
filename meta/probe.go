@@ -25,11 +25,9 @@ type ProbeFormat struct {
 }
 
 type ProbeChapter struct {
-	Base      string `json:"time_base"`
-	StartTime string `json:"start_time"`
-	//StartTime    float64           `json:"start"`
-	//EndTime      float64           `json:"end"`
-	EndTime      string            `json:"end_time"`
+	Base         string            `json:"time_base"`
+	Start        string            `json:"start_time"`
+	End          string            `json:"end_time"`
 	ChapterTitle string            `json:"title"`
 	Tags         map[string]string `json:"tags"`
 }
@@ -57,8 +55,8 @@ func (m ProbeMeta) Chapters() []*avtools.Chapter {
 	var ch []*avtools.Chapter
 	for _, c := range m.ChapterEntry {
 		chap := &avtools.Chapter{
-			Start: avtools.Timestamp(avtools.ParseDuration(c.StartTime + "s")),
-			End:   avtools.Timestamp(avtools.ParseDuration(c.EndTime + "s")),
+			Start: avtools.Timestamp(avtools.ParseDuration(c.Start + "s")),
+			End:   avtools.Timestamp(avtools.ParseDuration(c.End + "s")),
 			Title: c.Title(),
 		}
 		ch = append(ch, chap)
