@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
@@ -22,15 +24,25 @@ var extractCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		m := media.New(input).Probe()
+		var cmds []media.Cmd
 		if extract.Cover {
 			ff := m.ExtractCover()
-			ff.Compile().Run()
+			cmds = append(cmds, ff)
 		}
 		if extract.Cue {
-			m.SaveMetaFmt("cue")
+			c := m.SaveMetaFmt("cue")
+			cmds = append(cmds, c)
 		}
 		if extract.Meta {
-			m.SaveMetaFmt("ffmeta")
+			c := m.SaveMetaFmt("ffmeta")
+			cmds = append(cmds, c)
+		}
+
+		for _, c := range cmds {
+			err := c.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }

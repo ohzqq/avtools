@@ -84,6 +84,7 @@ type FileName struct {
 	Ext     string
 	Name    string
 	Padding string
+	data    []byte
 }
 
 func NewFile(n string) File {
@@ -153,17 +154,21 @@ func (f FileName) Write(wr io.Writer, data []byte) error {
 	return nil
 }
 
-func (f FileName) Save(data []byte) error {
+func (f FileName) Run() error {
 	file, err := os.Create(f.Join())
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	err = f.Write(file, data)
+	err = f.Write(file, f.data)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (f *FileName) Save(data []byte) {
+	f.data = data
 }

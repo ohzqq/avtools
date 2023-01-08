@@ -5,7 +5,7 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-func (m Media) ExtractCover() ff.Cmd {
+func (m Media) ExtractCover() Cmd {
 	var stream Stream
 	for _, s := range m.VideoStreams() {
 		if s.IsCover {
@@ -28,20 +28,23 @@ func (m Media) ExtractCover() ff.Cmd {
 	return cmd
 }
 
-func (m Media) SaveMetaFmt(f string) {
+func (m Media) SaveMetaFmt(f string) Cmd {
+	var cmd Cmd
 	switch f {
 	case "ini":
 		name := m.Input.NewName()
 		file := name.WithExt(".ini")
 		file.Save(m.DumpIni())
+		cmd = file
 	case "ffmeta":
-		ff := m.DumpFFMeta()
-		ff.Compile().Run()
+		cmd = m.DumpFFMeta()
 	case "cue":
 		if m.HasChapters() {
 			name := m.Input.NewName()
 			file := name.WithExt(".cue")
 			file.Save(m.DumpCue())
+			cmd = file
 		}
 	}
+	return cmd
 }

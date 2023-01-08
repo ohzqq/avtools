@@ -2,7 +2,6 @@ package ff
 
 import (
 	"fmt"
-	"log"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -52,9 +51,10 @@ func (cmd *Cmd) Compile() *ffmpeg.Stream {
 	return output
 }
 
-func (cmd *Cmd) Run() {
+func (cmd Cmd) Run() error {
 	err := cmd.Compile().ErrorToStdOut().Run()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }

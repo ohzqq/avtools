@@ -136,7 +136,9 @@ func (m *Media) Probe() *Media {
 func (m Media) DumpFFMeta() ff.Cmd {
 	cmd := ff.New()
 	cmd.In(m.Input.Abs, ffmpeg.KwArgs{"y": ""})
-	cmd.Output.Pad("").Name("ffmeta-" + m.Input.Name).Ext(".ini")
+	name := m.Input.NewName()
+	n := name.Prefix("ffmeta-").Join()
+	cmd.Output.Pad("").Name(n).Ext(".ini")
 	cmd.Output.Set("f", "ffmetadata")
 	return cmd
 }
