@@ -20,16 +20,25 @@ func Cut(file string) CutCmd {
 	return cut
 }
 
-func (c *CutCmd) Chapter(num int) *CutCmd {
+func (c *CutCmd) AllChapters() {
 	if c.HasChapters() {
-		if num > 0 && num < len(c.Chapters) {
+		for _, ch := range c.Chapters {
+			cmd := c.SetChapter(ch)
+			cmd.Compile().Run()
+		}
+	}
+}
+
+func (c CutCmd) Chapter(num int) CutCmd {
+	if c.HasChapters() {
+		if num > 0 && num <= len(c.Chapters) {
 			c.Chap = c.Chapters[num-1]
 		}
 	}
 	return c
 }
 
-func (c *CutCmd) SetChapter(ch *avtools.Chapter) *CutCmd {
+func (c CutCmd) SetChapter(ch *avtools.Chapter) CutCmd {
 	c.Chap = ch
 	return c
 }
@@ -50,12 +59,12 @@ func (c CutCmd) Title() string {
 	if c.Chap.Title != "" {
 		return c.Chap.Title
 	}
-	t := fmt.Sprintf("%s-%s", c.Chap.Start.Dur, c.Chap.End.Dur)
+	t := fmt.Sprintf("-%s-%s", c.Chap.Start.Dur, c.Chap.End.Dur)
 	return t
 }
 
 func (c CutCmd) Compile() Cmd {
-	out := c.Media.Input
+	out := c.Input.NewName()
 	name := filepath.Join(out.Path, out.Suffix(c.Title()).Name)
 
 	cmd := c.Media.Command()

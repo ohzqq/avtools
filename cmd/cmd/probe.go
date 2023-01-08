@@ -16,10 +16,11 @@ var probeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		cut := media.Cut(input)
-		cut.Chapter(3)
+		cut.AllChapters()
+		//cut.Chapter(3)
 		//cut.Start("00:01.000").End("00:02.999")
-		c := cut.Compile()
-		c.Run()
+		//c := cut.Compile()
+		//c.Run()
 		//m := media.New(input).SetMeta(input)
 		//m := media.New(input).LoadIni(input)
 		//m := media.New(input).Probe()
