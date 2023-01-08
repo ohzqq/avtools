@@ -27,7 +27,7 @@ func (m *Media) LoadIni(name string) *Media {
 		for scanner.Scan() {
 			if line == 0 && scanner.Text() == ";FFMETADATA1" {
 				ini := meta.LoadIni(file.Abs)
-				m.SetMeta(ini)
+				m.Media.SetMeta(ini)
 				m.Ini = file
 				break
 			} else {
@@ -85,7 +85,7 @@ func (m *Media) LoadCue(name string) *Media {
 	file := NewFile(name)
 	if IsPlainText(file.Mimetype) {
 		cue := meta.LoadCueSheet(file.Abs)
-		m.SetMeta(cue)
+		m.Media.SetMeta(cue)
 	}
 	return m
 }
@@ -106,7 +106,7 @@ func (m Media) DumpCue() []byte {
 
 func (m *Media) Probe() *Media {
 	p := meta.FFProbe(m.Input.Abs)
-	m.SetMeta(p)
+	m.Media.SetMeta(p)
 
 	if len(m.Media.Streams) > 0 {
 		for _, stream := range m.Media.Streams {

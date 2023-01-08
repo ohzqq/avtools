@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/avtools/ff"
 )
 
 type Media struct {
@@ -32,10 +33,31 @@ type Stream struct {
 
 func New(input string) *Media {
 	m := avtools.NewMedia(input)
-	return &Media{
+	med := &Media{
 		Media: m,
 		Input: NewFile(input),
 	}
+	med.Output = File{FileName: med.Input.NewName()}
+	//med.Probe()
+
+	return med
+}
+
+func (m *Media) SetMeta(name string) *Media {
+	file := NewFile(name)
+	switch file.Ext {
+	case ".cue":
+		m.LoadCue(name)
+	case ".ini":
+		m.LoadIni(name)
+	}
+	return m
+}
+
+func (m Media) Command() ff.Cmd {
+	cmd := ff.New()
+	cmd.In(m.Input.Abs)
+	return cmd
 }
 
 func (m Media) HasChapters() bool {
@@ -72,7 +94,7 @@ func IsPlainText(mtype string) bool {
 }
 
 type File struct {
-	FileName
+	*FileName
 	Abs      string
 	Base     string
 	File     string
@@ -96,7 +118,7 @@ func NewFile(n string) File {
 	f := File{
 		Base:     filepath.Base(abs),
 		Abs:      abs,
-		FileName: FileName{},
+		FileName: &FileName{},
 	}
 
 	f.Padding = "%03d"
