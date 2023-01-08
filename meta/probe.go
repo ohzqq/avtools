@@ -53,18 +53,15 @@ func FFProbe(input string) ProbeMeta {
 	return meta
 }
 
-func (ch ProbeChapter) Chap() *avtools.Chapter {
-	return &avtools.Chapter{
-		StartTime: avtools.Timestamp(avtools.ParseDuration(ch.StartTime + "s")),
-		EndTime:   avtools.Timestamp(avtools.ParseDuration(ch.EndTime + "s")),
-		ChTitle:   ch.Title(),
-	}
-}
-
 func (m ProbeMeta) Chapters() []*avtools.Chapter {
 	var ch []*avtools.Chapter
 	for _, c := range m.ChapterEntry {
-		ch = append(ch, c.Chap())
+		chap := &avtools.Chapter{
+			Start: avtools.Timestamp(avtools.ParseDuration(c.StartTime + "s")),
+			End:   avtools.Timestamp(avtools.ParseDuration(c.EndTime + "s")),
+			Title: c.Title(),
+		}
+		ch = append(ch, chap)
 	}
 	return ch
 }
@@ -109,11 +106,11 @@ func (c ProbeChapter) Title() string {
 	return c.ChapterTitle
 }
 
-func (c ProbeChapter) Timebase() float64 {
+func (c ProbeChapter) Timebase() int {
 	if tb := c.Base; tb != "" {
 		c.Base = strings.TrimPrefix(tb, "1/")
 	}
-	baseFloat, _ := strconv.ParseFloat(c.Base, 64)
+	baseFloat, _ := strconv.Atoi(c.Base)
 	return baseFloat
 }
 

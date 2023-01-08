@@ -21,10 +21,10 @@ type FFMeta struct {
 }
 
 type FFMetaChapter struct {
-	Base         string  `ini:"TIMEBASE"`
-	StartTime    float64 `ini:"START"`
-	EndTime      float64 `ini:"END"`
-	ChapterTitle string  `ini:"title"`
+	Base  string `ini:"TIMEBASE"`
+	Start int    `ini:"START"`
+	End   int    `ini:"END"`
+	Title string `ini:"title"`
 }
 
 func LoadIni(input string) *FFMeta {
@@ -52,19 +52,17 @@ func LoadIni(input string) *FFMeta {
 		for _, ch := range sections {
 			var chap FFMetaChapter
 			ch.MapTo(&chap)
-			ffmeta.chaps = append(ffmeta.chaps, chap.chap())
+
+			c := &avtools.Chapter{
+				Start: avtools.Timestamp(avtools.ParseStampDuration(chap.Start, chap.Timebase())),
+				End:   avtools.Timestamp(avtools.ParseStampDuration(chap.End, chap.Timebase())),
+				Title: chap.Title,
+			}
+			ffmeta.chaps = append(ffmeta.chaps, c)
 		}
 	}
 
 	return ffmeta
-}
-
-func (ch FFMetaChapter) chap() *avtools.Chapter {
-	return &avtools.Chapter{
-		StartTime: avtools.Timestamp(avtools.ParseStampDuration(ch.StartTime, ch.Timebase())),
-		EndTime:   avtools.Timestamp(avtools.ParseStampDuration(ch.EndTime, ch.Timebase())),
-		ChTitle:   ch.ChapterTitle,
-	}
 }
 
 func (ff FFMeta) Chapters() []*avtools.Chapter {
@@ -79,11 +77,11 @@ func (ff FFMeta) Streams() []map[string]string {
 	return []map[string]string{}
 }
 
-func (ch FFMetaChapter) Timebase() float64 {
+func (ch FFMetaChapter) Timebase() int {
 	if tb := ch.Base; tb != "" {
 		ch.Base = strings.TrimPrefix(tb, "1/")
 	}
-	baseFloat, _ := strconv.ParseFloat(ch.Base, 64)
+	baseFloat, _ := strconv.Atoi(ch.Base)
 	return baseFloat
 }
 

@@ -15,14 +15,14 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		//m := media.New(input).LoadCue(input)
+		m := media.New(input).LoadCue(input)
 		//m := media.New(input).LoadIni(input)
-		m := media.New(input).Probe()
-		fmt.Printf("meta %+V\n", m.Chapters[0].Start().String())
-		fmt.Printf("meta %+V\n", m.Chapters[0].Start().HHMMSS())
-		fmt.Printf("meta %+V\n", m.Chapters[10].Start().String())
-		fmt.Printf("meta %+V\n", m.Chapters[10].Start().HHMMSS())
-		fmt.Printf("meta %+V\n", m.Chapters[10].Start().MMSS())
+		//m := media.New(input).Probe()
+		fmt.Printf("meta %+V\n", m.Chapters[0].Start.String())
+		fmt.Printf("meta %+V\n", m.Chapters[0].Start.HHMMSS())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start.String())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start.HHMMSS())
+		fmt.Printf("meta %+V\n", m.Chapters[10].Start.MMSS())
 		//cue := m.DumpFFMeta()
 		//cue.Compile().Run()
 		//fmt.Printf("cue %+V\n", string(cue))

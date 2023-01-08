@@ -108,7 +108,7 @@ func (c Time) String() string {
 }
 
 func (c Time) MS() string {
-	ms := strconv.Itoa(c.Dur.Milliseconds())
+	ms := strconv.Itoa(int(c.Dur.Milliseconds()))
 	return ms
 }
 

@@ -15,9 +15,9 @@ type Media struct {
 }
 
 type Chapter struct {
-	StartTime Time
-	EndTime   Time
-	ChTitle   string
+	Start Time
+	End   Time
+	Title string
 }
 
 type ChapterMeta interface {
@@ -53,26 +53,14 @@ func (m *Media) SetMeta(meta Meta) *Media {
 
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
-		ChTitle:   chap.Title(),
-		StartTime: Timestamp(chap.Start()),
-		EndTime:   Timestamp(chap.End()),
+		Title: chap.Title(),
+		Start: Timestamp(chap.Start()),
+		End:   Timestamp(chap.End()),
 	}
-}
-
-func (ch Chapter) Start() Time {
-	return ch.StartTime
-}
-
-func (ch Chapter) End() Time {
-	return ch.EndTime
 }
 
 func (ch Chapter) Timebase() string {
 	return "1/1000"
-}
-
-func (ch Chapter) Title() string {
-	return ch.ChTitle
 }
 
 //func (ch Chapter) Dur() (Time, error) {

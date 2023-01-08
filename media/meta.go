@@ -61,9 +61,9 @@ func (m Media) DumpIni() []byte {
 			log.Fatal(err)
 		}
 		sec.NewKey("TIMEBASE", chapter.Timebase())
-		sec.NewKey("START", chapter.Start().MS())
-		sec.NewKey("END", chapter.End().MS())
-		sec.NewKey("title", chapter.Title())
+		sec.NewKey("START", chapter.Start.MS())
+		sec.NewKey("END", chapter.End.MS())
+		sec.NewKey("title", chapter.Title)
 	}
 
 	var buf bytes.Buffer

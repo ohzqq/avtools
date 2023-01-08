@@ -16,11 +16,9 @@ import (
 )
 
 type CueSheet struct {
-	file       string
-	Audio      string
-	Tracks     []*avtools.Chapter
-	titles     []string
-	startTimes []time.Duration
+	file   string
+	Audio  string
+	Tracks []*avtools.Chapter
 }
 
 func LoadCueSheet(file string) *CueSheet {
@@ -32,28 +30,29 @@ func LoadCueSheet(file string) *CueSheet {
 	}
 	defer contents.Close()
 
+	var times []time.Duration
+	var titles []string
 	scanner := bufio.NewScanner(contents)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		switch {
 		case strings.Contains(line, "TITLE"):
-			sheet.titles = append(sheet.titles, title(line))
+			titles = append(titles, title(line))
 		case strings.Contains(line, "INDEX 01"):
-			sheet.startTimes = append(sheet.startTimes, start(line))
+			times = append(times, start(line))
 		}
 	}
 
 	e := 1
-	for i := 0; i < len(sheet.titles); i++ {
-		//var t CueTrack
-		t := &avtools.Chapter{}
-		t.ChTitle = sheet.titles[i]
-		t.StartTime = avtools.Timestamp(sheet.startTimes[i])
-		if e < len(sheet.titles) {
-			t.EndTime = avtools.Timestamp(sheet.startTimes[e])
+	for i := 0; i < len(titles); i++ {
+		track := &avtools.Chapter{}
+		track.Title = titles[i]
+		track.Start = avtools.Timestamp(times[i])
+		if e < len(titles) {
+			track.End = avtools.Timestamp(times[e])
 		}
 		e++
-		sheet.Tracks = append(sheet.Tracks, t)
+		sheet.Tracks = append(sheet.Tracks, track)
 	}
 
 	return &sheet
