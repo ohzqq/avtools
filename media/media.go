@@ -38,7 +38,7 @@ func New(input string) *Media {
 		Input: NewFile(input),
 	}
 	med.Output = File{FileName: med.Input.NewName()}
-	//med.Probe()
+	med.Probe()
 
 	return med
 }

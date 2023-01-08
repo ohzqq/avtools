@@ -29,7 +29,7 @@ func (c *CutCmd) AllChapters() {
 	}
 }
 
-func (c CutCmd) Chapter(num int) CutCmd {
+func (c *CutCmd) Chapter(num int) *CutCmd {
 	if c.HasChapters() {
 		if num > 0 && num <= len(c.Chapters) {
 			c.Chap = c.Chapters[num-1]
