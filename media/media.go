@@ -72,16 +72,18 @@ func IsPlainText(mtype string) bool {
 }
 
 type File struct {
+	FileName
 	Abs      string
-	AbsName  string
-	Path     string
 	Base     string
-	Ext      string
-	Name     string
 	File     string
-	Padding  string
 	Mimetype string
-	name     string
+}
+
+type FileName struct {
+	Path    string
+	Ext     string
+	Name    string
+	Padding string
 }
 
 func NewFile(n string) File {
@@ -91,35 +93,59 @@ func NewFile(n string) File {
 	}
 
 	f := File{
-		Base:    filepath.Base(abs),
-		Ext:     filepath.Ext(abs),
-		Abs:     abs,
-		Padding: "%03d",
+		Base:     filepath.Base(abs),
+		Abs:      abs,
+		FileName: FileName{},
 	}
+
+	f.Padding = "%03d"
+	f.Ext = filepath.Ext(abs)
 	f.Mimetype = mime.TypeByExtension(f.Ext)
 	f.Name = strings.TrimSuffix(f.Base, f.Ext)
-	f.AbsName = strings.TrimSuffix(f.Abs, f.Ext)
 
 	f.Path, f.File = filepath.Split(abs)
 
 	return f
 }
 
-func (f File) WithExt(e string) string {
-	return filepath.Join(f.Path, f.name+e)
+func (f File) NewName() *FileName {
+	name := &FileName{
+		Name:    f.Name,
+		Path:    f.Path,
+		Padding: f.Padding,
+	}
+	return name
 }
 
-func (f File) AddSuffix(s string) string {
-	name := f.name + s + f.Ext
-	return filepath.Join(f.Path, name)
+func (f *FileName) WithExt(e string) *FileName {
+	//name := filepath.Join(f.Path, f.Name+e)
+	f.Ext = e
+	return f
 }
 
-func (f File) Pad(i int) string {
+func (f *FileName) Suffix(suf string) *FileName {
+	//name := f.Name + suf + f.Ext
+	//return filepath.Join(f.Path, name)
+	f.Name = f.Name + suf
+	return f
+}
+
+func (f *FileName) Prefix(pre string) *FileName {
+	f.Name = pre + f.Name
+	//return filepath.Join(f.Path, name)
+	return f
+}
+
+func (f *FileName) Pad(i int) *FileName {
 	p := fmt.Sprintf(f.Padding, i)
-	return f.AddSuffix(p)
+	return f.Suffix(p)
 }
 
-func (s File) Write(wr io.Writer, data []byte) error {
+func (f FileName) Join() string {
+	return filepath.Join(f.Path, f.Name+f.Ext)
+}
+
+func (f FileName) Write(wr io.Writer, data []byte) error {
 	_, err := wr.Write(data)
 	if err != nil {
 		return err
@@ -127,14 +153,14 @@ func (s File) Write(wr io.Writer, data []byte) error {
 	return nil
 }
 
-func (s File) Save(data []byte) error {
-	file, err := os.Create(s.AbsName + s.Ext)
+func (f FileName) Save(data []byte) error {
+	file, err := os.Create(f.Join())
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	err = s.Write(file, data)
+	err = f.Write(file, data)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,8 @@ var extractCmd = &cobra.Command{
 		input := args[0]
 		m := media.New(input).Probe()
 		if extract.Cover {
-			m.ExtractCover()
+			ff := m.ExtractCover()
+			ff.Compile().Run()
 		}
 		if extract.Cue {
 			m.SaveMetaFmt("cue")

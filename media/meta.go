@@ -3,7 +3,6 @@ package media
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -17,17 +16,16 @@ import (
 func (m Media) SaveMetaFmt(f string) {
 	switch f {
 	case "ini":
-		name := m.Input.AbsName + ".ini"
-		file := NewFile(name)
+		name := m.Input.NewName()
+		file := name.WithExt(".ini")
 		file.Save(m.DumpIni())
 	case "ffmeta":
 		ff := m.DumpFFMeta()
 		ff.Compile().Run()
 	case "cue":
 		if m.HasChapters() {
-			name := m.Input.AbsName + ".cue"
-			fmt.Println(name)
-			file := NewFile(name)
+			name := m.Input.NewName()
+			file := name.WithExt(".cue")
 			file.Save(m.DumpCue())
 		}
 	}

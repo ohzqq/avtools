@@ -16,7 +16,9 @@ func (m Media) ExtractCover() ff.Cmd {
 	cmd := ff.New()
 	cmd.In(m.Input.Abs, ffmpeg.KwArgs{"y": ""})
 	cmd.Output.Pad("").Set("c", "copy").Set("an", "")
-	cmd.Output.Name("cover-" + m.Input.Base)
+	name := m.Input.NewName()
+	n := name.Prefix("cover-").Join()
+	cmd.Output.Name(n)
 	switch stream.CodecName {
 	case "mjpeg":
 		cmd.Ext(".jpg")
