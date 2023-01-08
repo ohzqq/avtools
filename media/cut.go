@@ -65,7 +65,8 @@ func (c CutCmd) Title() string {
 
 func (c CutCmd) Compile() Cmd {
 	out := c.Input.NewName()
-	name := filepath.Join(out.Path, out.Suffix(c.Title()).Name)
+	out.Suffix(c.Title())
+	name := filepath.Join(out.Path, out.Name)
 
 	cmd := c.Media.Command()
 
