@@ -3,6 +3,7 @@ package media
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -12,6 +13,25 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"gopkg.in/ini.v1"
 )
+
+func (m Media) SaveMetaFmt(f string) {
+	switch f {
+	case "ini":
+		name := m.Input.AbsName + ".ini"
+		file := NewFile(name)
+		file.Save(m.DumpIni())
+	case "ffmeta":
+		ff := m.DumpFFMeta()
+		ff.Compile().Run()
+	case "cue":
+		if m.HasChapters() {
+			name := m.Input.AbsName + ".cue"
+			fmt.Println(name)
+			file := NewFile(name)
+			file.Save(m.DumpCue())
+		}
+	}
+}
 
 func (m *Media) LoadIni(name string) *Media {
 	file := NewFile(name)
@@ -28,7 +48,7 @@ func (m *Media) LoadIni(name string) *Media {
 			if line == 0 && scanner.Text() == ";FFMETADATA1" {
 				ini := meta.LoadIni(file.Abs)
 				m.SetMeta(ini)
-				m.FFmeta = file
+				m.Ini = file
 				break
 			} else {
 				log.Fatalln("ffmpeg metadata files need to have ';FFMETADATA1' as the first line")

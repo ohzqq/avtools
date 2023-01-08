@@ -5,7 +5,7 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-func (m *Media) ExtractCover() ff.Cmd {
+func (m Media) ExtractCover() ff.Cmd {
 	var stream Stream
 	for _, s := range m.VideoStreams() {
 		if s.IsCover {

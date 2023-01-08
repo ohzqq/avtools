@@ -2,8 +2,10 @@ package media
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"mime"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -15,7 +17,7 @@ type Media struct {
 	Streams  []Stream
 	Input    File
 	Output   File
-	FFmeta   File
+	Ini      File
 	Cue      File
 	Cover    File
 	HasCover bool
@@ -71,6 +73,7 @@ func IsPlainText(mtype string) bool {
 
 type File struct {
 	Abs      string
+	AbsName  string
 	Path     string
 	Base     string
 	Ext      string
@@ -94,8 +97,8 @@ func NewFile(n string) File {
 		Padding: "%03d",
 	}
 	f.Mimetype = mime.TypeByExtension(f.Ext)
-	//f.Name = strings.TrimSuffix(abs, f.Ext)
 	f.Name = strings.TrimSuffix(f.Base, f.Ext)
+	f.AbsName = strings.TrimSuffix(f.Abs, f.Ext)
 
 	f.Path, f.File = filepath.Split(abs)
 
@@ -114,4 +117,27 @@ func (f File) AddSuffix(s string) string {
 func (f File) Pad(i int) string {
 	p := fmt.Sprintf(f.Padding, i)
 	return f.AddSuffix(p)
+}
+
+func (s File) Write(wr io.Writer, data []byte) error {
+	_, err := wr.Write(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s File) Save(data []byte) error {
+	file, err := os.Create(s.AbsName + s.Ext)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	err = s.Write(file, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

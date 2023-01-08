@@ -1,40 +1,44 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
+
+type extractFlags struct {
+	Meta  bool
+	Cue   bool
+	Cover bool
+}
+
+var extract extractFlags
 
 // extractCmd represents the extract command
 var extractCmd = &cobra.Command{
 	Use:   "extract",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Extract metadata or cover art",
+	Long:  ``,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("extract called")
+		input := args[0]
+		m := media.New(input).Probe()
+		if extract.Cover {
+			m.ExtractCover()
+		}
+		if extract.Cue {
+			m.SaveMetaFmt("cue")
+		}
+		if extract.Meta {
+			m.SaveMetaFmt("ffmeta")
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(extractCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// extractCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// extractCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// flags
+	extractCmd.PersistentFlags().BoolVarP(&extract.Meta, "meta", "m", false, "extract ffmeta")
+	extractCmd.PersistentFlags().BoolVarP(&extract.Cue, "cue", "c", false, "extract cue sheet")
+	extractCmd.PersistentFlags().BoolVarP(&extract.Cover, "album art", "a", false, "extract album art")
 }
