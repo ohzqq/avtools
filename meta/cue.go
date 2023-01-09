@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"regexp"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -16,9 +16,19 @@ import (
 )
 
 type CueSheet struct {
-	file   string
-	Audio  string
+	File   string
+	Ext    string
 	Tracks []*avtools.Chapter
+}
+
+func NewCueSheet(f string) *CueSheet {
+	cue := &CueSheet{
+		File: f,
+		Ext:  filepath.Ext(f),
+	}
+	cue.Ext = strings.ToUpper(cue.Ext)
+	cue.Ext = strings.TrimPrefix(cue.Ext, ".")
+	return cue
 }
 
 func LoadCueSheet(file string) *CueSheet {
@@ -37,9 +47,17 @@ func LoadCueSheet(file string) *CueSheet {
 		line := strings.TrimSpace(scanner.Text())
 		switch {
 		case strings.Contains(line, "TITLE"):
-			titles = append(titles, title(line))
+			title := strings.TrimPrefix(line, "TITLE ")
+			title = strings.Trim(title, "'")
+			title = strings.Trim(title, `"`)
+			titles = append(titles, title)
 		case strings.Contains(line, "INDEX 01"):
-			times = append(times, start(line))
+			stamp := strings.TrimPrefix(line, "INDEX 01 ")
+			split := strings.Split(stamp, ":")
+			split = lo.DropRight(split, 1)
+			stamp = strings.Join(split, ":")
+			start := avtools.ParseStamp(stamp)
+			times = append(times, start)
 		}
 	}
 
@@ -58,73 +76,16 @@ func LoadCueSheet(file string) *CueSheet {
 	return &sheet
 }
 
-func (cue CueSheet) Chapters() []*avtools.Chapter {
-	return cue.Tracks
-}
-
-func (cue CueSheet) Tags() map[string]string {
-	return map[string]string{
-		"filename": cue.Audio,
-	}
-}
-
-func (cue CueSheet) Streams() []map[string]string {
-	return []map[string]string{}
-}
-
-func NewCueSheet(f string) *CueSheet {
-	return &CueSheet{file: f}
-}
-
-func (s *CueSheet) SetAudio(name string) *CueSheet {
-	s.Audio = name
-	return s
-}
-
-func (s CueSheet) File() string {
-	return s.Audio
-}
-
-func (s CueSheet) Ext() string {
-	//ext := strings.TrimPrefix(s.Audio.Ext, ".")
-	//return strings.ToUpper(ext)
-	return ""
-}
-
-func cueFile(line string) string {
-	fileRegexp := regexp.MustCompile(`^(\w+ )('|")(?P<title>.*)("|')( .*)$`)
-	matches := fileRegexp.FindStringSubmatch(line)
-	title := matches[fileRegexp.SubexpIndex("title")]
-	return title
-}
-
-func title(line string) string {
-	t := strings.TrimPrefix(line, "TITLE ")
-	t = strings.Trim(t, "'")
-	t = strings.Trim(t, `"`)
-	return t
-}
-
-func start(line string) time.Duration {
-	stamp := strings.TrimPrefix(line, "INDEX 01 ")
-	split := strings.Split(stamp, ":")
-	split = lo.DropRight(split, 1)
-	stamp = strings.Join(split, ":")
-	s := avtools.ParseStamp(stamp)
-	return s
-}
-
-func (s CueSheet) Dump() []byte {
+func DumpCueSheet(file string, meta avtools.Meta) []byte {
 	var (
 		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
 		buf  bytes.Buffer
 	)
 
-	if s.Audio == "" {
-		//s.Audio = file.New("tmp")
-	}
+	cue := NewCueSheet(file)
+	cue.Tracks = meta.Chapters()
 
-	err := tmpl.Execute(&buf, s)
+	err := tmpl.Execute(&buf, cue)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,20 +93,48 @@ func (s CueSheet) Dump() []byte {
 	return buf.Bytes()
 }
 
-func (s CueSheet) Write(wr io.Writer) error {
-	_, err := wr.Write(s.Dump())
+func (cue CueSheet) Chapters() []*avtools.Chapter {
+	return cue.Tracks
+}
+
+func (cue CueSheet) Tags() map[string]string {
+	return map[string]string{
+		"filename": cue.File,
+	}
+}
+
+func (cue CueSheet) Streams() []map[string]string {
+	return []map[string]string{}
+}
+
+func (cue CueSheet) Dump() []byte {
+	var (
+		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
+		buf  bytes.Buffer
+	)
+
+	err := tmpl.Execute(&buf, cue)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.Bytes()
+}
+
+func (cue CueSheet) Write(wr io.Writer) error {
+	_, err := wr.Write(cue.Dump())
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s CueSheet) Save() error {
-	return s.SaveAs(s.Audio)
+func (cue CueSheet) Save() error {
+	return cue.SaveAs(cue.File)
 }
 
-func (s CueSheet) SaveAs(name string) error {
-	if name == "" || s.Audio == "" {
+func (cue CueSheet) SaveAs(name string) error {
+	if name == "" || cue.File == "" {
 		name = "tmp"
 	}
 
@@ -155,7 +144,7 @@ func (s CueSheet) SaveAs(name string) error {
 	}
 	defer file.Close()
 
-	err = s.Write(file)
+	err = cue.Write(file)
 	if err != nil {
 		return err
 	}
@@ -179,5 +168,5 @@ TRACK {{inc $idx}} AUDIO
 {{- else}}
   TITLE "{{$ch.Title}}"
 {{- end}}
-  INDEX 01 {{$ch.Stamp}}
+  INDEX 01 {{$ch.Start.MMSS}}
 {{- end -}}`

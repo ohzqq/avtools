@@ -15,6 +15,12 @@ type fmtBoolFlags struct {
 	Cover bool
 }
 
+type fmtStringFlags struct {
+	Meta  string
+	Cue   string
+	Cover string
+}
+
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands

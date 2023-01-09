@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var probe fmtStringFlags
+
 // probeCmd represents the probe command
 var probeCmd = &cobra.Command{
 	Use:   "probe",
@@ -15,15 +17,18 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		cut := media.Cut(input)
+		m := media.New(input).Probe()
+		switch {
+		case cmd.Flags().Changed("meta"):
+			m.LoadIni(probe.Meta)
+		case cmd.Flags().Changed("cue"):
+			m.LoadCue(probe.Cue)
+		}
 		//cut.Chapter(3)
 		//cut.Start("00:01.000").End("00:02.999")
 		//c := cut.Compile()
 		//c.Run()
-		//m := media.New(input).SetMeta(input)
-		//m := media.New(input).LoadIni(input)
-		//m := media.New(input).Probe()
-		fmt.Printf("meta %+V\n", cut.Chapters()[0].Start.String())
+		fmt.Printf("meta %+V\n", m.Chapters())
 		//fmt.Printf("meta %+V\n", m.Chapters[0].Start.HHMMSS())
 		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.String())
 		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.HHMMSS())
@@ -40,6 +45,8 @@ var probeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(probeCmd)
 
+	probeCmd.PersistentFlags().StringVarP(&probe.Meta, "meta", "m", "", "extract ffmeta")
+	probeCmd.PersistentFlags().StringVarP(&probe.Cue, "cue", "c", "", "extract cue sheet")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

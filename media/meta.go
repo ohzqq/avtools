@@ -95,17 +95,7 @@ func (m *Media) LoadCue(name string) *Media {
 }
 
 func (m Media) DumpCue() []byte {
-	var (
-		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
-		buf  bytes.Buffer
-	)
-
-	err := tmpl.Execute(&buf, m)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return buf.Bytes()
+	return meta.DumpCueSheet(m.Input.Abs, m.Media)
 }
 
 func (m *Media) Probe() *Media {

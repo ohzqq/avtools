@@ -76,9 +76,7 @@ func (m *Media) SetMeta(meta Meta) *Media {
 
 	m.chapters = meta.Chapters()
 
-	//if streams := meta.Streams(); len(streams) > 0 {
 	m.streams = meta.Streams()
-	//}
 	return m
 }
 
