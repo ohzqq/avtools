@@ -15,7 +15,7 @@ import (
 
 type Media struct {
 	*avtools.Media
-	Streams  []Stream
+	streams  []Stream
 	Input    File
 	Output   File
 	Ini      File
@@ -66,7 +66,7 @@ func (m Media) HasChapters() bool {
 
 func (m Media) AudioStreams() []Stream {
 	var streams []Stream
-	for _, stream := range m.Streams {
+	for _, stream := range m.streams {
 		if stream.CodecType == "audio" {
 			streams = append(streams, stream)
 		}
@@ -76,7 +76,7 @@ func (m Media) AudioStreams() []Stream {
 
 func (m Media) VideoStreams() []Stream {
 	var streams []Stream
-	for _, stream := range m.Streams {
+	for _, stream := range m.streams {
 		if stream.CodecType == "video" {
 			streams = append(streams, stream)
 		}

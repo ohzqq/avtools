@@ -2,7 +2,6 @@ package media
 
 import (
 	"bufio"
-	"bytes"
 	"html/template"
 	"log"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
-	"gopkg.in/ini.v1"
 )
 
 func (m *Media) LoadIni(name string) *Media {
@@ -40,46 +38,7 @@ func (m *Media) LoadIni(name string) *Media {
 }
 
 func (m Media) DumpIni() []byte {
-	ini.PrettyFormat = false
-
-	opts := ini.LoadOptions{
-		IgnoreInlineComment:    true,
-		AllowNonUniqueSections: true,
-	}
-
-	ffmeta := ini.Empty(opts)
-
-	for k, v := range m.Tags() {
-		_, err := ffmeta.Section("").NewKey(k, v)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	for _, chapter := range m.Chapters() {
-		sec, err := ffmeta.NewSection("CHAPTER")
-		if err != nil {
-			log.Fatal(err)
-		}
-		sec.NewKey("TIMEBASE", chapter.Timebase())
-		sec.NewKey("START", chapter.Start.MS())
-		sec.NewKey("END", chapter.End.MS())
-		sec.NewKey("title", chapter.Title)
-	}
-
-	var buf bytes.Buffer
-	_, err := buf.WriteString(meta.FFmetaComment)
-	_, err = ffmeta.WriteTo(&buf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//_, err = buf.Write(ff.IniChaps())
-	//if err != nil {
-	//  log.Fatal(err)
-	//}
-
-	return buf.Bytes()
+	return meta.DumpIni(m)
 }
 
 func (m *Media) LoadCue(name string) *Media {
@@ -95,7 +54,7 @@ func (m *Media) LoadCue(name string) *Media {
 }
 
 func (m Media) DumpCue() []byte {
-	return meta.DumpCueSheet(m.Input.Abs, m.Media)
+	return meta.DumpCueSheet(m.Input.Abs, m)
 }
 
 func (m *Media) Probe() *Media {
@@ -120,7 +79,7 @@ func (m *Media) Probe() *Media {
 					}
 				}
 			}
-			m.Streams = append(m.Streams, s)
+			m.streams = append(m.streams, s)
 		}
 	}
 

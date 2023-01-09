@@ -21,8 +21,11 @@ var probeCmd = &cobra.Command{
 		switch {
 		case cmd.Flags().Changed("meta"):
 			m.LoadIni(probe.Meta)
+			cue := m.DumpIni()
+			println(string(cue))
 		case cmd.Flags().Changed("cue"):
 			m.LoadCue(probe.Cue)
+			//cue := meta.DumpCueSheet(m.Input.Abs, m.Media)
 		}
 		//cut.Chapter(3)
 		//cut.Start("00:01.000").End("00:02.999")

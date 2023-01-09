@@ -65,6 +65,44 @@ func LoadIni(input string) *FFMeta {
 	return ffmeta
 }
 
+func DumpIni(meta avtools.Meta) []byte {
+	ini.PrettyFormat = false
+
+	opts := ini.LoadOptions{
+		IgnoreInlineComment:    true,
+		AllowNonUniqueSections: true,
+	}
+
+	ffmeta := ini.Empty(opts)
+
+	for k, v := range meta.Tags() {
+		_, err := ffmeta.Section("").NewKey(k, v)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	for _, chapter := range meta.Chapters() {
+		sec, err := ffmeta.NewSection("CHAPTER")
+		if err != nil {
+			log.Fatal(err)
+		}
+		sec.NewKey("TIMEBASE", chapter.Timebase())
+		sec.NewKey("START", chapter.Start.MS())
+		sec.NewKey("END", chapter.End.MS())
+		sec.NewKey("title", chapter.Title)
+	}
+
+	var buf bytes.Buffer
+	_, err := buf.WriteString(FFmetaComment)
+	_, err = ffmeta.WriteTo(&buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.Bytes()
+}
+
 func (ff FFMeta) Chapters() []*avtools.Chapter {
 	return ff.chaps
 }
