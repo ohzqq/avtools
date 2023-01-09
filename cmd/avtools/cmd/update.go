@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
@@ -18,9 +17,7 @@ var updateCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		m := media.New(input).Probe()
-		in := ff.New()
-		in.In(m.Input.Abs)
+		m := media.Update(input, update.Meta, update.Cue)
 		switch {
 		case update.Meta != "":
 			m.LoadMeta(update.Meta)
@@ -28,7 +25,7 @@ var updateCmd = &cobra.Command{
 		case update.Cue != "":
 			m.LoadMeta(update.Cue)
 		}
-		in.Output.Set("c", "copy")
+		m.Run()
 		//out := ffmpeg.Input("ffmeta.ini").Output("jlk", ffmpeg.KwArgs{"map_metadata": "1"})
 		fmt.Printf("meta %+V\n", m.Chapters())
 		//fmt.Printf("args %+V\n", in.Compile().Args)

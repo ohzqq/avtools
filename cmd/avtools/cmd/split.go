@@ -23,11 +23,11 @@ var splitCmd = &cobra.Command{
 		cut := media.Cut(input)
 
 		if cmd.Flags().Changed("cue") {
-			cut.SetMeta(split.cue)
+			cut.LoadMeta(split.cue)
 		}
 
 		if cmd.Flags().Changed("meta") {
-			cut.SetMeta(split.ffmeta)
+			cut.LoadMeta(split.ffmeta)
 		}
 
 		cut.AllChapters()

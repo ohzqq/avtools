@@ -17,13 +17,14 @@ import (
 
 type Media struct {
 	*avtools.Media
-	streams  []Stream
-	Input    File
-	Output   File
-	Ini      File
-	Cue      File
-	Cover    File
-	HasCover bool
+	streams     []Stream
+	Input       File
+	Output      File
+	Ini         File
+	Cue         File
+	Cover       File
+	HasCover    bool
+	MetaChanged bool
 }
 
 type Stream struct {
@@ -58,7 +59,9 @@ func (m *Media) LoadMeta(name string) *Media {
 		dur := m.GetTag("duration")
 		last := m.Chapters()[len(m.Chapters())-1]
 		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
+		m.Cue = file
 	}
+	m.MetaChanged = true
 	return m
 }
 
@@ -115,6 +118,7 @@ type FileName struct {
 	Name    string
 	Padding string
 	data    []byte
+	file    *os.File
 }
 
 func NewFile(n string) File {
@@ -150,6 +154,7 @@ func (f File) NewName() *FileName {
 		Name:    f.Name,
 		Path:    f.Path,
 		Padding: f.Padding,
+		//Ext:     f.Ext,
 	}
 	return name
 }
@@ -181,6 +186,10 @@ func (f File) IsCue() bool {
 	return false
 }
 
+func (f File) IsImage() bool {
+	return strings.Contains(f.Mimetype, "image")
+}
+
 func (f *FileName) WithExt(e string) *FileName {
 	f.Ext = e
 	return f
@@ -205,8 +214,8 @@ func (f FileName) Join() string {
 	return filepath.Join(f.Path, f.Name+f.Ext)
 }
 
-func (f FileName) Write(wr io.Writer, data []byte) error {
-	_, err := wr.Write(data)
+func (f FileName) Write(wr io.Writer) error {
+	_, err := wr.Write(f.data)
 	if err != nil {
 		return err
 	}
@@ -214,13 +223,11 @@ func (f FileName) Write(wr io.Writer, data []byte) error {
 }
 
 func (f FileName) Run() error {
-	file, err := os.Create(f.Join())
-	if err != nil {
-		return err
+	if f.file != nil {
+		defer f.file.Close()
 	}
-	defer file.Close()
 
-	err = f.Write(file, f.data)
+	err := f.Write(f.file)
 	if err != nil {
 		return err
 	}
@@ -228,6 +235,20 @@ func (f FileName) Run() error {
 	return nil
 }
 
+func (f *FileName) Tmp(data []byte) {
+	file, err := os.CreateTemp("", f.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.file = file
+	f.data = data
+}
+
 func (f *FileName) Save(data []byte) {
+	file, err := os.Create(f.Join())
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.file = file
 	f.data = data
 }
