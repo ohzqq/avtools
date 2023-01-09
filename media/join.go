@@ -49,10 +49,9 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 
 	formats := make(map[string]Cmd)
 	tmpMedia := media[0]
-	tmpMedia.Chapters = GenerateChapters(media)
+	tmpMedia.SetChapters(GenerateChapters(media))
 	formats["ini"] = tmpMedia.SaveMetaFmt("ini")
 	formats["cue"] = tmpMedia.SaveMetaFmt("cue")
-	//s.Run()
 
 	cmd := ff.New()
 	cmd.In(tmp.Name())

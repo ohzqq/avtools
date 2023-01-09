@@ -49,14 +49,14 @@ func (m Media) DumpIni() []byte {
 
 	ffmeta := ini.Empty(opts)
 
-	for k, v := range m.Tags {
+	for k, v := range m.Tags() {
 		_, err := ffmeta.Section("").NewKey(k, v)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	for _, chapter := range m.Chapters {
+	for _, chapter := range m.Chapters() {
 		sec, err := ffmeta.NewSection("CHAPTER")
 		if err != nil {
 			log.Fatal(err)
@@ -88,7 +88,7 @@ func (m *Media) LoadCue(name string) *Media {
 		cue := meta.LoadCueSheet(file.Abs)
 		m.Media.SetMeta(cue)
 		dur := m.GetTag("duration")
-		last := m.Chapters[len(m.Chapters)-1]
+		last := m.Chapters()[len(m.Chapters())-1]
 		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
 	}
 	return m
@@ -112,8 +112,8 @@ func (m *Media) Probe() *Media {
 	p := meta.FFProbe(m.Input.Abs)
 	m.Media.SetMeta(p)
 
-	if len(m.Media.Streams) > 0 {
-		for _, stream := range m.Media.Streams {
+	if len(m.Media.Streams()) > 0 {
+		for _, stream := range m.Media.Streams() {
 			s := Stream{}
 			for key, val := range stream {
 				switch key {

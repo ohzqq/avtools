@@ -23,7 +23,7 @@ var probeCmd = &cobra.Command{
 		//m := media.New(input).SetMeta(input)
 		//m := media.New(input).LoadIni(input)
 		//m := media.New(input).Probe()
-		fmt.Printf("meta %+V\n", cut.Chapters[0].Start.String())
+		fmt.Printf("meta %+V\n", cut.Chapters()[0].Start.String())
 		//fmt.Printf("meta %+V\n", m.Chapters[0].Start.HHMMSS())
 		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.String())
 		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.HHMMSS())

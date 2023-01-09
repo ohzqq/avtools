@@ -22,7 +22,7 @@ func Cut(file string) CutCmd {
 
 func (c *CutCmd) AllChapters() {
 	if c.HasChapters() {
-		for _, ch := range c.Chapters {
+		for _, ch := range c.Chapters() {
 			cmd := c.SetChapter(ch)
 			cmd.Compile().Run()
 		}
@@ -31,8 +31,8 @@ func (c *CutCmd) AllChapters() {
 
 func (c *CutCmd) Chapter(num int) *CutCmd {
 	if c.HasChapters() {
-		if num > 0 && num <= len(c.Chapters) {
-			c.Chap = c.Chapters[num-1]
+		if num > 0 && num <= len(c.Chapters()) {
+			c.Chap = c.Chapters()[num-1]
 		}
 	}
 	return c

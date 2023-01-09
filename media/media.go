@@ -61,7 +61,7 @@ func (m Media) Command() ff.Cmd {
 }
 
 func (m Media) HasChapters() bool {
-	return len(m.Chapters) > 0
+	return len(m.Chapters()) > 0
 }
 
 func (m Media) AudioStreams() []Stream {

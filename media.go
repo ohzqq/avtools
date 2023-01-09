@@ -6,9 +6,9 @@ import (
 
 type Media struct {
 	Filename string
-	Tags     map[string]string
-	Chapters []*Chapter
-	Streams  []map[string]string
+	tags     map[string]string
+	chapters []*Chapter
+	streams  []map[string]string
 }
 
 type Chapter struct {
@@ -32,13 +32,37 @@ type Meta interface {
 func NewMedia(input string) *Media {
 	media := Media{
 		Filename: input,
-		Tags:     make(map[string]string),
+		tags:     make(map[string]string),
 	}
 	return &media
 }
 
+func (m Media) Chapters() []*Chapter {
+	return m.chapters
+}
+
+func (m *Media) SetChapters(chaps []*Chapter) {
+	m.chapters = chaps
+}
+
+func (m Media) Tags() map[string]string {
+	return m.tags
+}
+
+func (m *Media) SetTags(tags map[string]string) {
+	m.tags = tags
+}
+
+func (m Media) Streams() []map[string]string {
+	return m.streams
+}
+
+func (m *Media) SetStreams(streams []map[string]string) {
+	m.streams = streams
+}
+
 func (m Media) GetTag(key string) string {
-	if val, ok := m.Tags[key]; ok {
+	if val, ok := m.tags[key]; ok {
 		return val
 	}
 
@@ -47,13 +71,13 @@ func (m Media) GetTag(key string) string {
 
 func (m *Media) SetMeta(meta Meta) *Media {
 	for key, val := range meta.Tags() {
-		m.Tags[key] = val
+		m.tags[key] = val
 	}
 
-	m.Chapters = meta.Chapters()
+	m.chapters = meta.Chapters()
 
 	//if streams := meta.Streams(); len(streams) > 0 {
-	m.Streams = meta.Streams()
+	m.streams = meta.Streams()
 	//}
 	return m
 }
