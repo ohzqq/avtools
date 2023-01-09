@@ -118,10 +118,9 @@ func NewFile(n string) File {
 	f := File{
 		Base:     filepath.Base(abs),
 		Abs:      abs,
-		FileName: &FileName{},
+		FileName: NewFileName(),
 	}
 
-	f.Padding = "%03d"
 	f.Ext = filepath.Ext(abs)
 	f.Mimetype = mime.TypeByExtension(f.Ext)
 	f.Name = strings.TrimSuffix(f.Base, f.Ext)
@@ -129,6 +128,13 @@ func NewFile(n string) File {
 	f.Path, f.File = filepath.Split(abs)
 
 	return f
+}
+
+func NewFileName() *FileName {
+	name := &FileName{
+		Padding: "%03d",
+	}
+	return name
 }
 
 func (f File) NewName() *FileName {
@@ -141,21 +147,17 @@ func (f File) NewName() *FileName {
 }
 
 func (f *FileName) WithExt(e string) *FileName {
-	//name := filepath.Join(f.Path, f.Name+e)
 	f.Ext = e
 	return f
 }
 
 func (f *FileName) Suffix(suf string) *FileName {
-	//name := f.Name + suf + f.Ext
-	//return filepath.Join(f.Path, name)
 	f.Name = f.Name + suf
 	return f
 }
 
 func (f *FileName) Prefix(pre string) *FileName {
 	f.Name = pre + f.Name
-	//return filepath.Join(f.Path, name)
 	return f
 }
 

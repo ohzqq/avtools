@@ -47,27 +47,29 @@ func Join(ext string, dir ...string) Cmd {
 		}
 	}
 
+	tmpMedia := media[0]
+	tmpMedia.Chapters = GenerateChapters(media)
+	s := tmpMedia.SaveMetaFmt("ini")
+	s.Run()
+
 	cmd := ff.New()
 	cmd.In(tmp.Name())
 	cmd.Input.Set("f", "concat")
 	cmd.Input.Set("safe", "0")
 	cmd.Input.Set("y", "")
-	base := filepath.Base(d)
-	name := filepath.Join(path, base)
-	cmd.Output.Set("c", "copy").Ext(ext).Name(name)
+
 	if media[0].HasCover {
 		cmd.Output.Set("vn", "")
 	}
 
-	tmpMedia := media[0]
-	tmpMedia.Chapters = CalculateChapters(media)
-	s := tmpMedia.SaveMetaFmt("ini")
-	s.Run()
+	base := filepath.Base(d)
+	name := filepath.Join(path, base)
+	cmd.Output.Set("c", "copy").Ext(ext).Name(name)
 
 	return cmd
 }
 
-func CalculateChapters(media []*Media) []*avtools.Chapter {
+func GenerateChapters(media []*Media) []*avtools.Chapter {
 	var chapters []*avtools.Chapter
 
 	var start = []int64{0}
