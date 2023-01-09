@@ -3,10 +3,12 @@ package meta
 import (
 	"encoding/json"
 	"log"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/avtools/ff"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -49,6 +51,18 @@ func FFProbe(input string) ProbeMeta {
 	}
 
 	return meta
+}
+
+func DumpFFMeta(file string) ff.Cmd {
+	cmd := ff.New()
+	cmd.In(file, ffmpeg.KwArgs{"y": ""})
+	dir, name := filepath.Split(file)
+	ext := filepath.Ext(name)
+	name = "ffmeta-" + strings.TrimSuffix(name, ext)
+	name = filepath.Join(dir, name)
+	cmd.Output.Pad("").Name(name).Ext(".ini")
+	cmd.Output.Set("f", "ffmetadata")
+	return cmd
 }
 
 func (m ProbeMeta) Chapters() []*avtools.Chapter {

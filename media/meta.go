@@ -9,7 +9,6 @@ import (
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 func (m *Media) LoadIni(name string) *Media {
@@ -87,13 +86,7 @@ func (m *Media) Probe() *Media {
 }
 
 func (m Media) DumpFFMeta() ff.Cmd {
-	cmd := ff.New()
-	cmd.In(m.Input.Abs, ffmpeg.KwArgs{"y": ""})
-	name := m.Input.NewName()
-	n := name.Prefix("ffmeta-").Join()
-	cmd.Output.Pad("").Name(n).Ext(".ini")
-	cmd.Output.Set("f", "ffmetadata")
-	return cmd
+	return meta.DumpFFMeta(m.Input.Abs)
 }
 
 var tmplFuncs = template.FuncMap{
