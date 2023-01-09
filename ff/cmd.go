@@ -1,7 +1,7 @@
 package ff
 
 import (
-	"fmt"
+	"os/exec"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -37,22 +37,49 @@ func (cmd *Cmd) In(file string, args ...ffmpeg.KwArgs) *Cmd {
 	return cmd
 }
 
-func (cmd *Cmd) Compile() *ffmpeg.Stream {
+func (cmd *Cmd) Compile() *exec.Cmd {
 	input := NewInput(cmd.Input.Args)
 	in := input.Compile(cmd.File)
+	inArgs := len(in.GetArgs())
 
 	for _, filter := range cmd.Filters.Compile() {
-		fmt.Printf("filter %+V\n", filter)
 		in = filter(in)
 	}
+	fArgs := len(in.GetArgs()[inArgs:])
 
 	output := cmd.Output.Compile(in)
 
-	return output
+	outArgs := inArgs
+	if fArgs > 0 {
+		fArgs = fArgs + 2
+		outArgs = outArgs + fArgs
+	}
+
+	ffArgs := output.GetArgs()
+
+	var args []string
+
+	args = append(args, ffArgs[:inArgs]...)
+
+	if meta, ok := cmd.Input.Args["meta"]; ok {
+		args = append(args, "-i", meta.(string))
+	}
+
+	args = append(args, ffArgs[inArgs:outArgs]...)
+
+	if label, ok := cmd.Input.Args["map_metadata"]; ok {
+		args = append(args, "-map_metadata", label.(string))
+	}
+
+	args = append(args, ffArgs[outArgs:]...)
+
+	exe := exec.Command("ffmpeg", args...)
+
+	return exe
 }
 
 func (cmd Cmd) Run() error {
-	err := cmd.Compile().ErrorToStdOut().Run()
+	err := cmd.Compile().Run()
 	if err != nil {
 		return err
 	}

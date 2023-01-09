@@ -1,6 +1,8 @@
 package ff
 
-import ffmpeg "github.com/u2takey/ffmpeg-go"
+import (
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+)
 
 type Input struct {
 	File string
@@ -26,11 +28,29 @@ func (i *Input) Merge(kwargs ffmpeg.KwArgs) *Input {
 }
 
 func (i *Input) Compile(file string) *ffmpeg.Stream {
-	return ffmpeg.Input(file, i.Args)
+	args := make(ffmpeg.KwArgs)
+	for key, val := range i.Args {
+		switch key {
+		case "map_metadata", "map_chapters", "meta":
+		default:
+			args[key] = val
+		}
+	}
+	return ffmpeg.Input(file, args)
 }
 
 func (i *Input) Verbose() *Input {
 	i.Set("loglevel", "info")
+	return i
+}
+
+func (i *Input) FFMeta(file string, idx ...string) *Input {
+	label := "1"
+	if len(idx) > 0 {
+		label = idx[0]
+	}
+	i.Set("meta", file)
+	i.Set("map_metadata", label)
 	return i
 }
 

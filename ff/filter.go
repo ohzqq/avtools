@@ -99,7 +99,6 @@ func (f Filters) Compile() []filter {
 			case "palette":
 				filter = Palette(ffmpeg.KwArgs(args))
 			default:
-				println(name)
 				filter = newFilter(name, args.Args())
 			}
 			filters = append(filters, filter)
