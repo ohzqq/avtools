@@ -21,13 +21,17 @@ var updateCmd = &cobra.Command{
 		m := media.New(input).Probe()
 		in := ff.New()
 		in.In(m.Input.Abs)
-		if update.Meta != "" {
-			in.Input.FFMeta(update.Meta)
+		switch {
+		case update.Meta != "":
+			m.LoadMeta(update.Meta)
+			//in.Input.FFMeta(update.Meta)
+		case update.Cue != "":
+			m.LoadMeta(update.Cue)
 		}
 		in.Output.Set("c", "copy")
 		//out := ffmpeg.Input("ffmeta.ini").Output("jlk", ffmpeg.KwArgs{"map_metadata": "1"})
-		fmt.Printf("meta %+V\n", m.Input.Abs)
-		fmt.Printf("args %+V\n", in.Compile().Args)
+		fmt.Printf("meta %+V\n", m.Chapters())
+		//fmt.Printf("args %+V\n", in.Compile().Args)
 	},
 }
 

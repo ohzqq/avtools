@@ -1,6 +1,7 @@
 package media
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
+	"github.com/ohzqq/avtools/meta"
 )
 
 type Media struct {
@@ -43,13 +45,19 @@ func New(input string) *Media {
 	return med
 }
 
-func (m *Media) SetMeta(name string) *Media {
+func (m *Media) LoadMeta(name string) *Media {
 	file := NewFile(name)
-	switch file.Ext {
-	case ".cue":
-		m.LoadCue(name)
-	case ".ini":
-		m.LoadIni(name)
+	switch {
+	case file.IsFFMeta():
+		ini := meta.LoadIni(file.Abs)
+		m.Media.SetMeta(ini)
+		m.Ini = file
+	case file.IsCue():
+		cue := meta.LoadCueSheet(file.Abs)
+		m.Media.SetMeta(cue)
+		dur := m.GetTag("duration")
+		last := m.Chapters()[len(m.Chapters())-1]
+		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
 	}
 	return m
 }
@@ -144,6 +152,33 @@ func (f File) NewName() *FileName {
 		Padding: f.Padding,
 	}
 	return name
+}
+
+func (f File) IsFFMeta() bool {
+	if IsPlainText(f.Mimetype) {
+		contents, err := os.Open(f.Abs)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer contents.Close()
+
+		scanner := bufio.NewScanner(contents)
+		line := 0
+		for scanner.Scan() {
+			if line == 0 && scanner.Text() == ";FFMETADATA1" {
+				return true
+				break
+			}
+		}
+	}
+	return false
+}
+
+func (f File) IsCue() bool {
+	if IsPlainText(f.Mimetype) {
+		return f.Ext == ".cue"
+	}
+	return false
 }
 
 func (f *FileName) WithExt(e string) *FileName {

@@ -1,55 +1,14 @@
 package media
 
 import (
-	"bufio"
 	"html/template"
-	"log"
-	"os"
 
-	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
 )
 
-func (m *Media) LoadIni(name string) *Media {
-	file := NewFile(name)
-	if IsPlainText(file.Mimetype) {
-		contents, err := os.Open(file.Abs)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer contents.Close()
-
-		scanner := bufio.NewScanner(contents)
-		line := 0
-		for scanner.Scan() {
-			if line == 0 && scanner.Text() == ";FFMETADATA1" {
-				ini := meta.LoadIni(file.Abs)
-				m.Media.SetMeta(ini)
-				m.Ini = file
-				break
-			} else {
-				log.Fatalln("ffmpeg metadata files need to have ';FFMETADATA1' as the first line")
-			}
-		}
-	}
-	return m
-}
-
 func (m Media) DumpIni() []byte {
 	return meta.DumpIni(m)
-}
-
-func (m *Media) LoadCue(name string) *Media {
-	file := NewFile(name)
-	if IsPlainText(file.Mimetype) {
-		cue := meta.LoadCueSheet(file.Abs)
-		m.Media.SetMeta(cue)
-		dur := m.GetTag("duration")
-		last := m.Chapters()[len(m.Chapters())-1]
-		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
-	}
-	return m
 }
 
 func (m Media) DumpCue() []byte {

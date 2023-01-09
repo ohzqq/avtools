@@ -20,11 +20,11 @@ var probeCmd = &cobra.Command{
 		m := media.New(input).Probe()
 		switch {
 		case cmd.Flags().Changed("meta"):
-			m.LoadIni(probe.Meta)
+			m.LoadMeta(probe.Meta)
 			cue := m.DumpIni()
 			println(string(cue))
 		case cmd.Flags().Changed("cue"):
-			m.LoadCue(probe.Cue)
+			m.LoadMeta(probe.Cue)
 			//cue := meta.DumpCueSheet(m.Input.Abs, m.Media)
 		}
 		//cut.Chapter(3)
