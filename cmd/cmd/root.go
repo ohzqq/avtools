@@ -9,8 +9,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type fmtBoolFlags struct {
+	Meta  bool
+	Cue   bool
+	Cover bool
+}
+
 var cfgFile string
-var testFlag string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

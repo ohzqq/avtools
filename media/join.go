@@ -16,7 +16,7 @@ type JoinCmd struct {
 	ffmeta string
 }
 
-func Join(ext string, dir ...string) Cmd {
+func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 	d := "."
 	if len(dir) > 0 {
 		d = dir[0]
@@ -47,10 +47,12 @@ func Join(ext string, dir ...string) Cmd {
 		}
 	}
 
+	formats := make(map[string]Cmd)
 	tmpMedia := media[0]
 	tmpMedia.Chapters = GenerateChapters(media)
-	s := tmpMedia.SaveMetaFmt("ini")
-	s.Run()
+	formats["ini"] = tmpMedia.SaveMetaFmt("ini")
+	formats["cue"] = tmpMedia.SaveMetaFmt("cue")
+	//s.Run()
 
 	cmd := ff.New()
 	cmd.In(tmp.Name())
@@ -66,7 +68,7 @@ func Join(ext string, dir ...string) Cmd {
 	name := filepath.Join(path, base)
 	cmd.Output.Set("c", "copy").Ext(ext).Name(name)
 
-	return cmd
+	return cmd, formats
 }
 
 func GenerateChapters(media []*Media) []*avtools.Chapter {

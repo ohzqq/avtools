@@ -7,13 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type extractFlags struct {
-	Meta  bool
-	Cue   bool
-	Cover bool
-}
-
-var extract extractFlags
+var extract fmtBoolFlags
 
 // extractCmd represents the extract command
 var extractCmd = &cobra.Command{
