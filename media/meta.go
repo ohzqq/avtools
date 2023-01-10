@@ -10,6 +10,7 @@ import (
 
 func (m *Media) LoadIni(name string) {
 	file := NewFile(name)
+	println("load ini")
 	if file.IsFFMeta() {
 		ini := meta.LoadIni(file.Abs)
 		m.Media.SetMeta(ini)
@@ -68,8 +69,9 @@ func (m *Media) Probe() *Media {
 	return m
 }
 
-func (m Media) DumpFFMeta() ff.Cmd {
-	return meta.DumpFFMeta(m.Input.Abs)
+func (m Media) DumpFFMeta() *ff.Cmd {
+	cmd := meta.DumpFFMeta(m.Input.Abs)
+	return cmd
 }
 
 var tmplFuncs = template.FuncMap{

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ohzqq/avtools"
 	"gopkg.in/ini.v1"
@@ -16,8 +17,9 @@ import (
 const FFmetaComment = ";FFMETADATA1\n"
 
 type FFMeta struct {
-	tags  map[string]string
-	chaps []*avtools.Chapter
+	tags     map[string]string
+	chaps    []*avtools.Chapter
+	chapters []map[string]string
 }
 
 type FFMetaChapter struct {
@@ -50,15 +52,8 @@ func LoadIni(input string) *FFMeta {
 		}
 
 		for _, ch := range sections {
-			var chap FFMetaChapter
-			ch.MapTo(&chap)
-
-			c := &avtools.Chapter{
-				Start: avtools.Timestamp(avtools.ParseStampDuration(chap.Start, chap.Timebase())),
-				End:   avtools.Timestamp(avtools.ParseStampDuration(chap.End, chap.Timebase())),
-				Title: chap.Title,
-			}
-			ffmeta.chaps = append(ffmeta.chaps, c)
+			h := ch.KeysHash()
+			ffmeta.chapters = append(ffmeta.chapters, h)
 		}
 	}
 
@@ -91,6 +86,9 @@ func DumpIni(meta avtools.Meta) []byte {
 		sec.NewKey("START", chapter.Start.MS())
 		sec.NewKey("END", chapter.End.MS())
 		sec.NewKey("title", chapter.Title)
+		for k, v := range chapter.Tags {
+			sec.NewKey(k, v)
+		}
 	}
 
 	var buf bytes.Buffer
@@ -104,7 +102,42 @@ func DumpIni(meta avtools.Meta) []byte {
 }
 
 func (ff FFMeta) Chapters() []*avtools.Chapter {
-	return ff.chaps
+	var chapters []*avtools.Chapter
+	for _, chapter := range ff.chapters {
+		var base string
+		if b, ok := chapter["timebase"]; ok {
+			base = b
+		}
+		ch := &avtools.Chapter{
+			Tags: make(map[string]string),
+		}
+		for key, val := range chapter {
+			switch key {
+			case "start":
+				var dur time.Duration
+				if base == "" {
+					dur = avtools.ParseStamp(val)
+				} else {
+					dur = avtools.ParseTimeAndBase(val, base)
+				}
+				ch.Start = avtools.Timestamp(dur)
+			case "end":
+				var dur time.Duration
+				if base == "" {
+					dur = avtools.ParseStamp(val)
+				} else {
+					dur = avtools.ParseTimeAndBase(val, base)
+				}
+				ch.End = avtools.Timestamp(dur)
+			case "title":
+				ch.Title = val
+			default:
+				ch.Tags[key] = val
+			}
+		}
+		chapters = append(chapters, ch)
+	}
+	return chapters
 }
 
 func (ff FFMeta) Tags() map[string]string {

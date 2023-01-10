@@ -47,6 +47,7 @@ func (cmd Command) updateMeta(input string) *Media {
 
 	switch {
 	case cmd.Flags.File.Meta != "":
+		println("update meta")
 		m.LoadIni(cmd.Flags.File.Meta)
 		m.MetaChanged = true
 	case cmd.Flags.File.Cue != "":

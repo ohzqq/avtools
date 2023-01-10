@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
@@ -18,29 +17,13 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		m := media.New(input).Probe()
+		//m := media.New(input).Probe()
+		m := probe.Update(input).(media.UpdateCmd)
 		fmt.Printf("meta %+V\n", m.Input.Abs)
-		pro := ff.GetProfile("audio")
-		fmt.Printf("profile %+V\n", pro)
-		//probe.LoadMeta(m)
-		//switch {
-		//case cmd.Flags().Changed("meta"):
-		//  m.LoadMeta(probe.Meta)
-		//  cue := m.DumpIni()
-		//  println(string(cue))
-		//case cmd.Flags().Changed("cue"):
-		//  m.LoadMeta(probe.Cue)
-		//  //cue := meta.DumpCueSheet(m.Input.Abs, m.Media)
-		//}
-
-		//cut.Chapter(3)
-		//cut.Start("00:01.000").End("00:02.999")
-		//c := cut.Compile()
-		//c.Run()
-		//fmt.Printf("meta %+V\n", m.Chapters[0].Start.HHMMSS())
-		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.String())
-		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.HHMMSS())
-		//fmt.Printf("meta %+V\n", m.Chapters[10].Start.MMSS())
+		fmt.Printf("meta %+V\n", len(m.Chapters()))
+		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Start.HHMMSS())
+		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].End.HHMMSS())
+		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//cue := m.DumpFFMeta()
 		//cue.Compile().Run()
 		//fmt.Printf("cue %+V\n", string(cue))

@@ -15,6 +15,7 @@ type Chapter struct {
 	Start Time
 	End   Time
 	Title string
+	Tags  map[string]string
 }
 
 type ChapterMeta interface {
@@ -42,6 +43,7 @@ func NewChapter(chap ChapterMeta) *Chapter {
 		Title: chap.Title(),
 		Start: Timestamp(chap.Start()),
 		End:   Timestamp(chap.End()),
+		Tags:  make(map[string]string),
 	}
 }
 

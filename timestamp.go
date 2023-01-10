@@ -79,6 +79,24 @@ func ParseStamp(t string) time.Duration {
 	return ParseDuration(stamp)
 }
 
+func ParseTimeAndBase(t, b string) time.Duration {
+	base, err := strconv.Atoi(strings.TrimPrefix(b, "1/"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dur, err := strconv.Atoi(t)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	secs := dur / base
+	ms := secs * 1000
+	d := strconv.Itoa(ms) + "ms"
+
+	return ParseDuration(d)
+}
+
 func ParseStampDuration[N Number](t, b N) time.Duration {
 	secs := float64(t) / float64(b)
 	ms := secs * 1000

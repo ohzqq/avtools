@@ -27,10 +27,10 @@ type ProbeFormat struct {
 }
 
 type ProbeChapter struct {
-	Base         string            `json:"time_base"`
-	Start        string            `json:"start_time"`
-	End          string            `json:"end_time"`
-	ChapterTitle string            `json:"title"`
+	Base         string            `json:"time_base" ini:"TIMEBASE"`
+	Start        string            `json:"start_time" ini:"START"`
+	End          string            `json:"end_time" ini:"END"`
+	ChapterTitle string            `ini:"title"`
 	Tags         map[string]string `json:"tags"`
 }
 
@@ -53,7 +53,7 @@ func FFProbe(input string) ProbeMeta {
 	return meta
 }
 
-func DumpFFMeta(file string) ff.Cmd {
+func DumpFFMeta(file string) *ff.Cmd {
 	cmd := ff.New()
 	cmd.In(file, ffmpeg.KwArgs{"y": ""})
 	dir, name := filepath.Split(file)
@@ -62,7 +62,7 @@ func DumpFFMeta(file string) ff.Cmd {
 	name = filepath.Join(dir, name)
 	cmd.Output.Pad("").Name(name).Ext(".ini")
 	cmd.Output.Set("f", "ffmetadata")
-	return cmd
+	return cmd.Compile()
 }
 
 func (m ProbeMeta) Chapters() []*avtools.Chapter {
