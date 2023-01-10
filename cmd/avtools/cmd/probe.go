@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ohzqq/avtools/media"
+	"github.com/ohzqq/avtools/yygif"
 	"github.com/spf13/cobra"
 )
 
@@ -21,9 +22,10 @@ var probeCmd = &cobra.Command{
 		m := probe.Update(input).(media.UpdateCmd)
 		fmt.Printf("meta %+V\n", m.Input.Abs)
 		fmt.Printf("meta %+V\n", len(m.Chapters()))
-		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Start.HHMMSS())
-		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].End.HHMMSS())
-		fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
+		g := yygif.MkGifs(probe.Flags.File.Meta)
+		fmt.Printf("tags %+V\n", g)
+		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].End.HHMMSS())
+		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//cue := m.DumpFFMeta()
 		//cue.Compile().Run()
 		//fmt.Printf("cue %+V\n", string(cue))
