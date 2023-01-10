@@ -7,33 +7,11 @@ import (
 )
 
 type Output struct {
-	name    string
-	ext     string
-	padding string
-	num     int
-	Args    ffmpeg.KwArgs
+	Args ffmpeg.KwArgs
 }
 
 func NewOutput(args ...ffmpeg.KwArgs) Output {
 	var out Output
-
-	for _, a := range args {
-		if n, ok := a["name"]; ok {
-			out.name = n.(string)
-		}
-
-		if pad, ok := a["padding"]; ok {
-			out.padding = pad.(string)
-		}
-
-		if e, ok := a["ext"]; ok {
-			out.ext = e.(string)
-		}
-
-		if n, ok := a["num"]; ok {
-			out.num = n.(int)
-		}
-	}
 
 	out.Args = ffmpeg.MergeKwArgs(args)
 

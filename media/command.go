@@ -154,7 +154,6 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 
 	base := filepath.Base(d)
 	name := filepath.Join(path, base)
-	fmt.Printf("out name %s\n", name+ext)
 	//cmd.Output.Set("c", "copy")
 	cmd.Output.Ext(ext).Name(name)
 
