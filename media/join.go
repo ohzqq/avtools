@@ -67,7 +67,7 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 	name := filepath.Join(path, base)
 	cmd.Output.Set("c", "copy").Ext(ext).Name(name)
 
-	return cmd, formats
+	return cmd.Compile(), formats
 }
 
 func GenerateChapters(media []*Media) []*avtools.Chapter {

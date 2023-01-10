@@ -62,7 +62,6 @@ func (cmd Command) Remove(input string) Cmd {
 	}
 
 	if cmd.Flags.Bool.Chapters {
-		println("Map ch")
 		f.Input.MapChapters("-1")
 	}
 
@@ -75,7 +74,7 @@ func (cmd Command) Remove(input string) Cmd {
 	f.Output.Set("c", "copy")
 	f.Output.Ext(m.Input.Ext).Name(name).Pad("")
 
-	return f
+	return f.Compile()
 }
 
 func (cmd Command) Extract(input string) []Cmd {
@@ -161,7 +160,7 @@ func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
 		Pad("").
 		Ext(media.Input.Ext)
 
-	return cmd
+	return cmd.Compile()
 }
 
 func (cmd Command) Update(input string) Cmd {

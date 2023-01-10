@@ -25,7 +25,7 @@ func (m Media) ExtractCover() Cmd {
 	case "png":
 		cmd.Ext(".png")
 	}
-	return cmd
+	return cmd.Compile()
 }
 
 func (m Media) SaveMetaFmt(f string) Cmd {
