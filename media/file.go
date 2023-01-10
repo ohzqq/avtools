@@ -159,3 +159,12 @@ func (f *FileName) Save(data []byte) {
 	f.file = file
 	f.data = data
 }
+
+func IsPlainText(mtype string) bool {
+	if strings.Contains(mtype, "text/plain") {
+		return true
+	} else {
+		log.Fatalln("needs to be plain text file")
+	}
+	return false
+}

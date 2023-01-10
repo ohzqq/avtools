@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 )
@@ -10,7 +12,7 @@ type splitFlags struct {
 	ffmeta string
 }
 
-var split splitFlags
+var split media.Command
 
 // splitCmd represents the split command
 var splitCmd = &cobra.Command{
@@ -20,23 +22,30 @@ var splitCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		cut := media.Cut(input)
-
-		if cmd.Flags().Changed("cue") {
-			cut.LoadMeta(split.cue)
+		cmds := split.Split(input)
+		for _, c := range cmds {
+			err := c.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
+		//cut := media.Cut(input)
 
-		if cmd.Flags().Changed("meta") {
-			cut.LoadMeta(split.ffmeta)
-		}
+		//if cmd.Flags().Changed("cue") {
+		//  cut.LoadMeta(split.cue)
+		//}
 
-		cut.AllChapters()
+		//if cmd.Flags().Changed("meta") {
+		//  cut.LoadMeta(split.ffmeta)
+		//}
+
+		//cut.AllChapters()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(splitCmd)
-	splitCmd.PersistentFlags().StringVarP(&split.cue, "cue", "c", "", "split by cue sheet")
-	splitCmd.PersistentFlags().StringVarP(&split.ffmeta, "meta", "m", "", "split by ffmetadata")
+	splitCmd.PersistentFlags().StringVarP(&split.Flags.File.Cue, "cue", "c", "", "split by cue sheet")
+	splitCmd.PersistentFlags().StringVarP(&split.Flags.File.Meta, "meta", "m", "", "split by ffmetadata")
 	splitCmd.MarkFlagsMutuallyExclusive("cue", "meta")
 }

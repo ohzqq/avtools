@@ -20,6 +20,9 @@ func Cut(file string) CutCmd {
 	return cut
 }
 
+func CutTime(file, start, end string) {
+}
+
 func (c *CutCmd) AllChapters() {
 	if c.HasChapters() {
 		for _, ch := range c.Chapters() {
@@ -44,14 +47,12 @@ func (c CutCmd) SetChapter(ch *avtools.Chapter) CutCmd {
 }
 
 func (c *CutCmd) Start(ss string) *CutCmd {
-	dur := avtools.ParseStamp(ss)
-	c.Chap.Start = avtools.Timestamp(dur)
+	c.Chap.SS(ss)
 	return c
 }
 
 func (c *CutCmd) End(to string) *CutCmd {
-	dur := avtools.ParseStamp(to)
-	c.Chap.End = avtools.Timestamp(dur)
+	c.Chap.To(to)
 	return c
 }
 
@@ -77,6 +78,29 @@ func (c CutCmd) Compile() Cmd {
 		Name(name).
 		Pad("").
 		Ext(c.Media.Input.Ext)
+
+	return cmd
+}
+
+func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
+	out := media.Input.NewName()
+
+	title := chapter.Title
+	if title == "" {
+		title = fmt.Sprintf("-%s-%s", chapter.Start.Dur, chapter.End.Dur)
+	}
+	out.Suffix(title)
+
+	cmd := media.Command()
+
+	cmd.Input.Start(chapter.Start.String()).
+		End(chapter.End.String())
+
+	name := filepath.Join(out.Path, out.Name)
+	cmd.Output.Set("c", "copy").
+		Name(name).
+		Pad("").
+		Ext(media.Input.Ext)
 
 	return cmd
 }

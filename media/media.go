@@ -1,9 +1,6 @@
 package media
 
 import (
-	"log"
-	"strings"
-
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
@@ -69,6 +66,17 @@ func (m Media) HasChapters() bool {
 	return len(m.Chapters()) > 0
 }
 
+func (m Media) GetChapter(num int) *avtools.Chapter {
+	var chapter *avtools.Chapter
+
+	if m.HasChapters() {
+		if num > 0 && num <= len(m.Chapters()) {
+			chapter = m.Chapters()[num-1]
+		}
+	}
+	return chapter
+}
+
 func (m Media) AudioStreams() []Stream {
 	var streams []Stream
 	for _, stream := range m.streams {
@@ -87,13 +95,4 @@ func (m Media) VideoStreams() []Stream {
 		}
 	}
 	return streams
-}
-
-func IsPlainText(mtype string) bool {
-	if strings.Contains(mtype, "text/plain") {
-		return true
-	} else {
-		log.Fatalln("needs to be plain text file")
-	}
-	return false
 }
