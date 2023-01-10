@@ -55,6 +55,8 @@ func (cmd *Cmd) Compile() *exec.Cmd {
 		outArgs = outArgs + fArgs
 	}
 
+	//output.Compile()
+
 	ffArgs := output.GetArgs()
 
 	var args []string

@@ -90,6 +90,7 @@ func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
 		title = fmt.Sprintf("-%s-%s", chapter.Start.Dur, chapter.End.Dur)
 	}
 	out.Suffix(title)
+	//fmt.Printf("chapter %+V\n", chapter)
 
 	cmd := media.Command()
 

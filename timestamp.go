@@ -114,8 +114,7 @@ func (c Time) MS() string {
 
 func (ch Time) Min() int {
 	min := ch.Dur.Minutes()
-	mm := int(math.Round(min))
-	return mm
+	return int(min)
 }
 
 func (c Time) HHMMSS() string {

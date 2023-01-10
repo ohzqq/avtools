@@ -65,7 +65,8 @@ func LoadCueSheet(file string) *CueSheet {
 	for i := 0; i < len(titles); i++ {
 		track := &avtools.Chapter{}
 		track.Title = titles[i]
-		track.Start = avtools.Timestamp(times[i])
+		ss := avtools.Timestamp(times[i])
+		track.Start = ss
 		if e < len(titles) {
 			track.End = avtools.Timestamp(times[e])
 		}
@@ -168,5 +169,5 @@ TRACK {{inc $idx}} AUDIO
 {{- else}}
   TITLE "{{$ch.Title}}"
 {{- end}}
-  INDEX 01 {{$ch.Start.MMSS}}
+	INDEX 01 {{$ch.Start.MMSS}}:00
 {{- end -}}`
