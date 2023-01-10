@@ -29,17 +29,6 @@ var splitCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		}
-		//cut := media.Cut(input)
-
-		//if cmd.Flags().Changed("cue") {
-		//  cut.LoadMeta(split.cue)
-		//}
-
-		//if cmd.Flags().Changed("meta") {
-		//  cut.LoadMeta(split.ffmeta)
-		//}
-
-		//cut.AllChapters()
 	},
 }
 

@@ -74,14 +74,6 @@ func (cmd Command) Extract(input string) []Cmd {
 	return cmds
 }
 
-func (cmd Command) Update(input string) Cmd {
-	m := UpdateCmd{
-		Media: cmd.updateMeta(input),
-	}
-
-	return m
-}
-
 func (cmd Command) CutStamp(input, start, end string) Cmd {
 	var (
 		chapter = &avtools.Chapter{}
@@ -143,6 +135,14 @@ func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
 		Ext(media.Input.Ext)
 
 	return cmd
+}
+
+func (cmd Command) Update(input string) Cmd {
+	m := UpdateCmd{
+		Media: cmd.updateMeta(input),
+	}
+
+	return m
 }
 
 func (up UpdateCmd) Run() error {

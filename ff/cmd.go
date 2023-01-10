@@ -73,6 +73,10 @@ func (cmd *Cmd) Compile() *exec.Cmd {
 		args = append(args, "-map_metadata", label.(string))
 	}
 
+	if label, ok := cmd.Input.Args["map_chapters"]; ok {
+		args = append(args, "-map_chapters", label.(string))
+	}
+
 	args = append(args, ffArgs[outArgs:]...)
 
 	exe := exec.Command("ffmpeg", args...)

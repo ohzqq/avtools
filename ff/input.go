@@ -54,6 +54,16 @@ func (i *Input) FFMeta(file string, idx ...string) *Input {
 	return i
 }
 
+func (i *Input) MapChapters(idx string) *Input {
+	i.Set("map_chapters", idx)
+	return i
+}
+
+func (i *Input) MapMetadata(idx string) *Input {
+	i.Set("map_metadata", idx)
+	return i
+}
+
 func (i *Input) Overwrite() *Input {
 	i.Set("y", "")
 	return i
