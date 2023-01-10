@@ -21,9 +21,10 @@ type Flags struct {
 }
 
 type Bool struct {
-	Meta  bool
-	Cue   bool
-	Cover bool
+	Meta     bool
+	Cue      bool
+	Cover    bool
+	Chapters bool
 }
 
 type Files struct {
@@ -49,6 +50,32 @@ func (cmd Command) updateMeta(input string) *Media {
 	}
 
 	return m
+}
+
+func (cmd Command) Remove(input string) Cmd {
+	m := New(input)
+
+	f := m.Command()
+
+	if cmd.Flags.Bool.Meta {
+		f.Input.MapMetadata("-1")
+	}
+
+	if cmd.Flags.Bool.Chapters {
+		println("Map ch")
+		f.Input.MapChapters("-1")
+	}
+
+	if cmd.Flags.Bool.Cover {
+		f.Output.Set("vn", "")
+	}
+
+	f.Input.Set("y", "")
+	name := m.Input.NewName().Prefix("updated-").Join()
+	f.Output.Set("c", "copy")
+	f.Output.Ext(m.Input.Ext).Name(name).Pad("")
+
+	return f
 }
 
 func (cmd Command) Extract(input string) []Cmd {

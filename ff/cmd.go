@@ -1,6 +1,7 @@
 package ff
 
 import (
+	"fmt"
 	"os/exec"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -55,7 +56,7 @@ func (cmd *Cmd) Compile() *exec.Cmd {
 		outArgs = outArgs + fArgs
 	}
 
-	//output.Compile()
+	output.Compile()
 
 	ffArgs := output.GetArgs()
 
@@ -78,6 +79,8 @@ func (cmd *Cmd) Compile() *exec.Cmd {
 	}
 
 	args = append(args, ffArgs[outArgs:]...)
+
+	fmt.Printf("args %+V\n", args)
 
 	exe := exec.Command("ffmpeg", args...)
 

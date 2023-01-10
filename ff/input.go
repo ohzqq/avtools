@@ -55,6 +55,7 @@ func (i *Input) FFMeta(file string, idx ...string) *Input {
 }
 
 func (i *Input) MapChapters(idx string) *Input {
+	println("Map chapters")
 	i.Set("map_chapters", idx)
 	return i
 }
