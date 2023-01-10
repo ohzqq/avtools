@@ -6,7 +6,6 @@ import (
 
 type UpdateCmd struct {
 	*Media
-	meta bool
 }
 
 func Update(file string, other ...string) UpdateCmd {
@@ -39,12 +38,12 @@ func (up UpdateCmd) Run() error {
 		cmd.Output.Ext(up.Input.Ext).Name(name).Pad("")
 
 		c := cmd.Compile()
-		fmt.Println(c.String())
+		//fmt.Println(c.String())
 
-		//err := c.Run()
-		//if err != nil {
-		//return err
-		//}
+		err := c.Run()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

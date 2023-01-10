@@ -18,15 +18,17 @@ var probeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
 		m := media.New(input).Probe()
-		switch {
-		case cmd.Flags().Changed("meta"):
-			m.LoadMeta(probe.Meta)
-			cue := m.DumpIni()
-			println(string(cue))
-		case cmd.Flags().Changed("cue"):
-			m.LoadMeta(probe.Cue)
-			//cue := meta.DumpCueSheet(m.Input.Abs, m.Media)
-		}
+		probe.LoadMeta(m)
+		//switch {
+		//case cmd.Flags().Changed("meta"):
+		//  m.LoadMeta(probe.Meta)
+		//  cue := m.DumpIni()
+		//  println(string(cue))
+		//case cmd.Flags().Changed("cue"):
+		//  m.LoadMeta(probe.Cue)
+		//  //cue := meta.DumpCueSheet(m.Input.Abs, m.Media)
+		//}
+
 		//cut.Chapter(3)
 		//cut.Start("00:01.000").End("00:02.999")
 		//c := cut.Compile()

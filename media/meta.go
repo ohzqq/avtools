@@ -3,12 +3,36 @@ package media
 import (
 	"html/template"
 
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
 )
 
+func (m *Media) LoadIni(name string) {
+	file := NewFile(name)
+	if file.IsFFMeta() {
+		ini := meta.LoadIni(file.Abs)
+		m.Media.SetMeta(ini)
+		m.Ini = file
+		m.MetaChanged = true
+	}
+}
+
 func (m Media) DumpIni() []byte {
 	return meta.DumpIni(m)
+}
+
+func (m *Media) LoadCue(name string) {
+	file := NewFile(name)
+	if file.IsCue() {
+		cue := meta.LoadCueSheet(file.Abs)
+		m.Media.SetMeta(cue)
+		dur := m.GetTag("duration")
+		last := m.Chapters()[len(m.Chapters())-1]
+		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
+		m.Cue = file
+		m.MetaChanged = true
+	}
 }
 
 func (m Media) DumpCue() []byte {

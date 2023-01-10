@@ -5,6 +5,7 @@ import (
 	"mime"
 	"os"
 
+	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -15,10 +16,56 @@ type fmtBoolFlags struct {
 	Cover bool
 }
 
+func (flags fmtBoolFlags) DumpMeta(m *media.Media) []media.Cmd {
+	var cmds []media.Cmd
+
+	if flags.Cue {
+		c := m.SaveMetaFmt("cue")
+		cmds = append(cmds, c)
+	}
+
+	if flags.Meta {
+		c := m.SaveMetaFmt("ffmeta")
+		cmds = append(cmds, c)
+	}
+
+	return cmds
+}
+
+func (flags fmtBoolFlags) Extract(m *media.Media) []media.Cmd {
+	var cmds []media.Cmd
+
+	if flags.Cue {
+		c := m.SaveMetaFmt("cue")
+		cmds = append(cmds, c)
+	}
+
+	if flags.Meta {
+		c := m.SaveMetaFmt("ffmeta")
+		cmds = append(cmds, c)
+	}
+
+	if flags.Cover {
+		ff := m.ExtractCover()
+		cmds = append(cmds, ff)
+	}
+
+	return cmds
+}
+
 type fmtStringFlags struct {
 	Meta  string
 	Cue   string
 	Cover string
+}
+
+func (flags fmtStringFlags) LoadMeta(m *media.Media) {
+	switch {
+	case flags.Meta != "":
+		m.LoadIni(flags.Meta)
+	case flags.Cue != "":
+		m.LoadCue(flags.Cue)
+	}
 }
 
 var cfgFile string
@@ -45,18 +92,11 @@ func init() {
 	mime.AddExtensionType(".ini", "text/plain")
 	mime.AddExtensionType(".cue", "text/plain")
 	mime.AddExtensionType(".m4b", "audio/mp4")
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmd.yaml)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.

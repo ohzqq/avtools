@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var extract fmtBoolFlags
+var extract media.Command
 
 // extractCmd represents the extract command
 var extractCmd = &cobra.Command{
@@ -17,20 +17,7 @@ var extractCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		m := media.New(input).Probe()
-		var cmds []media.Cmd
-		if extract.Cover {
-			ff := m.ExtractCover()
-			cmds = append(cmds, ff)
-		}
-		if extract.Cue {
-			c := m.SaveMetaFmt("cue")
-			cmds = append(cmds, c)
-		}
-		if extract.Meta {
-			c := m.SaveMetaFmt("ffmeta")
-			cmds = append(cmds, c)
-		}
+		cmds := extract.Extract(input)
 
 		for _, c := range cmds {
 			err := c.Run()
@@ -45,7 +32,7 @@ func init() {
 	rootCmd.AddCommand(extractCmd)
 
 	// flags
-	extractCmd.PersistentFlags().BoolVarP(&extract.Meta, "meta", "m", false, "extract ffmeta")
-	extractCmd.PersistentFlags().BoolVarP(&extract.Cue, "cue", "c", false, "extract cue sheet")
-	extractCmd.PersistentFlags().BoolVarP(&extract.Cover, "album art", "a", false, "extract album art")
+	extractCmd.PersistentFlags().BoolVarP(&extract.Bool.Meta, "meta", "m", false, "extract ffmeta")
+	extractCmd.PersistentFlags().BoolVarP(&extract.Bool.Cue, "cue", "c", false, "extract cue sheet")
+	extractCmd.PersistentFlags().BoolVarP(&extract.Bool.Cover, "album art", "a", false, "extract album art")
 }
