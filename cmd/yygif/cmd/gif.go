@@ -27,11 +27,17 @@ var gifCmd = &cobra.Command{
 				}
 				clip := meta.GetClip(arg[0], arg[1])
 				ff := ParseFlags(cmd, clip)
-				ff.Run()
+				err := ff.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
 			} else {
 				c := meta.MkGifs()
 				for _, clip := range c {
-					clip.Run()
+					err := clip.Run()
+					if err != nil {
+						log.Fatal(err)
+					}
 				}
 			}
 		}

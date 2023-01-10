@@ -24,8 +24,8 @@ type Clip struct {
 	Crop  string `yaml:"crop"`
 }
 
-func (m Meta) MkGifs() []ff.Cmd {
-	var cmds []ff.Cmd
+func (m Meta) MkGifs() []*ff.Cmd {
+	var cmds []*ff.Cmd
 	for s, scene := range m {
 		for c, _ := range scene {
 			s = strings.TrimPrefix(s, "scene")
@@ -37,7 +37,7 @@ func (m Meta) MkGifs() []ff.Cmd {
 	return cmds
 }
 
-func (m Meta) GetClip(s, c string) ff.Cmd {
+func (m Meta) GetClip(s, c string) *ff.Cmd {
 	sNum, _ := strconv.Atoi(s)
 	cNum, _ := strconv.Atoi(c)
 	scene := fmt.Sprintf("scene%03d", sNum)
@@ -50,7 +50,7 @@ func (m Meta) GetClip(s, c string) ff.Cmd {
 
 	cmd.Output.Name(name).Num(cNum)
 
-	return cmd
+	return cmd.Compile()
 }
 
 func (c Clip) Compile() ff.Cmd {

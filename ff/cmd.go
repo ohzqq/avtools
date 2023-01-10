@@ -50,8 +50,7 @@ func (cmd *Cmd) Compile() *Cmd {
 		outArgs = outArgs + fArgs
 	}
 
-	output.Compile()
-	fmt.Printf("Profile %+V\n", cmd.Output)
+	//output.Compile()
 
 	ffArgs := output.GetArgs()
 
@@ -73,7 +72,7 @@ func (cmd *Cmd) Compile() *Cmd {
 
 	cmd.args = append(cmd.args, ffArgs[outArgs:]...)
 
-	//fmt.Printf("args %+V\n", args)
+	//fmt.Printf("args %+V\n", cmd.args)
 
 	return cmd
 }

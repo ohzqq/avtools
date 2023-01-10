@@ -75,12 +75,15 @@ func initConfig() {
 	//fmt.Printf("%+V\n", yygif.Profiles)
 }
 
-func ParseFlags(cmd *cobra.Command, ffCmd ff.Cmd) ff.Cmd {
+func ParseFlags(cmd *cobra.Command, ffCmd *ff.Cmd) *ff.Cmd {
 	orig := ffCmd
 	if cmd.Flags().Changed("profile") {
-		ffCmd = ff.New(proFile)
+		//ffCmd = ff.New(proFile)
+		c := ff.New(proFile)
+		orig = &c
 		ffCmd.In(orig.File, orig.Input.Args)
-		ffCmd.Output = orig.Output.Merge(ffCmd.Output.Args)
+		//ffCmd.Output = orig.Output.Merge(ffCmd.Output.Args)
+		ffCmd.Output = ff.NewOutput(orig.Output.Args, ffCmd.Output.Args)
 	}
 
 	if cmd.Flags().Changed("output") {
