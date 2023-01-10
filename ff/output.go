@@ -53,27 +53,31 @@ func (out Output) KwArgs() ffmpeg.KwArgs {
 }
 
 func (out Output) String() string {
+	var name string
 	if n := out.Get("name"); n != nil {
-		out.name = n.(string)
+		name = n.(string)
 	}
 
+	var padding string
 	if pad := out.Get("padding"); pad != nil {
-		out.padding = pad.(string)
+		padding = pad.(string)
 	}
 
+	var ext string
 	if e := out.Get("ext"); e != nil {
-		out.ext = e.(string)
+		ext = e.(string)
 	}
 
+	var num int
 	if n := out.Get("num"); n != nil {
-		out.num = n.(int)
+		num = n.(int)
 	}
 
-	if out.padding == "" {
-		return fmt.Sprintf("%s%s", out.name, out.ext)
+	if padding == "" {
+		return fmt.Sprintf("%s%s", name, ext)
 	}
 
-	name := fmt.Sprintf("%s"+out.padding+"%s", out.name, out.num, out.ext)
+	name = fmt.Sprintf("%s"+padding+"%s", name, num, ext)
 
 	return name
 }
@@ -83,22 +87,22 @@ func (out Output) Compile(s *ffmpeg.Stream) *ffmpeg.Stream {
 }
 
 func (out *Output) Name(n string) *Output {
-	out.name = n
+	out.Set("name", n)
 	return out
 }
 
 func (out *Output) Pad(p string) *Output {
-	out.padding = p
+	out.Set("padding", p)
 	return out
 }
 
 func (out *Output) Num(n int) *Output {
-	out.num = n
+	out.Set("num", n)
 	return out
 }
 
 func (out *Output) Ext(ext string) *Output {
-	out.ext = ext
+	out.Set("ext", ext)
 	return out
 }
 

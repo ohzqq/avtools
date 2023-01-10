@@ -69,6 +69,7 @@ func (m Media) Command() ff.Cmd {
 			pro = "video"
 		}
 	}
+	println(pro)
 	cmd := ff.New(pro)
 	cmd.In(m.Input.Abs)
 	return cmd

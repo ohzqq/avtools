@@ -51,6 +51,7 @@ func (cmd *Cmd) Compile() *Cmd {
 	}
 
 	output.Compile()
+	fmt.Printf("Profile %+V\n", cmd.Output)
 
 	ffArgs := output.GetArgs()
 

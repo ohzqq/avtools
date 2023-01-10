@@ -142,7 +142,7 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 	formats["ini"] = tmpMedia.SaveMetaFmt("ini")
 	formats["cue"] = tmpMedia.SaveMetaFmt("cue")
 
-	cmd := ff.New()
+	cmd := ff.New("audio")
 	cmd.In(tmp.Name())
 	cmd.Input.Set("f", "concat")
 	cmd.Input.Set("safe", "0")
@@ -154,6 +154,7 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 
 	base := filepath.Base(d)
 	name := filepath.Join(path, base)
+	fmt.Printf("out name %s\n", name+ext)
 	//cmd.Output.Set("c", "copy")
 	cmd.Output.Ext(ext).Name(name)
 
