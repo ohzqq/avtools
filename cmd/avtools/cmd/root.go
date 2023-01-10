@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"mime"
 	"os"
+	"path/filepath"
 
+	"github.com/ohzqq/avtools/ff"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -51,6 +53,8 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".cmd")
+		path := filepath.Join(home, ".config/avtools/profiles.yml")
+		ff.ReadConfig(path)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

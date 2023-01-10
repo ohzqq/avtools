@@ -15,12 +15,7 @@ type Output struct {
 }
 
 func NewOutput(args ...ffmpeg.KwArgs) Output {
-	out := Output{
-		name:    "tmp",
-		padding: `%03d`,
-		num:     1,
-		ext:     ".mkv",
-	}
+	var out Output
 
 	for _, a := range args {
 		if n, ok := a["name"]; ok {

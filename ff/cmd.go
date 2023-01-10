@@ -16,20 +16,12 @@ type Cmd struct {
 }
 
 func New(profile ...string) Cmd {
+	pro := "default"
 	if len(profile) > 0 {
-		pro := GetProfile(profile[0])
-		return pro
+		pro = profile[0]
 	}
 
-	def := Cmd{
-		Filters: make(Filters),
-		Output:  NewOutput(),
-		Input: NewInput(ffmpeg.KwArgs{
-			"loglevel":    "error",
-			"hide_banner": "",
-		}),
-	}
-	return def
+	return GetProfile(pro)
 }
 
 func (cmd *Cmd) In(file string, args ...ffmpeg.KwArgs) *Cmd {

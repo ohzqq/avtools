@@ -38,6 +38,16 @@ func ArgsToKwArgs(args []string) ffmpeg.KwArgs {
 	return parsed
 }
 
+func MergeFilters(filters []Filters) Filters {
+	a := Filters{}
+	for _, b := range filters {
+		for c := range b {
+			a[c] = b[c]
+		}
+	}
+	return a
+}
+
 func (f Filters) Set(name string, args ...string) {
 	filter := f.Get(name)
 	merged := filter.MergeArgs(args...)
