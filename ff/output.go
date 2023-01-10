@@ -11,11 +11,9 @@ type Output struct {
 }
 
 func NewOutput(args ...ffmpeg.KwArgs) Output {
-	var out Output
-
-	out.Args = ffmpeg.MergeKwArgs(args)
-
-	return out
+	return Output{
+		Args: ffmpeg.MergeKwArgs(args),
+	}
 }
 
 func (out Output) KwArgs() ffmpeg.KwArgs {
