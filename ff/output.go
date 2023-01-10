@@ -40,28 +40,6 @@ func NewOutput(args ...ffmpeg.KwArgs) Output {
 	return out
 }
 
-func (out Output) Merge(kwargs ffmpeg.KwArgs) Output {
-	if n, ok := kwargs["name"]; ok {
-		out.name = n.(string)
-	}
-
-	if pad, ok := kwargs["padding"]; ok {
-		out.padding = pad.(string)
-	}
-
-	if e, ok := kwargs["ext"]; ok {
-		out.ext = e.(string)
-	}
-
-	if n, ok := kwargs["num"]; ok {
-		out.num = n.(int)
-	}
-
-	args := []ffmpeg.KwArgs{out.Args, kwargs}
-	out.Args = ffmpeg.MergeKwArgs(args)
-	return out
-}
-
 func (out Output) KwArgs() ffmpeg.KwArgs {
 	args := make(ffmpeg.KwArgs)
 	for key, val := range out.Args {
@@ -121,6 +99,13 @@ func (out *Output) Num(n int) *Output {
 
 func (out *Output) Ext(ext string) *Output {
 	out.ext = ext
+	return out
+}
+
+func (out *Output) Copy() *Output {
+	out.Set("c", "copy")
+	out.Del("c:a")
+	out.Del("c:v")
 	return out
 }
 

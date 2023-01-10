@@ -1,6 +1,8 @@
 package media
 
 import (
+	"strings"
+
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/meta"
@@ -14,6 +16,7 @@ type Media struct {
 	Ini         File
 	Cue         File
 	Cover       File
+	profile     string
 	HasCover    bool
 	MetaChanged bool
 }
@@ -57,7 +60,16 @@ func (m *Media) LoadMeta(name string) *Media {
 }
 
 func (m Media) Command() ff.Cmd {
-	cmd := ff.New()
+	pro := m.profile
+	if pro == "" {
+		switch {
+		case m.IsAudio():
+			pro = "audio"
+		case m.IsVideo():
+			pro = "video"
+		}
+	}
+	cmd := ff.New(pro)
 	cmd.In(m.Input.Abs)
 	return cmd
 }
@@ -95,4 +107,12 @@ func (m Media) VideoStreams() []Stream {
 		}
 	}
 	return streams
+}
+
+func (m Media) IsAudio() bool {
+	return strings.Contains(m.Input.Mimetype, "audio")
+}
+
+func (m Media) IsVideo() bool {
+	return strings.Contains(m.Input.Mimetype, "video")
 }

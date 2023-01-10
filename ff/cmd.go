@@ -50,7 +50,7 @@ func (cmd *Cmd) Compile() *Cmd {
 		outArgs = outArgs + fArgs
 	}
 
-	//output.Compile()
+	output.Compile()
 
 	ffArgs := output.GetArgs()
 

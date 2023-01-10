@@ -76,7 +76,7 @@ func (cmd Command) Remove(input string) Cmd {
 
 	f.Input.Set("y", "")
 	name := m.Input.NewName().Prefix("updated-").Join()
-	f.Output.Set("c", "copy")
+	//f.Output.Set("c", "copy")
 	f.Output.Ext(m.Input.Ext).Name(name).Pad("")
 
 	return f.Compile()
@@ -154,7 +154,8 @@ func Join(ext string, dir ...string) (Cmd, map[string]Cmd) {
 
 	base := filepath.Base(d)
 	name := filepath.Join(path, base)
-	cmd.Output.Set("c", "copy").Ext(ext).Name(name)
+	//cmd.Output.Set("c", "copy")
+	cmd.Output.Ext(ext).Name(name)
 
 	return cmd.Compile(), formats
 }
@@ -185,6 +186,7 @@ func GenerateChapters(media []*Media) []*avtools.Chapter {
 
 	return chapters
 }
+
 func ExtractCover(m *Media) Cmd {
 	var stream Stream
 	for _, s := range m.VideoStreams() {
@@ -199,7 +201,7 @@ func ExtractCover(m *Media) Cmd {
 	name := m.Input.NewName()
 	n := name.Prefix("cover-").Join()
 	cmd.Output.Name(n)
-	cmd.Output.Pad("").Set("c", "copy").Set("an", "")
+	cmd.Output.Pad("").Set("an", "")
 
 	switch stream.CodecName {
 	case "mjpeg":
