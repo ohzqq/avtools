@@ -1,6 +1,9 @@
 package media
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/ohzqq/avtools"
 )
 
@@ -27,6 +30,10 @@ type Files struct {
 	Meta  string
 	Cue   string
 	Cover string
+}
+
+type UpdateCmd struct {
+	*Media
 }
 
 func (cmd Command) updateMeta(input string) *Media {
@@ -112,4 +119,52 @@ func (cmd Command) Split(input string) []Cmd {
 	}
 
 	return cmds
+}
+
+func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
+	out := media.Input.NewName()
+
+	title := chapter.Title
+	if title == "" {
+		title = fmt.Sprintf("-%s-%s", chapter.Start.Dur, chapter.End.Dur)
+	}
+	out.Suffix(title)
+	//fmt.Printf("chapter %+V\n", chapter)
+
+	cmd := media.Command()
+
+	cmd.Input.Start(chapter.Start.String()).
+		End(chapter.End.String())
+
+	name := filepath.Join(out.Path, out.Name)
+	cmd.Output.Set("c", "copy").
+		Name(name).
+		Pad("").
+		Ext(media.Input.Ext)
+
+	return cmd
+}
+
+func (up UpdateCmd) Run() error {
+	if up.MetaChanged {
+		file := up.Input.NewName()
+		file.Tmp(up.DumpIni())
+		file.Run()
+		tmp := file.file.Name()
+		cmd := up.Command()
+		cmd.Input.FFMeta(tmp)
+
+		cmd.Output.Set("c", "copy")
+		name := up.Input.NewName().Prefix("updated-").Join()
+		cmd.Output.Ext(up.Input.Ext).Name(name).Pad("")
+
+		c := cmd.Compile()
+		//fmt.Println(c.String())
+
+		err := c.Run()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
