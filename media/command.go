@@ -10,7 +10,7 @@ type Command struct {
 
 type Flags struct {
 	Bool Bool
-	File String
+	File Files
 }
 
 type Bool struct {
@@ -19,7 +19,7 @@ type Bool struct {
 	Cover bool
 }
 
-type String struct {
+type Files struct {
 	Meta  string
 	Cue   string
 	Cover string

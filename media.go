@@ -37,6 +37,14 @@ func NewMedia(input string) *Media {
 	return &media
 }
 
+func NewChapter(chap ChapterMeta) *Chapter {
+	return &Chapter{
+		Title: chap.Title(),
+		Start: Timestamp(chap.Start()),
+		End:   Timestamp(chap.End()),
+	}
+}
+
 func (m Media) Chapters() []*Chapter {
 	return m.chapters
 }
@@ -80,16 +88,20 @@ func (m *Media) SetMeta(meta Meta) *Media {
 	return m
 }
 
-func NewChapter(chap ChapterMeta) *Chapter {
-	return &Chapter{
-		Title: chap.Title(),
-		Start: Timestamp(chap.Start()),
-		End:   Timestamp(chap.End()),
-	}
-}
-
 func (ch Chapter) Timebase() string {
 	return "1/1000"
+}
+
+func (ch *Chapter) SS(ss string) *Chapter {
+	dur := ParseStamp(ss)
+	ch.Start = Timestamp(dur)
+	return ch
+}
+
+func (ch *Chapter) To(to string) *Chapter {
+	dur := ParseStamp(to)
+	ch.End = Timestamp(dur)
+	return ch
 }
 
 //func (ch Chapter) Dur() (Time, error) {

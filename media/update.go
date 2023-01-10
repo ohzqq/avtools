@@ -1,27 +1,7 @@
 package media
 
-import (
-	"fmt"
-)
-
 type UpdateCmd struct {
 	*Media
-}
-
-func Update(file string, other ...string) UpdateCmd {
-	m := New(file)
-	for _, f := range other {
-		if f != "" {
-			file := NewFile(f)
-			switch {
-			case file.IsFFMeta(), file.IsCue():
-				m.LoadMeta(f)
-			case file.IsImage():
-				fmt.Println(file.IsImage())
-			}
-		}
-	}
-	return UpdateCmd{Media: m}
 }
 
 func (up UpdateCmd) Run() error {
