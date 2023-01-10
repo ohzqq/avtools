@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var join fmtBoolFlags
+var join media.Command
 
 // joinCmd represents the join command
 var joinCmd = &cobra.Command{
@@ -29,10 +29,10 @@ var joinCmd = &cobra.Command{
 		ff, formats := media.Join(ext, dir)
 		ff.Run()
 		for format, c := range formats {
-			if format == "ini" && join.Meta {
+			if format == "ini" && join.Flags.Bool.Meta {
 				c.Run()
 			}
-			if format == "cue" && join.Cue {
+			if format == "cue" && join.Flags.Bool.Cue {
 				c.Run()
 			}
 		}
@@ -41,6 +41,6 @@ var joinCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(joinCmd)
-	joinCmd.PersistentFlags().BoolVarP(&join.Meta, "meta", "m", false, "extract ffmeta")
-	joinCmd.PersistentFlags().BoolVarP(&join.Cue, "cue", "c", false, "extract cue sheet")
+	joinCmd.PersistentFlags().BoolVarP(&join.Flags.Bool.Meta, "meta", "m", false, "extract ffmeta")
+	joinCmd.PersistentFlags().BoolVarP(&join.Flags.Bool.Cue, "cue", "c", false, "extract cue sheet")
 }

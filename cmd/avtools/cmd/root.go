@@ -5,75 +5,16 @@ import (
 	"mime"
 	"os"
 
-	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-type fmtBoolFlags struct {
-	Meta  bool
-	Cue   bool
-	Cover bool
-}
-
-func (flags fmtBoolFlags) DumpMeta(m *media.Media) []media.Cmd {
-	var cmds []media.Cmd
-
-	if flags.Cue {
-		c := m.SaveMetaFmt("cue")
-		cmds = append(cmds, c)
-	}
-
-	if flags.Meta {
-		c := m.SaveMetaFmt("ffmeta")
-		cmds = append(cmds, c)
-	}
-
-	return cmds
-}
-
-func (flags fmtBoolFlags) Extract(m *media.Media) []media.Cmd {
-	var cmds []media.Cmd
-
-	if flags.Cue {
-		c := m.SaveMetaFmt("cue")
-		cmds = append(cmds, c)
-	}
-
-	if flags.Meta {
-		c := m.SaveMetaFmt("ffmeta")
-		cmds = append(cmds, c)
-	}
-
-	if flags.Cover {
-		ff := m.ExtractCover()
-		cmds = append(cmds, ff)
-	}
-
-	return cmds
-}
-
-type fmtStringFlags struct {
-	Meta  string
-	Cue   string
-	Cover string
-}
-
-func (flags fmtStringFlags) LoadMeta(m *media.Media) {
-	switch {
-	case flags.Meta != "":
-		m.LoadIni(flags.Meta)
-	case flags.Cue != "":
-		m.LoadCue(flags.Cue)
-	}
-}
 
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "cmd",
-	Short: "A brief description of your application",
+	Short: "tools for working with a/v files",
 	Long:  ``,
 }
 

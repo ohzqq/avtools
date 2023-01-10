@@ -93,7 +93,7 @@ func (cmd Command) Extract(input string) []Cmd {
 	}
 
 	if cmd.Flags.Bool.Cover {
-		ff := m.ExtractCover()
+		ff := ExtractCover(m)
 		cmds = append(cmds, ff)
 	}
 
