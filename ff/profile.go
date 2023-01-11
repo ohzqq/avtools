@@ -88,7 +88,7 @@ func GetProfile(name string) Cmd {
 	case "video":
 		pro = MergeProfiles("quiet", "stream", "defaultVideo")
 	default:
-		pro = profiles[name]
+		pro = MergeProfiles("quiet", name)
 	}
 
 	filters := pro.Filters

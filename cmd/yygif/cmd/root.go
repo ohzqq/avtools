@@ -1,15 +1,29 @@
 package cmd
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/ohzqq/avtools/ff"
+	"github.com/ohzqq/avtools/media"
+	"github.com/ohzqq/avtools/yygif"
 	"github.com/spf13/cobra"
 )
 
 var (
-	cfgFile    string
+	cfgFile   string
+	outName   string
+	inName    string
+	startTime string
+	endTime   string
+	proFile   string
+	metadata  string
+	verbose   bool
+	overwrite bool
+	chap      int
+	// filters
 	scale      []string
 	crop       []string
 	eq         []string
@@ -19,21 +33,33 @@ var (
 	fps        string
 	setpts     string
 	bayerScale string
-	startTime  string
-	endTime    string
-	proFile    string
 	dither     string
-	outName    string
-	metadata   string
-	verbose    bool
 	yadif      bool
-	overwrite  bool
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "cmd",
 	Short: "A brief description of your application",
 	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		var meta *media.Media
+		if cmd.Flags().Changed("meta") {
+			println(metadata)
+			meta = yygif.LoadGifMeta(metadata)
+		}
+		if cmd.Flags().Changed("input") {
+			meta = media.New(inName)
+			meta.Profile = "gif"
+		}
+		if meta == nil {
+			log.Fatal("either a video or meta file is required")
+		}
+		fmt.Printf("input %+V\n", meta)
+
+		if cmd.Flags().Changed("num") {
+		} else {
+		}
+	},
 }
 
 func Execute() {
@@ -46,23 +72,27 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.PersistentFlags().StringVarP(&metadata, "meta", "m", "", "")
+	rootCmd.PersistentFlags().StringVarP(&outName, "output", "o", "tmp", "")
+	rootCmd.PersistentFlags().StringVarP(&inName, "input", "i", "", "input video")
+	rootCmd.PersistentFlags().StringVarP(&proFile, "profile", "p", "default", "")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "")
+	rootCmd.PersistentFlags().BoolVarP(&overwrite, "overwrite", "y", true, "")
+	rootCmd.PersistentFlags().StringVarP(&startTime, "ss", "s", "", "")
+	rootCmd.PersistentFlags().StringVarP(&endTime, "to", "t", "", "")
+	rootCmd.Flags().IntVarP(&chap, "num", "n", 1, "chapter number")
+
+	// filters
+	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
 	rootCmd.PersistentFlags().StringSliceVarP(&scale, "scale", "a", []string{}, "")
 	rootCmd.PersistentFlags().StringSliceVarP(&crop, "crop", "c", []string{}, "")
 	rootCmd.PersistentFlags().StringSliceVarP(&eq, "eq", "e", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
 	rootCmd.PersistentFlags().StringVar(&bayerScale, "bs", "3", "")
 	rootCmd.PersistentFlags().StringVarP(&dither, "dither", "d", "bayer", "")
-	rootCmd.PersistentFlags().StringVarP(&outName, "output", "o", "tmp", "")
-	rootCmd.PersistentFlags().StringVar(&metadata, "meta", "metadata-default.yml", "")
-	rootCmd.PersistentFlags().StringVarP(&startTime, "ss", "s", "", "")
-	rootCmd.PersistentFlags().StringVarP(&endTime, "to", "t", "", "")
 	rootCmd.PersistentFlags().StringVarP(&smartblur, "smartblur", "b", "0.5", "")
-	rootCmd.PersistentFlags().StringVarP(&proFile, "profile", "p", "default", "")
-	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "m", []string{}, "")
+	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "k", []string{}, "")
 	rootCmd.PersistentFlags().StringVarP(&fps, "fps", "r", "", "")
 	rootCmd.PersistentFlags().StringVar(&setpts, "setpts", "", "")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "")
-	rootCmd.PersistentFlags().BoolVarP(&overwrite, "overwrite", "y", true, "")
 	rootCmd.PersistentFlags().BoolVar(&yadif, "yadif", false, "")
 }
 

@@ -16,7 +16,7 @@ type Media struct {
 	Ini         File
 	Cue         File
 	Cover       File
-	profile     string
+	Profile     string
 	HasCover    bool
 	MetaChanged bool
 }
@@ -60,7 +60,7 @@ func (m *Media) LoadMeta(name string) *Media {
 }
 
 func (m Media) Command() ff.Cmd {
-	pro := m.profile
+	pro := m.Profile
 	if pro == "" {
 		switch {
 		case m.IsAudio():

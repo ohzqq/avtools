@@ -13,6 +13,7 @@ type Cmd struct {
 	Output
 	Input
 	args []string
+	cmd  *exec.Cmd
 }
 
 func New(profile ...string) Cmd {
@@ -50,7 +51,7 @@ func (cmd *Cmd) Compile() *Cmd {
 		outArgs = outArgs + fArgs
 	}
 
-	output.Compile()
+	//output.Compile()
 
 	ffArgs := output.GetArgs()
 
@@ -72,9 +73,17 @@ func (cmd *Cmd) Compile() *Cmd {
 
 	cmd.args = append(cmd.args, ffArgs[outArgs:]...)
 
+	cmd.cmd = exec.Command("ffmpeg", cmd.args...)
 	//fmt.Printf("args %+V\n", cmd.args)
 
 	return cmd
+}
+
+func (c Cmd) String() string {
+	if c.cmd != nil {
+		return c.cmd.String()
+	}
+	return ""
 }
 
 func (c Cmd) Run() error {
@@ -83,13 +92,12 @@ func (c Cmd) Run() error {
 		stdout bytes.Buffer
 	)
 
-	cmd := exec.Command("ffmpeg", c.args...)
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
+	c.cmd.Stderr = &stderr
+	c.cmd.Stdout = &stdout
 
-	err := cmd.Run()
+	err := c.cmd.Run()
 	if err != nil {
-		return fmt.Errorf("%v\n%v\n", stderr.String(), cmd.String())
+		return fmt.Errorf("%v\n%v\n", stderr.String(), c.cmd.String())
 	}
 
 	if len(stdout.Bytes()) > 0 {
