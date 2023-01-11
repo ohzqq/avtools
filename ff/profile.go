@@ -23,9 +23,7 @@ var profiles = map[string]profile{
 		},
 	},
 	"defaultAudio": profile{
-		Out: ffmpeg.KwArgs{
-			"ext": ".mka",
-		},
+		Out: ffmpeg.KwArgs{},
 	},
 	"defaultVideo": profile{
 		Out: ffmpeg.KwArgs{

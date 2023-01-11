@@ -89,6 +89,24 @@ func (out *Output) Copy() *Output {
 	return out
 }
 
+func (out *Output) IsStreamCopy() bool {
+	var aCopy bool
+	if ac, ok := out.Args["c:a"]; ok {
+		if ac == "copy" {
+			aCopy = true
+		}
+	}
+
+	var vCopy bool
+	if vc, ok := out.Args["c:v"]; ok {
+		if vc == "copy" {
+			vCopy = true
+		}
+	}
+
+	return aCopy || vCopy
+}
+
 func (out *Output) Get(key string) any {
 	if val, ok := out.Args[key]; ok {
 		return val

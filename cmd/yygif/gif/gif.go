@@ -21,6 +21,23 @@ func LoadGifMeta(input string) *media.Media {
 	}
 }
 
+func MakeGif(input string, ch *avtools.Chapter) {
+	in := media.New(input)
+	in.Profile = "gif"
+
+	cmd := media.CutChapter(in, ch)
+
+	//filters := ff.GetProfile("gif").Filters
+	//if c, ok := ch.Tags["crop"]; ok {
+	//crop := strings.Split(c, ":")
+	//filters.Set("crop", crop...)
+	//}
+	//cmd.Filters = filters
+	println(cmd.String())
+
+	cmd.Run()
+}
+
 func MkGif(input string, ch *avtools.Chapter) *ff.Cmd {
 	in := media.NewFile(input)
 	cmd := ff.New("gif")

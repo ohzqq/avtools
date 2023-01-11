@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools"
-	"github.com/ohzqq/avtools/cmd/yygif/gif"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/media"
+	"github.com/ohzqq/avtools/meta"
 	"github.com/spf13/cobra"
 )
 
@@ -46,10 +46,17 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		meta := getMedia(cmd)
+		//c := media.CutChapter(meta, meta.Chapters()[0])
+		//c.Run()
 
 		for _, ch := range getChapters(cmd, meta) {
-			g := gif.MkGif(meta.Input.Abs, ch)
-			ff := ParseFlags(cmd, g)
+			g := media.CutChapter(meta, ch)
+			if c, ok := ch.Tags["crop"]; ok {
+				crop := strings.Split(c, ":")
+				g.Filters.Set("crop", crop...)
+			}
+			//  g := gif.MkGif(meta.Input.Abs, ch)
+			ff := ParseFlags(cmd, &g)
 			ff.Compile()
 
 			if cmd.Flags().Changed("verbose") {
@@ -61,7 +68,19 @@ var rootCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		}
+
 	},
+}
+
+func LoadGifMeta(input string) *media.Media {
+	meta := meta.LoadIni(input)
+	src := avtools.NewMedia().SetMeta(meta)
+	vid := meta.Tags()["title"]
+	return &media.Media{
+		Media:   src,
+		Input:   media.NewFile(vid),
+		Profile: "gif",
+	}
 }
 
 func getMedia(cmd *cobra.Command) *media.Media {
@@ -74,7 +93,7 @@ func getMedia(cmd *cobra.Command) *media.Media {
 		if cmd.Flags().Changed("input") {
 			meta.LoadIni(metadata)
 		} else {
-			meta = gif.LoadGifMeta(metadata)
+			meta = LoadGifMeta(metadata)
 		}
 	}
 	if meta == nil {

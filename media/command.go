@@ -234,6 +234,7 @@ func (m Media) SaveMetaFmt(f string) Cmd {
 	}
 	return cmd
 }
+
 func (cmd Command) CutStamp(input, start, end string) Cmd {
 	var (
 		chapter = &avtools.Chapter{}
@@ -258,7 +259,8 @@ func (cmd Command) CutStamp(input, start, end string) Cmd {
 func (cmd Command) CutChapter(input string, num int) Cmd {
 	media := New(input)
 	chapter := media.GetChapter(num)
-	return CutChapter(media, chapter)
+	ff := CutChapter(media, chapter)
+	return ff.Compile()
 }
 
 func (cmd Command) Split(input string) []Cmd {
@@ -267,13 +269,13 @@ func (cmd Command) Split(input string) []Cmd {
 	var cmds []Cmd
 	for _, chapter := range media.Chapters() {
 		ch := CutChapter(media, chapter)
-		cmds = append(cmds, ch)
+		cmds = append(cmds, ch.Compile())
 	}
 
 	return cmds
 }
 
-func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
+func CutChapter(media *Media, chapter *avtools.Chapter) ff.Cmd {
 	out := media.Input.NewName()
 
 	title := chapter.Title
@@ -288,13 +290,22 @@ func CutChapter(media *Media, chapter *avtools.Chapter) Cmd {
 	cmd.Input.Start(chapter.Start.String()).
 		End(chapter.End.String())
 
-	name := filepath.Join(out.Path, out.Name)
-	cmd.Output.Set("c", "copy").
-		Name(name).
-		Pad("").
-		Ext(media.Input.Ext)
+	//name := filepath.Join(out.Path, out.Name)
+	cmd.Output.Name(out.Join()).Pad("")
+	if cmd.IsStreamCopy() {
+		cmd.Output.Ext(media.Input.Ext)
+	}
+	//if e := cmd.Output.Get("ext").(string); e == "" {
+	//  cmd.Output.Ext(media.Input.Ext)
+	//} else {
+	//  cmd.Output.Ext(e)
+	//}
 
-	return cmd.Compile()
+	//Name(name).
+	//Pad("").
+	//Ext(media.Input.Ext)
+
+	return cmd
 }
 
 func (cmd Command) Update(input string) Cmd {

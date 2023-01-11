@@ -52,6 +52,7 @@ func (m Meta) Tags() map[string]string {
 	clip := m.GetClip("1", "1")
 	return map[string]string{
 		"title": clip.Input.File,
+		//"title": media.NewFile(clip.Input.File).Abs,
 	}
 }
 

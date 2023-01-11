@@ -118,7 +118,6 @@ func ParseDuration(d string) time.Duration {
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(dur.String())
 	return dur
 }
 
