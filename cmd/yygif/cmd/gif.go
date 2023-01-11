@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ohzqq/avtools/yygif"
+	"github.com/ohzqq/avtools/cmd/yygif/gif"
 	"github.com/spf13/cobra"
 )
 
@@ -14,10 +14,10 @@ var gifCmd = &cobra.Command{
 	Use:   "gif",
 	Short: "make gifs",
 	Run: func(cmd *cobra.Command, args []string) {
-		var meta yygif.Meta
+		var meta gif.Meta
 		if !cmd.Flags().Changed("meta") {
 			if MetaExists(metadata) {
-				meta = yygif.ReadMeta(metadata)
+				meta = gif.ReadMeta(metadata)
 			}
 			if len(args) > 0 {
 				arg := strings.Split(args[0], ",")

@@ -1,4 +1,4 @@
-package yygif
+package gif
 
 import (
 	"fmt"

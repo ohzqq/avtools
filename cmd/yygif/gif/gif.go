@@ -1,4 +1,4 @@
-package yygif
+package gif
 
 import (
 	"strings"
@@ -9,12 +9,6 @@ import (
 	"github.com/ohzqq/avtools/meta"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
-
-type Gif struct {
-	*avtools.Chapter
-	Input *media.Media
-	Crop  string
-}
 
 func LoadGifMeta(input string) *media.Media {
 	meta := meta.LoadIni(input)

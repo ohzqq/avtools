@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/avtools/cmd/yygif/gif"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/media"
-	"github.com/ohzqq/avtools/yygif"
 	"github.com/spf13/cobra"
 )
 
@@ -42,15 +42,14 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "cmd",
-	Short: "A brief description of your application",
+	Short: "make gifs!",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		meta := getMedia(cmd)
-		fmt.Printf("input %+V\n", meta.Input.Name)
 
 		for _, ch := range getChapters(cmd, meta) {
-			gif := yygif.MkGif(meta.Input.Abs, ch)
-			ff := ParseFlags(cmd, gif)
+			g := gif.MkGif(meta.Input.Abs, ch)
+			ff := ParseFlags(cmd, g)
 			ff.Compile()
 
 			if cmd.Flags().Changed("verbose") {
@@ -75,7 +74,7 @@ func getMedia(cmd *cobra.Command) *media.Media {
 		if cmd.Flags().Changed("input") {
 			meta.LoadIni(metadata)
 		} else {
-			meta = yygif.LoadGifMeta(metadata)
+			meta = gif.LoadGifMeta(metadata)
 		}
 	}
 	if meta == nil {
