@@ -30,10 +30,9 @@ type Meta interface {
 	Streams() []map[string]string
 }
 
-func NewMedia(input string) *Media {
+func NewMedia() *Media {
 	media := Media{
-		Filename: input,
-		tags:     make(map[string]string),
+		tags: make(map[string]string),
 	}
 	return &media
 }
@@ -45,6 +44,15 @@ func NewChapter(chap ChapterMeta) *Chapter {
 		End:   Timestamp(chap.End()),
 		Tags:  make(map[string]string),
 	}
+}
+
+func (m *Media) SetMeta(meta Meta) *Media {
+	for key, val := range meta.Tags() {
+		m.tags[key] = val
+	}
+	m.chapters = meta.Chapters()
+	m.streams = meta.Streams()
+	return m
 }
 
 func (m Media) Chapters() []*Chapter {
@@ -77,17 +85,6 @@ func (m Media) GetTag(key string) string {
 	}
 
 	return ""
-}
-
-func (m *Media) SetMeta(meta Meta) *Media {
-	for key, val := range meta.Tags() {
-		m.tags[key] = val
-	}
-
-	m.chapters = meta.Chapters()
-
-	m.streams = meta.Streams()
-	return m
 }
 
 func (ch Chapter) Timebase() string {

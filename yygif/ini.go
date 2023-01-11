@@ -1,18 +1,26 @@
 package yygif
 
 import (
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/meta"
 )
 
 type Gif struct {
-	*media.Media
+	*avtools.Chapter
+	Crop string
 }
 
-func MkGifs(input string) Gif {
+func MkGifs(input string) *media.Media {
 	meta := meta.LoadIni(input)
-	vid := meta.Tags()["title"]
-	src := media.New(vid)
-	src.SetMeta(meta)
-	return Gif{Media: src}
+	src := avtools.NewMedia().SetMeta(meta)
+	return src
+}
+
+func MkGif(input string, ch *avtools.Chapter) Gif {
+	g := Gif{Chapter: ch}
+	if crop, ok := ch.Tags["crop"]; ok {
+		g.Crop = crop
+	}
+	return g
 }

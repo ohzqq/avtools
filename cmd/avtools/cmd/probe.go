@@ -23,7 +23,7 @@ var probeCmd = &cobra.Command{
 		fmt.Printf("meta %+V\n", m.Input.Abs)
 		fmt.Printf("meta %+V\n", len(m.Chapters()))
 		g := yygif.MkGifs(probe.Flags.File.Meta)
-		fmt.Printf("tags %+V\n", g)
+		fmt.Printf("tags %+V\n", g.Chapters())
 		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].End.HHMMSS())
 		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//cue := m.DumpFFMeta()
