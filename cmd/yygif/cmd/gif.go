@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/yygif"
 	"github.com/spf13/cobra"
 )
@@ -50,24 +49,6 @@ func MetaExists(file string) bool {
 		return false
 	}
 	return !info.IsDir()
-}
-
-func FilterFlag() ff.Filters {
-	filters := make(ff.Filters)
-	for _, filter := range filterFlag {
-		split := strings.Split(filter, ":")
-		var name, args string
-		switch l := len(split); l {
-		case 2:
-			args = split[1]
-			fallthrough
-		case 1:
-			name = split[0]
-		}
-		f := ff.NewFilter(args)
-		filters[name] = f
-	}
-	return filters
 }
 
 func init() {

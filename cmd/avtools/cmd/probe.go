@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ohzqq/avtools/media"
-	"github.com/ohzqq/avtools/yygif"
 	"github.com/spf13/cobra"
 )
 
@@ -18,15 +17,9 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		//m := media.New(input).Probe()
-		m := probe.Update(input).(media.UpdateCmd)
+		m := media.New(input).Probe()
 		fmt.Printf("meta %+V\n", m.Input.Abs)
 		//fmt.Printf("meta %+V\n", len(m.Chapters()))
-		gm := yygif.LoadGifMeta(probe.Flags.File.Meta)
-		fmt.Printf("gif meta %+V\n", gm.Chapters())
-		g := yygif.MkGif(gm.Input.Abs, gm.Chapters()[0])
-		fmt.Printf("gif %+V\n", g.String())
-		g.Run()
 		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//cue := m.DumpFFMeta()
 		//cue.Compile().Run()

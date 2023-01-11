@@ -5,13 +5,22 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ohzqq/avtools/ff"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile    string
+	outName    string
+	inName     string
+	proFile    string
+	verbose    bool
+	overwrite  bool
+	filterFlag []string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -37,6 +46,12 @@ func init() {
 	mime.AddExtensionType(".m4b", "audio/mp4")
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmd.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&outName, "output", "o", "tmp", "")
+	rootCmd.PersistentFlags().StringVarP(&proFile, "profile", "p", "default", "")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "")
+	rootCmd.PersistentFlags().BoolVarP(&overwrite, "overwrite", "y", true, "")
+	rootCmd.PersistentFlags().StringVarP(&inName, "input", "i", "", "input video")
+	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
 
 }
 
@@ -63,4 +78,54 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func ParseFlags(cmd *cobra.Command, ffCmd *ff.Cmd) *ff.Cmd {
+	orig := ffCmd
+	if cmd.Flags().Changed("profile") {
+		//ffCmd = ff.New(proFile)
+		c := ff.New(proFile)
+		orig = &c
+		ffCmd.In(orig.File, orig.Input.Args)
+		//ffCmd.Output = orig.Output.Merge(ffCmd.Output.Args)
+		ffCmd.Output = ff.NewOutput(orig.Output.Args, ffCmd.Output.Args)
+	}
+
+	if cmd.Flags().Changed("output") {
+		ffCmd.Output.Name(outName).Pad("")
+	}
+
+	if cmd.Flags().Changed("verbose") {
+		ffCmd.Verbose()
+	}
+
+	if !cmd.Flags().Changed("overwrite") {
+		ffCmd.Overwrite()
+	}
+
+	if cmd.Flags().Changed("filter") {
+		for n, f := range FilterFlag() {
+			ffCmd.Filters.Add(n, f)
+		}
+	}
+
+	return ffCmd
+}
+
+func FilterFlag() ff.Filters {
+	filters := make(ff.Filters)
+	for _, filter := range filterFlag {
+		split := strings.Split(filter, ":")
+		var name, args string
+		switch l := len(split); l {
+		case 2:
+			args = split[1]
+			fallthrough
+		case 1:
+			name = split[0]
+		}
+		f := ff.NewFilter(args)
+		filters[name] = f
+	}
+	return filters
 }

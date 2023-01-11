@@ -10,7 +10,6 @@ import (
 
 func (m *Media) LoadIni(name string) {
 	file := NewFile(name)
-	println("load ini")
 	if file.IsFFMeta() {
 		ini := meta.LoadIni(file.Abs)
 		m.Media.SetMeta(ini)

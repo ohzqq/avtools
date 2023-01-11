@@ -3,9 +3,12 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/yygif"
@@ -18,11 +21,11 @@ var (
 	inName    string
 	startTime string
 	endTime   string
-	proFile   string
 	metadata  string
+	proFile   string
 	verbose   bool
 	overwrite bool
-	chap      int
+	chapterNo int
 	// filters
 	scale      []string
 	crop       []string
@@ -42,67 +45,80 @@ var rootCmd = &cobra.Command{
 	Short: "A brief description of your application",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var meta *media.Media
-		if cmd.Flags().Changed("meta") {
-			println(metadata)
-			meta = yygif.LoadGifMeta(metadata)
-		}
-		if cmd.Flags().Changed("input") {
-			meta = media.New(inName)
-			meta.Profile = "gif"
-		}
-		if meta == nil {
-			log.Fatal("either a video or meta file is required")
-		}
-		fmt.Printf("input %+V\n", meta)
+		meta := getMedia(cmd)
+		fmt.Printf("input %+V\n", meta.Input.Name)
 
-		if cmd.Flags().Changed("num") {
-		} else {
+		for _, ch := range getChapters(cmd, meta) {
+			gif := yygif.MkGif(meta.Input.Abs, ch)
+			ff := ParseFlags(cmd, gif)
+			ff.Compile()
+
+			if cmd.Flags().Changed("verbose") {
+				fmt.Println(ff.String())
+			}
+
+			err := ff.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }
 
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+func getMedia(cmd *cobra.Command) *media.Media {
+	var meta *media.Media
+	if cmd.Flags().Changed("input") {
+		meta = media.New(inName)
+		meta.Profile = "gif"
 	}
+	if cmd.Flags().Changed("meta") {
+		if cmd.Flags().Changed("input") {
+			meta.LoadIni(metadata)
+		} else {
+			meta = yygif.LoadGifMeta(metadata)
+		}
+	}
+	if meta == nil {
+		log.Fatal("either a video or meta file is required")
+	}
+	return meta
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
+func getChapters(cmd *cobra.Command, meta *media.Media) []*avtools.Chapter {
+	var chapters []*avtools.Chapter
+	switch {
+	case cmd.Flags().Changed("num"):
+		ch := meta.GetChapter(chapterNo)
+		chapters = append(chapters, ch)
+	case cmd.Flags().Changed("ss"), cmd.Flags().Changed("to"):
+		if !cmd.Flags().Changed("input") {
+			log.Fatal("this command requires an input video src")
+		}
 
-	rootCmd.PersistentFlags().StringVarP(&metadata, "meta", "m", "", "")
-	rootCmd.PersistentFlags().StringVarP(&outName, "output", "o", "tmp", "")
-	rootCmd.PersistentFlags().StringVarP(&inName, "input", "i", "", "input video")
-	rootCmd.PersistentFlags().StringVarP(&proFile, "profile", "p", "default", "")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "")
-	rootCmd.PersistentFlags().BoolVarP(&overwrite, "overwrite", "y", true, "")
-	rootCmd.PersistentFlags().StringVarP(&startTime, "ss", "s", "", "")
-	rootCmd.PersistentFlags().StringVarP(&endTime, "to", "t", "", "")
-	rootCmd.Flags().IntVarP(&chap, "num", "n", 1, "chapter number")
+		start := "00:00"
+		if cmd.Flags().Changed("ss") {
+			start = startTime
+		}
 
-	// filters
-	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&scale, "scale", "a", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&crop, "crop", "c", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&eq, "eq", "e", []string{}, "")
-	rootCmd.PersistentFlags().StringVar(&bayerScale, "bs", "3", "")
-	rootCmd.PersistentFlags().StringVarP(&dither, "dither", "d", "bayer", "")
-	rootCmd.PersistentFlags().StringVarP(&smartblur, "smartblur", "b", "0.5", "")
-	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "k", []string{}, "")
-	rootCmd.PersistentFlags().StringVarP(&fps, "fps", "r", "", "")
-	rootCmd.PersistentFlags().StringVar(&setpts, "setpts", "", "")
-	rootCmd.PersistentFlags().BoolVar(&yadif, "yadif", false, "")
-}
+		end := meta.GetTag("duration")
+		if cmd.Flags().Changed("to") {
+			end = endTime
+		}
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-	path := filepath.Join(home, ".config/avtools/profiles.yml")
-	ff.ReadConfig(path)
-	//fmt.Printf("%+V\n", yygif.Profiles)
+		ch := &avtools.Chapter{
+			Title: fmt.Sprintf("%s-%s-%s", meta.Input.Name, start, end),
+		}
+		ch.SS(start).To(end)
+		chapters = append(chapters, ch)
+	default:
+		if meta.HasChapters() {
+			chapters = meta.Chapters()
+		} else {
+			log.Fatal("no gifs to make")
+		}
+	}
+
+	return chapters
 }
 
 func ParseFlags(cmd *cobra.Command, ffCmd *ff.Cmd) *ff.Cmd {
@@ -192,4 +208,68 @@ func ParseFlags(cmd *cobra.Command, ffCmd *ff.Cmd) *ff.Cmd {
 	}
 
 	return ffCmd
+}
+
+func FilterFlag() ff.Filters {
+	filters := make(ff.Filters)
+	for _, filter := range filterFlag {
+		split := strings.Split(filter, ":")
+		var name, args string
+		switch l := len(split); l {
+		case 2:
+			args = split[1]
+			fallthrough
+		case 1:
+			name = split[0]
+		}
+		f := ff.NewFilter(args)
+		filters[name] = f
+	}
+	return filters
+}
+
+func Execute() {
+	err := rootCmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	mime.AddExtensionType(".ini", "text/plain")
+	mime.AddExtensionType(".cue", "text/plain")
+	mime.AddExtensionType(".m4b", "audio/mp4")
+
+	rootCmd.PersistentFlags().StringVarP(&metadata, "meta", "m", "", "")
+	rootCmd.PersistentFlags().StringVarP(&outName, "output", "o", "tmp", "")
+	rootCmd.PersistentFlags().StringVarP(&inName, "input", "i", "", "input video")
+	rootCmd.PersistentFlags().StringVarP(&proFile, "profile", "p", "default", "")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "")
+	rootCmd.PersistentFlags().BoolVarP(&overwrite, "overwrite", "y", true, "")
+	rootCmd.PersistentFlags().StringVarP(&startTime, "ss", "s", "", "")
+	rootCmd.PersistentFlags().StringVarP(&endTime, "to", "t", "", "")
+	rootCmd.Flags().IntVarP(&chapterNo, "num", "n", 1, "chapter number")
+
+	// filters
+	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
+	rootCmd.PersistentFlags().StringSliceVarP(&scale, "scale", "a", []string{}, "")
+	rootCmd.PersistentFlags().StringSliceVarP(&crop, "crop", "c", []string{}, "")
+	rootCmd.PersistentFlags().StringSliceVarP(&eq, "eq", "e", []string{}, "")
+	rootCmd.PersistentFlags().StringVar(&bayerScale, "bs", "3", "")
+	rootCmd.PersistentFlags().StringVarP(&dither, "dither", "d", "bayer", "")
+	rootCmd.PersistentFlags().StringVarP(&smartblur, "smartblur", "b", "0.5", "")
+	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "k", []string{}, "")
+	rootCmd.PersistentFlags().StringVarP(&fps, "fps", "r", "", "")
+	rootCmd.PersistentFlags().StringVar(&setpts, "setpts", "", "")
+	rootCmd.PersistentFlags().BoolVar(&yadif, "yadif", false, "")
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+	path := filepath.Join(home, ".config/avtools/profiles.yml")
+	ff.ReadConfig(path)
+	//fmt.Printf("%+V\n", yygif.Profiles)
 }
