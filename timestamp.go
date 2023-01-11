@@ -25,10 +25,16 @@ type Time struct {
 
 func Timestamp(d time.Duration) Time {
 	stamp := Time{Dur: d}
+	dur := d.String()
 
-	t := strings.SplitAfter(d.String(), "m")
-	ss := strings.TrimSuffix(t[len(t)-1], "s")
-	stamp.ss = StringToFloat(ss)
+	var t []string
+	if strings.Contains(dur, "ms") {
+		stamp.ss = d.Seconds()
+	} else {
+		t = strings.SplitAfter(dur, "m")
+		ss := strings.TrimSuffix(t[len(t)-1], "s")
+		stamp.ss = StringToFloat(ss)
+	}
 
 	t = lo.DropRight(t, 1)
 
@@ -52,6 +58,9 @@ func ParseString(t string) Time {
 }
 
 func StringToFloat(t string) float64 {
+	if t == "" {
+		t = "0"
+	}
 	i, err := strconv.ParseFloat(t, 64)
 	if err != nil {
 		log.Fatal(err)
@@ -109,6 +118,7 @@ func ParseDuration(d string) time.Duration {
 	if err != nil {
 		log.Fatal(err)
 	}
+	println(dur.String())
 	return dur
 }
 

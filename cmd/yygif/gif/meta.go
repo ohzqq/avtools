@@ -1,14 +1,18 @@
 package gif
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"gopkg.in/ini.v1"
 	"gopkg.in/yaml.v3"
 )
 
@@ -17,11 +21,96 @@ type Meta map[string]Scene
 type Scene map[string]Clip
 
 type Clip struct {
-	Name  string
-	Video string `yaml:"video"`
-	Start string `yaml:"s"`
-	End   string `yaml:"e"`
-	Crop  string `yaml:"crop"`
+	Name      string
+	Video     string `yaml:"video"`
+	StartTime string `yaml:"s"`
+	EndTime   string `yaml:"e"`
+	Crop      string `yaml:"crop"`
+}
+
+func (m Meta) Chapters() []*avtools.Chapter {
+	var chapters []*avtools.Chapter
+
+	count := 1
+	for _, scene := range m {
+		for _, clip := range scene {
+			clip.Name = fmt.Sprintf("Gif%03d", count)
+			ch := avtools.NewChapter(clip)
+			ch.Tags["crop"] = clip.Crop
+			count++
+			chapters = append(chapters, ch)
+		}
+	}
+	return chapters
+}
+
+func (m Meta) Streams() []map[string]string {
+	return []map[string]string{}
+}
+
+func (m Meta) Tags() map[string]string {
+	clip := m.GetClip("1", "1")
+	return map[string]string{
+		"title": clip.Input.File,
+	}
+}
+
+func (meta Meta) DumpIni() []byte {
+	ini.PrettyFormat = false
+
+	opts := ini.LoadOptions{
+		IgnoreInlineComment:    true,
+		AllowNonUniqueSections: true,
+	}
+
+	ffmeta := ini.Empty(opts)
+
+	for k, v := range meta.Tags() {
+		_, err := ffmeta.Section("").NewKey(k, v)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	for _, chapter := range meta.Chapters() {
+		sec, err := ffmeta.NewSection("CHAPTER")
+		if err != nil {
+			log.Fatal(err)
+		}
+		sec.NewKey("START", chapter.Start.String())
+		sec.NewKey("END", chapter.End.String())
+		sec.NewKey("title", chapter.Title)
+		for k, v := range chapter.Tags {
+			sec.NewKey(k, v)
+		}
+	}
+
+	var buf bytes.Buffer
+	_, err := buf.WriteString(";FFMETADATA1\n")
+	_, err = ffmeta.WriteTo(&buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.Bytes()
+}
+
+func (c Clip) Chap() *avtools.Chapter {
+	ch := avtools.NewChapter(c)
+	ch.Tags["crop"] = c.Crop
+	return ch
+}
+
+func (c Clip) Start() time.Duration {
+	return avtools.ParseStamp(c.StartTime)
+}
+
+func (c Clip) End() time.Duration {
+	return avtools.ParseStamp(c.EndTime)
+}
+
+func (c Clip) Title() string {
+	return c.Name
 }
 
 func (m Meta) MkGifs() []*ff.Cmd {
@@ -62,7 +151,7 @@ func (c Clip) Compile() ff.Cmd {
 }
 
 func (c Clip) Input() ffmpeg.KwArgs {
-	return ffmpeg.KwArgs{"ss": c.Start, "to": c.End}
+	return ffmpeg.KwArgs{"ss": c.StartTime, "to": c.EndTime}
 }
 
 func (c Clip) Filters() ff.Filters {
@@ -119,6 +208,7 @@ func ReadMeta(name string) Meta {
 				log.Fatal(err)
 			}
 			clip.Video = video
+			clip.Name = scene + k
 			scenes[k] = clip
 		}
 		meta[scene] = scenes
