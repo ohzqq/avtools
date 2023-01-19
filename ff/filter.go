@@ -85,6 +85,7 @@ func (f Filter) Merge(filter Filter) Filter {
 var filterOrder = []string{
 	"ffmetadata",
 	"yadif",
+	"thumbnail",
 	"fps",
 	"setpts",
 	"colortemperature",

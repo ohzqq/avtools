@@ -58,6 +58,27 @@ func (cmd Command) updateMeta(input string) *Media {
 	return m
 }
 
+func (cmd Command) Thumbnail(input string, output string) Cmd {
+	m := New(input)
+
+	out := "thumb-"
+	if output != "tmp" {
+		out += output
+	} else {
+		out += m.Input.Name
+	}
+
+	//ff := m.Command()
+	f := ff.New("quiet")
+	f.In(m.Input.Abs)
+	f.Filters.Add("thumbnail", ff.NewFilter())
+	f.Output.Name(out).Ext(".jpg").Pad("")
+
+	c := f.Compile()
+
+	return c
+}
+
 func (cmd Command) Remove(input string) Cmd {
 	m := New(input)
 
