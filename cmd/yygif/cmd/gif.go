@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ohzqq/avtools/cmd/yygif/gif"
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +13,10 @@ var gifCmd = &cobra.Command{
 	Use:   "gif",
 	Short: "make gifs",
 	Run: func(cmd *cobra.Command, args []string) {
-		var gifMeta gif.Meta
+		var gifMeta Meta
 		if !cmd.Flags().Changed("meta") {
 			if MetaExists("metadata-default.yml") {
-				gifMeta = gif.ReadMeta("metadata-default.yml")
-				ini := gifMeta.DumpIni()
-				println(string(ini))
+				gifMeta = ReadMeta("metadata-default.yml")
 			}
 			if len(args) > 0 {
 				arg := strings.Split(args[0], ",")

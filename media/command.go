@@ -21,8 +21,9 @@ type Command struct {
 }
 
 type Flags struct {
-	Bool Bool
-	File Files
+	Bool    Bool
+	File    Files
+	Profile string
 }
 
 type Bool struct {
@@ -47,7 +48,6 @@ func (cmd Command) updateMeta(input string) *Media {
 
 	switch {
 	case cmd.Flags.File.Meta != "":
-		println("update meta")
 		m.LoadIni(cmd.Flags.File.Meta)
 		m.MetaChanged = true
 	case cmd.Flags.File.Cue != "":
@@ -283,27 +283,17 @@ func CutChapter(media *Media, chapter *avtools.Chapter) ff.Cmd {
 		title = fmt.Sprintf("-%s-%s", chapter.Start.Dur, chapter.End.Dur)
 	}
 	out.Suffix(title)
-	//fmt.Printf("chapter %+V\n", chapter)
 
 	cmd := media.Command()
 
 	cmd.Input.Start(chapter.Start.String()).
 		End(chapter.End.String())
 
-	//name := filepath.Join(out.Path, out.Name)
 	cmd.Output.Name(out.Join()).Pad("")
+
 	if cmd.IsStreamCopy() {
 		cmd.Output.Ext(media.Input.Ext)
 	}
-	//if e := cmd.Output.Get("ext").(string); e == "" {
-	//  cmd.Output.Ext(media.Input.Ext)
-	//} else {
-	//  cmd.Output.Ext(e)
-	//}
-
-	//Name(name).
-	//Pad("").
-	//Ext(media.Input.Ext)
 
 	return cmd
 }
