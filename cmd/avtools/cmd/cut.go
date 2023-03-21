@@ -15,7 +15,7 @@ var chap int
 // cutCmd represents the cut command
 var cutCmd = &cobra.Command{
 	Use:   "cut",
-	Short: "A brief description of your command",
+	Short: "lossly cut clips",
 	Long:  `losslessly cut a clip`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

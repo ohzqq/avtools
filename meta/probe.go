@@ -128,6 +128,7 @@ func (c ProbeChapter) Timebase() int {
 
 var probeArgs = []ffmpeg.KwArgs{
 	ffmpeg.KwArgs{"show_chapters": ""},
+	ffmpeg.KwArgs{"pretty": ""},
 	//ffmpeg.KwArgs{"select_streams": "a"},
 	ffmpeg.KwArgs{"show_entries": "stream:format=filename, start_time, duration, size, bit_rate:format_tags"},
 	ffmpeg.KwArgs{"of": "json"},

@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/dur"
 	"gopkg.in/ini.v1"
 )
 
@@ -101,34 +101,41 @@ func DumpIni(meta avtools.Meta) []byte {
 	return buf.Bytes()
 }
 
+func timebase(b string) int {
+	base, err := strconv.Atoi(strings.TrimPrefix(b, "1/"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return base
+}
+
 func (ff FFMeta) Chapters() []*avtools.Chapter {
 	var chapters []*avtools.Chapter
 	for _, chapter := range ff.chapters {
-		var base string
-		if b, ok := chapter["timebase"]; ok {
-			base = b
-		}
+		//var base string
+		//if b, ok := chapter["timebase"]; ok {
+		//  base = b
+		//}
 		ch := &avtools.Chapter{
 			Tags: make(map[string]string),
 		}
 		for key, val := range chapter {
 			switch key {
 			case "start":
-				var dur time.Duration
-				if base == "" {
-					dur = avtools.ParseStamp(val)
-				} else {
-					dur = avtools.ParseTimeAndBase(val, base)
+				//d := ParseStamp(val, base)
+				d, err := dur.Parse(val)
+				if err != nil {
+					log.Fatal(err)
 				}
-				ch.Start = avtools.Timestamp(dur)
+				println(d.HHMMSS())
+				//ch.Start = avtools.Timestamp(d.Dur)
 			case "end":
-				var dur time.Duration
-				if base == "" {
-					dur = avtools.ParseStamp(val)
-				} else {
-					dur = avtools.ParseTimeAndBase(val, base)
+				d, err := dur.Parse(val)
+				if err != nil {
+					log.Fatal(err)
 				}
-				ch.End = avtools.Timestamp(dur)
+				println(d.HHMMSS())
+				//ch.End = avtools.Timestamp(d.Dur)
 			case "title":
 				ch.Title = val
 			default:

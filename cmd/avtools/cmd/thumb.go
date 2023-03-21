@@ -10,7 +10,7 @@ var thumb media.Command
 // thumbCmd represents the thumb command
 var thumbCmd = &cobra.Command{
 	Use:   "thumb",
-	Short: "A brief description of your command",
+	Short: "create a thumbnail from a video",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]

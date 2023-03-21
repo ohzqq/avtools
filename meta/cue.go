@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/ohzqq/avtools"
-	"github.com/samber/lo"
+	"github.com/ohzqq/dur"
 )
 
 type CueSheet struct {
@@ -53,11 +53,11 @@ func LoadCueSheet(file string) *CueSheet {
 			titles = append(titles, title)
 		case strings.Contains(line, "INDEX 01"):
 			stamp := strings.TrimPrefix(line, "INDEX 01 ")
-			split := strings.Split(stamp, ":")
-			split = lo.DropRight(split, 1)
-			stamp = strings.Join(split, ":")
-			start := avtools.ParseStamp(stamp)
-			times = append(times, start)
+			start, err := dur.Parse(stamp)
+			if err != nil {
+				log.Fatal(err)
+			}
+			times = append(times, start.Dur)
 		}
 	}
 

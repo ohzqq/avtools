@@ -74,7 +74,7 @@ func (cmd *Cmd) Compile() *Cmd {
 	cmd.args = append(cmd.args, ffArgs[outArgs:]...)
 
 	cmd.cmd = exec.Command("ffmpeg", cmd.args...)
-	//fmt.Printf("args %+V\n", cmd.args)
+	fmt.Printf("args %+V\n", cmd.args)
 
 	return cmd
 }
@@ -95,6 +95,7 @@ func (c Cmd) Run() error {
 	c.cmd.Stderr = &stderr
 	c.cmd.Stdout = &stdout
 
+	println(c.cmd.String())
 	err := c.cmd.Run()
 	if err != nil {
 		return fmt.Errorf("%v\n%v\n", stderr.String(), c.cmd.String())
