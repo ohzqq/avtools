@@ -1,10 +1,9 @@
-package meta
+package cue
 
 import (
 	"bufio"
 	"bytes"
 	"html/template"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,20 +17,16 @@ import (
 type CueSheet struct {
 	File   string
 	Ext    string
-	Tracks []*avtools.Chapter
+	Tracks []avtools.ChapterMeta
 }
 
-func NewCueSheet(f string) *CueSheet {
-	cue := &CueSheet{
-		File: f,
-		Ext:  filepath.Ext(f),
-	}
-	cue.Ext = strings.ToUpper(cue.Ext)
-	cue.Ext = strings.TrimPrefix(cue.Ext, ".")
-	return cue
+type Track struct {
+	StartStamp time.Duration
+	EndStamp   time.Duration
+	ChapTitle  string
 }
 
-func LoadCueSheet(file string) *CueSheet {
+func Load(file string) *CueSheet {
 	var sheet CueSheet
 
 	contents, err := os.Open(file)
@@ -63,12 +58,11 @@ func LoadCueSheet(file string) *CueSheet {
 
 	e := 1
 	for i := 0; i < len(titles); i++ {
-		track := &avtools.Chapter{}
+		var track Track
 		track.ChapTitle = titles[i]
-		ss := avtools.Timestamp(times[i])
-		track.StartTime = ss
+		track.StartStamp = times[i]
 		if e < len(titles) {
-			track.EndTime = avtools.Timestamp(times[e])
+			track.EndStamp = times[e]
 		}
 		e++
 		sheet.Tracks = append(sheet.Tracks, track)
@@ -77,14 +71,24 @@ func LoadCueSheet(file string) *CueSheet {
 	return &sheet
 }
 
-func DumpCueSheet(file string, meta avtools.Meta) []byte {
+func NewCueSheet(f string) *CueSheet {
+	cue := &CueSheet{
+		File: f,
+		Ext:  filepath.Ext(f),
+	}
+	cue.Ext = strings.ToUpper(cue.Ext)
+	cue.Ext = strings.TrimPrefix(cue.Ext, ".")
+	return cue
+}
+
+func Dump(file string, meta avtools.Meta) []byte {
 	var (
 		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
 		buf  bytes.Buffer
 	)
 
 	cue := NewCueSheet(file)
-	cue.Tracks = meta.Chapters()
+	//cue.Tracks = meta.Chapters()
 
 	err := tmpl.Execute(&buf, cue)
 	if err != nil {
@@ -94,7 +98,7 @@ func DumpCueSheet(file string, meta avtools.Meta) []byte {
 	return buf.Bytes()
 }
 
-func (cue CueSheet) Chapters() []*avtools.Chapter {
+func (cue CueSheet) Chapters() []avtools.ChapterMeta {
 	return cue.Tracks
 }
 
@@ -106,51 +110,6 @@ func (cue CueSheet) Tags() map[string]string {
 
 func (cue CueSheet) Streams() []map[string]string {
 	return []map[string]string{}
-}
-
-func (cue CueSheet) Dump() []byte {
-	var (
-		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
-		buf  bytes.Buffer
-	)
-
-	err := tmpl.Execute(&buf, cue)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return buf.Bytes()
-}
-
-func (cue CueSheet) Write(wr io.Writer) error {
-	_, err := wr.Write(cue.Dump())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (cue CueSheet) Save() error {
-	return cue.SaveAs(cue.File)
-}
-
-func (cue CueSheet) SaveAs(name string) error {
-	if name == "" || cue.File == "" {
-		name = "tmp"
-	}
-
-	file, err := os.Create(name + ".cue")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	err = cue.Write(file)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 var tmplFuncs = template.FuncMap{

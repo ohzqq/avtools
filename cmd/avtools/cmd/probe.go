@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ohzqq/avtools/cue"
 	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/media"
 	"github.com/spf13/cobra"
@@ -18,7 +19,8 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		testIni(input)
+		//testIni(input)
+		testCue(input)
 		//metad := meta.FFProbe(input)
 		//for _, ch := range metad.ChapterEntry {
 		//fmt.Printf("probe meta %+V\n", ch.Start)
@@ -38,6 +40,15 @@ var probeCmd = &cobra.Command{
 		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//meta := meta.LoadIni(input)
 	},
+}
+
+func testCue(in string) {
+	ff := cue.Load(in)
+	fmt.Printf("%+V\n", ff)
+	for _, ch := range ff.Chapters() {
+		fmt.Printf("%s\n", ch.Start())
+		fmt.Printf("%s\n", ch.End().Milliseconds())
+	}
 }
 
 func testIni(in string) {
