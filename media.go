@@ -2,17 +2,34 @@ package avtools
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/ohzqq/dur"
+	"github.com/ohzqq/fidi"
 )
 
 type Media struct {
+	fidi.File
 	Filename string
 	tags     map[string]string
 	chapters []*Chapter
+	Chaps    []*Chapter
 	streams  []map[string]string
+	Streamz  []Stream
+	Input    fidi.File
+	Output   fidi.File
+	Ini      fidi.File
+	Cue      fidi.File
+	Cover    fidi.File
+}
+
+type Stream struct {
+	CodecType string
+	CodecName string
+	Index     string
+	IsCover   bool
 }
 
 type Chapter struct {
@@ -30,6 +47,12 @@ type ChapterMeta interface {
 	Title() string
 }
 
+type Metaz interface {
+	Chapters() []ChapterMeta
+	Tags() map[string]string
+	Streams() []map[string]string
+}
+
 type Meta interface {
 	Chapters() []*Chapter
 	Tags() map[string]string
@@ -44,12 +67,28 @@ func NewMedia() *Media {
 }
 
 func NewChapter(chap ChapterMeta) *Chapter {
-	return &Chapter{
-		ChapTitle: chap.Title(),
-		StartTime: Timestamp(chap.Start()),
-		EndTime:   Timestamp(chap.End()),
-		Tags:      make(map[string]string),
+	ss, err := dur.New(chap.Start())
+	if err != nil {
+		log.Fatal(err)
 	}
+	to, err := dur.New(chap.End())
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &Chapter{
+		ChapTitle:  chap.Title(),
+		StartStamp: ss,
+		EndStamp:   to,
+		Tags:       make(map[string]string),
+	}
+}
+
+func NewChapters(chaps []ChapterMeta) []*Chapter {
+	var ch []*Chapter
+	for _, c := range chaps {
+		ch = append(ch, NewChapter(c))
+	}
+	return ch
 }
 
 func (m *Media) SetMeta(meta Meta) *Media {
@@ -78,11 +117,30 @@ func (m *Media) SetTags(tags map[string]string) {
 }
 
 func (m Media) Streams() []map[string]string {
+
 	return m.streams
 }
 
 func (m *Media) SetStreams(streams []map[string]string) {
-	m.streams = streams
+	for _, stream := range streams {
+		s := Stream{}
+		for key, val := range stream {
+			switch key {
+			case "codec_type":
+				s.CodecType = val
+			case "codec_name":
+				s.CodecName = val
+			case "index":
+				s.Index = val
+			case "cover":
+				if val == "true" {
+					//s.IsCover = true
+					//m.HasCover = true
+				}
+			}
+		}
+		m.Streamz = append(m.Streamz, s)
+	}
 }
 
 func (m Media) GetTag(key string) string {

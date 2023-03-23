@@ -23,7 +23,7 @@ type Sheet struct {
 	Tracks []avtools.ChapterMeta
 }
 
-func Load(file string) (*Sheet, error) {
+func Load(file string) (avtools.Metaz, error) {
 	sheet := new(Sheet)
 	sheet.File = fidi.NewFile(file)
 	if err := avtools.IsPlainText(sheet.Mime); err != nil {

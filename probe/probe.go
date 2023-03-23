@@ -25,7 +25,7 @@ type Format struct {
 	Tags     map[string]string `json:"tags"`
 }
 
-func Load(input string) (Meta, error) {
+func Load(input string) (avtools.Metaz, error) {
 	args := ffmpeg.MergeKwArgs(probeArgs)
 	info, err := ffmpeg.ProbeWithTimeoutExec(input, 0, args)
 	if err != nil {
