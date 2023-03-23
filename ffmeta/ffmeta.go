@@ -1,4 +1,4 @@
-package meta
+package ffmeta
 
 import (
 	"bytes"
@@ -30,7 +30,7 @@ type FFMetaChapter struct {
 	Title string `ini:"title"`
 }
 
-func LoadIni(input string) *FFMeta {
+func Load(input string) *FFMeta {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
 	opts.InsensitiveSections = true
@@ -61,7 +61,7 @@ func LoadIni(input string) *FFMeta {
 	return ffmeta
 }
 
-func DumpIni(meta avtools.Meta) []byte {
+func Dump(meta avtools.Meta) []byte {
 	ini.PrettyFormat = false
 
 	opts := ini.LoadOptions{
