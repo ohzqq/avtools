@@ -28,7 +28,7 @@ var probeCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("probe meta %+V\n", f)
+			fmt.Printf("probe meta %+V\n", f.HHMMSS())
 		}
 		//m := media.New(input)
 		//for _, ch := range m.Chapters() {
