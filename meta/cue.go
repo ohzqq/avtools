@@ -64,11 +64,11 @@ func LoadCueSheet(file string) *CueSheet {
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		track := &avtools.Chapter{}
-		track.Title = titles[i]
+		track.ChapTitle = titles[i]
 		ss := avtools.Timestamp(times[i])
-		track.Start = ss
+		track.StartTime = ss
 		if e < len(titles) {
-			track.End = avtools.Timestamp(times[e])
+			track.EndTime = avtools.Timestamp(times[e])
 		}
 		e++
 		sheet.Tracks = append(sheet.Tracks, track)

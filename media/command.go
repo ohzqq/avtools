@@ -199,9 +199,9 @@ func GenerateChapters(media []*Media) []*avtools.Chapter {
 		ss := avtools.ParseStampDuration(start[idx], 1000)
 		to := avtools.ParseStampDuration(end[idx], 1000)
 		chapter := &avtools.Chapter{
-			Start: avtools.Timestamp(ss),
-			End:   avtools.Timestamp(to),
-			Title: "Chapter " + strconv.Itoa(idx+1),
+			StartTime: avtools.Timestamp(ss),
+			EndTime:   avtools.Timestamp(to),
+			ChapTitle: "Chapter " + strconv.Itoa(idx+1),
 		}
 		chapters = append(chapters, chapter)
 	}
@@ -299,16 +299,16 @@ func (cmd Command) Split(input string) []Cmd {
 func CutChapter(media *Media, chapter *avtools.Chapter) ff.Cmd {
 	out := media.Input.NewName()
 
-	title := chapter.Title
+	title := chapter.ChapTitle
 	if title == "" {
-		title = fmt.Sprintf("-%s-%s", chapter.Start.Dur, chapter.End.Dur)
+		title = fmt.Sprintf("-%s-%s", chapter.StartTime.Dur, chapter.EndTime.Dur)
 	}
 	out.Suffix(title)
 
 	cmd := media.Command()
 
-	cmd.Input.Start(chapter.Start.String()).
-		End(chapter.End.String())
+	cmd.Input.Start(chapter.StartTime.String()).
+		End(chapter.EndTime.String())
 
 	cmd.Output.Name(out.Join()).Pad("")
 

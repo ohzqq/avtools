@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/media"
-	"github.com/ohzqq/avtools/meta"
-	"github.com/ohzqq/dur"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +18,17 @@ var probeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		input := args[0]
-		metad := meta.FFProbe(input)
-		for _, ch := range metad.ChapterEntry {
-			fmt.Printf("probe meta %+V\n", ch.Start)
-			//d := meta.ParseStamp(ch.Start, ch.Base)
-			f, err := dur.Parse(ch.Start)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Printf("probe meta %+V\n", f.HHMMSS())
-		}
+		testIni(input)
+		//metad := meta.FFProbe(input)
+		//for _, ch := range metad.ChapterEntry {
+		//fmt.Printf("probe meta %+V\n", ch.Start)
+		//d := meta.ParseStamp(ch.Start, ch.Base)
+		//f, err := dur.Parse(ch.Start)
+		//if err != nil {
+		//log.Fatal(err)
+		//}
+		//fmt.Printf("probe meta %+V\n", f.HHMMSS())
+		//}
 		//m := media.New(input)
 		//for _, ch := range m.Chapters() {
 		//  fmt.Printf("probe meta %+V\n", ch.Start.String())
@@ -39,6 +38,15 @@ var probeCmd = &cobra.Command{
 		//fmt.Printf("tags %+V\n", m.Chapters()[len(m.Chapters())-1].Tags)
 		//meta := meta.LoadIni(input)
 	},
+}
+
+func testIni(in string) {
+	ff := ffmeta.Load(in)
+	fmt.Printf("%+V\n", ff)
+	for _, ch := range ff.Chapters() {
+		fmt.Printf("%s\n", ch.Start())
+		fmt.Printf("%s\n", ch.End().Milliseconds())
+	}
 }
 
 func init() {

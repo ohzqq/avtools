@@ -2,6 +2,8 @@ package avtools
 
 import (
 	"time"
+
+	"github.com/ohzqq/dur"
 )
 
 type Media struct {
@@ -12,10 +14,12 @@ type Media struct {
 }
 
 type Chapter struct {
-	Start Time
-	End   Time
-	Title string
-	Tags  map[string]string
+	StartTime  Time
+	EndTime    Time
+	StartStamp dur.Timestamp
+	EndStamp   dur.Timestamp
+	ChapTitle  string
+	Tags       map[string]string
 }
 
 type ChapterMeta interface {
@@ -39,10 +43,10 @@ func NewMedia() *Media {
 
 func NewChapter(chap ChapterMeta) *Chapter {
 	return &Chapter{
-		Title: chap.Title(),
-		Start: Timestamp(chap.Start()),
-		End:   Timestamp(chap.End()),
-		Tags:  make(map[string]string),
+		ChapTitle: chap.Title(),
+		StartTime: Timestamp(chap.Start()),
+		EndTime:   Timestamp(chap.End()),
+		Tags:      make(map[string]string),
 	}
 }
 
@@ -93,14 +97,26 @@ func (ch Chapter) Timebase() string {
 
 func (ch *Chapter) SS(ss string) *Chapter {
 	dur := ParseStamp(ss)
-	ch.Start = Timestamp(dur)
+	ch.StartTime = Timestamp(dur)
 	return ch
 }
 
 func (ch *Chapter) To(to string) *Chapter {
 	dur := ParseStamp(to)
-	ch.End = Timestamp(dur)
+	ch.EndTime = Timestamp(dur)
 	return ch
+}
+
+func (ch Chapter) Start() time.Duration {
+	return ch.StartStamp.Dur
+}
+
+func (ch Chapter) End() time.Duration {
+	return ch.StartStamp.Dur
+}
+
+func (ch Chapter) Title() string {
+	return ch.ChapTitle
 }
 
 //func (ch Chapter) Dur() (Time, error) {

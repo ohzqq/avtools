@@ -69,9 +69,9 @@ func (m ProbeMeta) Chapters() []*avtools.Chapter {
 	var ch []*avtools.Chapter
 	for _, c := range m.ChapterEntry {
 		chap := &avtools.Chapter{
-			Start: avtools.Timestamp(avtools.ParseDuration(c.Start + "s")),
-			End:   avtools.Timestamp(avtools.ParseDuration(c.End + "s")),
-			Title: c.Title(),
+			StartTime: avtools.Timestamp(avtools.ParseDuration(c.Start + "s")),
+			EndTime:   avtools.Timestamp(avtools.ParseDuration(c.End + "s")),
+			ChapTitle: c.Title(),
 		}
 		ch = append(ch, chap)
 	}

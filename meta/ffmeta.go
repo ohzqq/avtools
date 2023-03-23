@@ -84,9 +84,9 @@ func DumpIni(meta avtools.Meta) []byte {
 			log.Fatal(err)
 		}
 		sec.NewKey("TIMEBASE", chapter.Timebase())
-		sec.NewKey("START", chapter.Start.MS())
-		sec.NewKey("END", chapter.End.MS())
-		sec.NewKey("title", chapter.Title)
+		sec.NewKey("START", chapter.StartTime.MS())
+		sec.NewKey("END", chapter.EndTime.MS())
+		sec.NewKey("title", chapter.ChapTitle)
 		for k, v := range chapter.Tags {
 			sec.NewKey(k, v)
 		}
@@ -138,7 +138,7 @@ func (ff FFMeta) Chapters() []*avtools.Chapter {
 				fmt.Println(d.MMSS())
 				//ch.End = avtools.Timestamp(d.Dur)
 			case "title":
-				ch.Title = val
+				ch.ChapTitle = val
 			default:
 				ch.Tags[key] = val
 			}

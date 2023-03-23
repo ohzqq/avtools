@@ -52,7 +52,7 @@ func (m *Media) LoadMeta(name string) *Media {
 		m.Media.SetMeta(cue)
 		dur := m.GetTag("duration")
 		last := m.Chapters()[len(m.Chapters())-1]
-		last.End = avtools.Timestamp(avtools.ParseStamp(dur))
+		last.EndTime = avtools.Timestamp(avtools.ParseStamp(dur))
 		m.Cue = file
 	}
 	m.MetaChanged = true
