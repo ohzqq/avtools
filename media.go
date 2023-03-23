@@ -1,6 +1,8 @@
 package avtools
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ohzqq/dur"
@@ -117,6 +119,13 @@ func (ch Chapter) End() time.Duration {
 
 func (ch Chapter) Title() string {
 	return ch.ChapTitle
+}
+
+func IsPlainText(mtype string) error {
+	if strings.Contains(mtype, "text/plain") {
+		return nil
+	}
+	return fmt.Errorf("needs to be plain text file")
 }
 
 //func (ch Chapter) Dur() (Time, error) {

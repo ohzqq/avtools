@@ -1,55 +1,64 @@
 package ffmeta
 
 import (
+	"bufio"
 	"bytes"
+	"fmt"
 	"log"
-	"path/filepath"
+	"os"
 	"strconv"
 
 	"github.com/ohzqq/avtools"
+	"github.com/ohzqq/fidi"
 	"gopkg.in/ini.v1"
 )
 
 const FFmetaComment = ";FFMETADATA1\n"
 
 type FFMeta struct {
+	fidi.File
 	tags     map[string]string
 	chapters []avtools.ChapterMeta
 }
 
-func Load(input string) *FFMeta {
+func Load(input string) (*FFMeta, error) {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
 	opts.InsensitiveSections = true
 	opts.IgnoreInlineComment = true
 	opts.AllowNonUniqueSections = true
 
-	abs, _ := filepath.Abs(input)
-	f, err := ini.LoadSources(opts, abs)
-	if err != nil {
-		log.Fatal(err)
+	ffmeta := &FFMeta{}
+	ffmeta.File = fidi.NewFile(input)
+
+	if !IsFFMeta(ffmeta.File) {
+		return ffmeta, fmt.Errorf("not an ffmetadata file")
 	}
 
-	ffmeta := &FFMeta{}
+	f, err := ini.LoadSources(opts, ffmeta.Path())
+	if err != nil {
+		return ffmeta, err
+	}
+
 	ffmeta.tags = f.Section("").KeysHash()
 
 	if f.HasSection("chapter") {
 		sections, err := f.SectionsByName("chapter")
 		if err != nil {
-			log.Fatal(err)
+			return ffmeta, err
 		}
 
 		for _, ch := range sections {
 			var c FFMetaChapter
 			err := ch.MapTo(&c)
 			if err != nil {
-				log.Fatal(err)
+				return ffmeta, err
 			}
 			ffmeta.chapters = append(ffmeta.chapters, c)
 		}
 	}
 
-	return ffmeta
+	return ffmeta, nil
 }
 
 func Dump(meta avtools.Meta) []byte {
@@ -106,4 +115,25 @@ func (ff FFMeta) Tags() map[string]string {
 
 func (ff FFMeta) Streams() []map[string]string {
 	return []map[string]string{}
+}
+
+func IsFFMeta(f fidi.File) bool {
+	if err := avtools.IsPlainText(f.Mime); err != nil {
+		return false
+	}
+	contents, err := os.Open(f.Path())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer contents.Close()
+
+	scanner := bufio.NewScanner(contents)
+	line := 0
+	for scanner.Scan() {
+		if line == 0 && scanner.Text() == ";FFMETADATA1" {
+			return true
+			break
+		}
+	}
+	return false
 }

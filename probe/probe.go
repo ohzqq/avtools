@@ -1,8 +1,7 @@
-package meta
+package probe
 
 import (
 	"encoding/json"
-	"log"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -12,13 +11,13 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-type ProbeMeta struct {
+type Meta struct {
 	StreamEntry  []map[string]any `json:"streams"`
-	Format       ProbeFormat      `json:"format"`
-	ChapterEntry []ProbeChapter   `json:"chapters"`
+	Format       Format           `json:"format"`
+	ChapterEntry []Chapter        `json:"chapters"`
 }
 
-type ProbeFormat struct {
+type Format struct {
 	Filename string            `json:"filename"`
 	Dur      string            `json:"duration"`
 	Size     string            `json:"size"`
@@ -26,31 +25,23 @@ type ProbeFormat struct {
 	Tags     map[string]string `json:"tags"`
 }
 
-type ProbeChapter struct {
-	Base         string            `json:"time_base" ini:"TIMEBASE"`
-	Start        string            `json:"start_time" ini:"START"`
-	End          string            `json:"end_time" ini:"END"`
-	ChapterTitle string            `ini:"title"`
-	Tags         map[string]string `json:"tags"`
-}
-
-func FFProbe(input string) ProbeMeta {
+func Load(input string) (Meta, error) {
 	args := ffmpeg.MergeKwArgs(probeArgs)
 	info, err := ffmpeg.ProbeWithTimeoutExec(input, 0, args)
 	if err != nil {
-		log.Fatal(err)
+		return Meta{}, err
 	}
 	//fmt.Println(info)
 
 	data := []byte(info)
 
-	var meta ProbeMeta
+	var meta Meta
 	err = json.Unmarshal(data, &meta)
 	if err != nil {
-		log.Fatal(err)
+		return Meta{}, err
 	}
 
-	return meta
+	return meta, nil
 }
 
 func DumpFFMeta(file string) *ff.Cmd {
@@ -65,20 +56,15 @@ func DumpFFMeta(file string) *ff.Cmd {
 	return cmd.Compile()
 }
 
-func (m ProbeMeta) Chapters() []*avtools.Chapter {
-	var ch []*avtools.Chapter
-	for _, c := range m.ChapterEntry {
-		chap := &avtools.Chapter{
-			StartTime: avtools.Timestamp(avtools.ParseDuration(c.Start + "s")),
-			EndTime:   avtools.Timestamp(avtools.ParseDuration(c.End + "s")),
-			ChapTitle: c.Title(),
-		}
-		ch = append(ch, chap)
+func (m Meta) Chapters() []avtools.ChapterMeta {
+	var chaps []avtools.ChapterMeta
+	for _, ch := range m.ChapterEntry {
+		chaps = append(chaps, ch)
 	}
-	return ch
+	return chaps
 }
 
-func (m ProbeMeta) Streams() []map[string]string {
+func (m Meta) Streams() []map[string]string {
 	var streams []map[string]string
 	for _, stream := range m.StreamEntry {
 		meta := make(map[string]string)
@@ -103,27 +89,12 @@ func (m ProbeMeta) Streams() []map[string]string {
 	return streams
 }
 
-func (m ProbeMeta) Tags() map[string]string {
+func (m Meta) Tags() map[string]string {
 	m.Format.Tags["filename"] = m.Format.Filename
 	m.Format.Tags["duration"] = m.Format.Dur
 	m.Format.Tags["size"] = m.Format.Size
 	m.Format.Tags["bit_rate"] = m.Format.BitRate
 	return m.Format.Tags
-}
-
-func (c ProbeChapter) Title() string {
-	if t, ok := c.Tags["title"]; ok {
-		return t
-	}
-	return c.ChapterTitle
-}
-
-func (c ProbeChapter) Timebase() int {
-	if tb := c.Base; tb != "" {
-		c.Base = strings.TrimPrefix(tb, "1/")
-	}
-	baseFloat, _ := strconv.Atoi(c.Base)
-	return baseFloat
 }
 
 var probeArgs = []ffmpeg.KwArgs{

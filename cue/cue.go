@@ -3,6 +3,7 @@ package cue
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -12,20 +13,26 @@ import (
 
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/dur"
+	"github.com/ohzqq/fidi"
 )
 
 type Sheet struct {
-	File   string
+	fidi.File
+	file   string
 	Ext    string
 	Tracks []avtools.ChapterMeta
 }
 
-func Load(file string) *Sheet {
-	var sheet Sheet
+func Load(file string) (*Sheet, error) {
+	sheet := new(Sheet)
+	sheet.File = fidi.NewFile(file)
+	if err := avtools.IsPlainText(sheet.Mime); err != nil {
+		return sheet, fmt.Errorf("ini load err: %w", err)
+	}
 
 	contents, err := os.Open(file)
 	if err != nil {
-		log.Fatal(err)
+		return sheet, err
 	}
 	defer contents.Close()
 
@@ -44,7 +51,7 @@ func Load(file string) *Sheet {
 			stamp := strings.TrimPrefix(line, "INDEX 01 ")
 			start, err := dur.Parse(stamp)
 			if err != nil {
-				log.Fatal(err)
+				return sheet, err
 			}
 			times = append(times, start.Dur)
 		}
@@ -62,12 +69,12 @@ func Load(file string) *Sheet {
 		sheet.Tracks = append(sheet.Tracks, track)
 	}
 
-	return &sheet
+	return sheet, nil
 }
 
 func NewCueSheet(f string) *Sheet {
 	cue := &Sheet{
-		File: f,
+		file: f,
 		Ext:  filepath.Ext(f),
 	}
 	cue.Ext = strings.ToUpper(cue.Ext)
@@ -98,7 +105,7 @@ func (cue Sheet) Chapters() []avtools.ChapterMeta {
 
 func (cue Sheet) Tags() map[string]string {
 	return map[string]string{
-		"filename": cue.File,
+		"filename": cue.file,
 	}
 }
 

@@ -19,6 +19,7 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ohzqq/dur v0.0.2 // indirect
+	github.com/ohzqq/fidi v0.0.27 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/samber/lo v1.37.0 // indirect
