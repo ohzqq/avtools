@@ -82,7 +82,7 @@ func NewCueSheet(f string) *Sheet {
 	return cue
 }
 
-func Dump(file string, meta avtools.Meta) []byte {
+func Dump(file string, meta avtools.Metaz) []byte {
 	var (
 		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
 		buf  bytes.Buffer
