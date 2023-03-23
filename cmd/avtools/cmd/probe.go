@@ -51,7 +51,8 @@ func testMedia(in string) {
 
 	media.Cue("tmp/curse.cue")
 	testChaps(media.Chaps)
-	//fmt.Printf("%+V\n", media)
+	c := cue.Dump(in, media.Chaps)
+	fmt.Printf("%+V\n", string(c))
 }
 
 func testChaps(chaps []*avtools.Chapter) {

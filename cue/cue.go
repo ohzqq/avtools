@@ -21,6 +21,7 @@ type Sheet struct {
 	file   string
 	Ext    string
 	Tracks []avtools.ChapterMeta
+	Chaps  []*avtools.Chapter
 }
 
 func Load(file string) (avtools.Metaz, error) {
@@ -82,14 +83,14 @@ func NewCueSheet(f string) *Sheet {
 	return cue
 }
 
-func Dump(file string, meta avtools.Metaz) []byte {
+func Dump(file string, chaps []*avtools.Chapter) []byte {
 	var (
 		tmpl = template.Must(template.New("cue").Funcs(tmplFuncs).Parse(cueTmpl))
 		buf  bytes.Buffer
 	)
 
 	cue := NewCueSheet(file)
-	//cue.Tracks = meta.Chapters()
+	cue.Chaps = chaps
 
 	err := tmpl.Execute(&buf, cue)
 	if err != nil {
@@ -126,12 +127,12 @@ func Inc(n int) int {
 }
 
 const cueTmpl = `FILE "{{.File}}" {{.Ext -}}
-{{range $idx, $ch := .Tracks}}
+{{range $idx, $ch := .Chaps}}
 TRACK {{inc $idx}} AUDIO
 {{- if eq $ch.Title ""}}
   TITLE "Chapter {{inc $idx}}"
 {{- else}}
   TITLE "{{$ch.Title}}"
 {{- end}}
-	INDEX 01 {{$ch.Start.MMSS}}:00
+  INDEX 01 {{$ch.Start.MMSS}}:00
 {{- end -}}`

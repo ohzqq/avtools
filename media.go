@@ -144,12 +144,12 @@ func (ch *Chapter) To(to string) *Chapter {
 	return ch
 }
 
-func (ch Chapter) Start() time.Duration {
-	return ch.StartStamp.Dur
+func (ch Chapter) Start() dur.Timestamp {
+	return ch.StartStamp
 }
 
-func (ch Chapter) End() time.Duration {
-	return ch.StartStamp.Dur
+func (ch Chapter) End() dur.Timestamp {
+	return ch.StartStamp
 }
 
 func (ch Chapter) Title() string {
