@@ -14,20 +14,14 @@ import (
 	"github.com/ohzqq/dur"
 )
 
-type CueSheet struct {
+type Sheet struct {
 	File   string
 	Ext    string
 	Tracks []avtools.ChapterMeta
 }
 
-type Track struct {
-	StartStamp time.Duration
-	EndStamp   time.Duration
-	ChapTitle  string
-}
-
-func Load(file string) *CueSheet {
-	var sheet CueSheet
+func Load(file string) *Sheet {
+	var sheet Sheet
 
 	contents, err := os.Open(file)
 	if err != nil {
@@ -59,10 +53,10 @@ func Load(file string) *CueSheet {
 	e := 1
 	for i := 0; i < len(titles); i++ {
 		var track Track
-		track.ChapTitle = titles[i]
-		track.StartStamp = times[i]
+		track.title = titles[i]
+		track.start = times[i]
 		if e < len(titles) {
-			track.EndStamp = times[e]
+			track.end = times[e]
 		}
 		e++
 		sheet.Tracks = append(sheet.Tracks, track)
@@ -71,8 +65,8 @@ func Load(file string) *CueSheet {
 	return &sheet
 }
 
-func NewCueSheet(f string) *CueSheet {
-	cue := &CueSheet{
+func NewCueSheet(f string) *Sheet {
+	cue := &Sheet{
 		File: f,
 		Ext:  filepath.Ext(f),
 	}
@@ -98,17 +92,17 @@ func Dump(file string, meta avtools.Meta) []byte {
 	return buf.Bytes()
 }
 
-func (cue CueSheet) Chapters() []avtools.ChapterMeta {
+func (cue Sheet) Chapters() []avtools.ChapterMeta {
 	return cue.Tracks
 }
 
-func (cue CueSheet) Tags() map[string]string {
+func (cue Sheet) Tags() map[string]string {
 	return map[string]string{
 		"filename": cue.File,
 	}
 }
 
-func (cue CueSheet) Streams() []map[string]string {
+func (cue Sheet) Streams() []map[string]string {
 	return []map[string]string{}
 }
 
