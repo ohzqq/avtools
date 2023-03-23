@@ -14,6 +14,7 @@ type Media struct {
 	fidi.File
 	Filename string
 	tags     map[string]string
+	Tagz     map[string]string
 	chapters []*Chapter
 	Chaps    []*Chapter
 	streams  []map[string]string
@@ -23,6 +24,7 @@ type Media struct {
 	Ini      fidi.File
 	Cue      fidi.File
 	Cover    fidi.File
+	HasCover bool
 }
 
 type Stream struct {
@@ -51,6 +53,7 @@ type Metaz interface {
 	Chapters() []ChapterMeta
 	Tags() map[string]string
 	Streams() []map[string]string
+	Source() fidi.File
 }
 
 type Meta interface {
@@ -112,39 +115,13 @@ func (m Media) Tags() map[string]string {
 	return m.tags
 }
 
-func (m *Media) SetTags(tags map[string]string) {
-	m.tags = tags
-}
-
 func (m Media) Streams() []map[string]string {
 
 	return m.streams
 }
 
-func (m *Media) SetStreams(streams []map[string]string) {
-	for _, stream := range streams {
-		s := Stream{}
-		for key, val := range stream {
-			switch key {
-			case "codec_type":
-				s.CodecType = val
-			case "codec_name":
-				s.CodecName = val
-			case "index":
-				s.Index = val
-			case "cover":
-				if val == "true" {
-					//s.IsCover = true
-					//m.HasCover = true
-				}
-			}
-		}
-		m.Streamz = append(m.Streamz, s)
-	}
-}
-
 func (m Media) GetTag(key string) string {
-	if val, ok := m.tags[key]; ok {
+	if val, ok := m.Tagz[key]; ok {
 		return val
 	}
 

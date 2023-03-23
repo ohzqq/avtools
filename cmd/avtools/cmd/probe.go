@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/av"
 	"github.com/ohzqq/avtools/cue"
 	"github.com/ohzqq/avtools/ffmeta"
@@ -46,10 +47,20 @@ var probeCmd = &cobra.Command{
 func testMedia(in string) {
 	media := av.New(in)
 	fmt.Printf("%+V\n", media)
+	testChaps(media.Chaps)
+
 	media.Cue("tmp/curse.cue")
-	fmt.Printf("%+V\n", media)
-	media.Probe()
-	fmt.Printf("%+V\n", media)
+	testChaps(media.Chaps)
+	//fmt.Printf("%+V\n", media)
+}
+
+func testChaps(chaps []*avtools.Chapter) {
+	for _, ch := range chaps {
+		//fmt.Printf("%s\n", ch.StartTime)
+		fmt.Printf("%s\n", ch.StartStamp.HHMMSS())
+		fmt.Printf("%s\n", ch.EndStamp.HHMMSS())
+		//fmt.Printf("%s\n", ch.End().Milliseconds())
+	}
 }
 
 func testProbe(in string) {

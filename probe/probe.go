@@ -8,6 +8,7 @@ import (
 
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
+	"github.com/ohzqq/fidi"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -15,6 +16,7 @@ type Meta struct {
 	StreamEntry  []map[string]any `json:"streams"`
 	Format       Format           `json:"format"`
 	ChapterEntry []Chapter        `json:"chapters"`
+	fidi.File
 }
 
 type Format struct {
@@ -40,6 +42,7 @@ func Load(input string) (avtools.Metaz, error) {
 	if err != nil {
 		return Meta{}, err
 	}
+	meta.File = fidi.NewFile(input)
 
 	return meta, nil
 }
@@ -95,6 +98,10 @@ func (m Meta) Tags() map[string]string {
 	m.Format.Tags["size"] = m.Format.Size
 	m.Format.Tags["bit_rate"] = m.Format.BitRate
 	return m.Format.Tags
+}
+
+func (m Meta) Source() fidi.File {
+	return m.File
 }
 
 var probeArgs = []ffmpeg.KwArgs{

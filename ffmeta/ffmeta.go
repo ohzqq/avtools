@@ -21,7 +21,7 @@ type FFMeta struct {
 	chapters []avtools.ChapterMeta
 }
 
-func Load(input string) (*FFMeta, error) {
+func Load(input string) (avtools.Metaz, error) {
 	opts := ini.LoadOptions{}
 	opts.Insensitive = true
 	opts.InsensitiveSections = true
@@ -115,6 +115,10 @@ func (ff FFMeta) Tags() map[string]string {
 
 func (ff FFMeta) Streams() []map[string]string {
 	return []map[string]string{}
+}
+
+func (ff FFMeta) Source() fidi.File {
+	return ff.File
 }
 
 func IsFFMeta(f fidi.File) bool {

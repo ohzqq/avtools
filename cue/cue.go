@@ -49,7 +49,7 @@ func Load(file string) (avtools.Metaz, error) {
 			titles = append(titles, title)
 		case strings.Contains(line, "INDEX 01"):
 			stamp := strings.TrimPrefix(line, "INDEX 01 ")
-			start, err := dur.Parse(stamp)
+			start, err := dur.Parse(stamp[:len(stamp)-3])
 			if err != nil {
 				return sheet, err
 			}
@@ -111,6 +111,10 @@ func (cue Sheet) Tags() map[string]string {
 
 func (cue Sheet) Streams() []map[string]string {
 	return []map[string]string{}
+}
+
+func (cue Sheet) Source() fidi.File {
+	return cue.File
 }
 
 var tmplFuncs = template.FuncMap{
