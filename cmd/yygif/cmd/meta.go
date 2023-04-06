@@ -20,7 +20,7 @@ import (
 // metaCmd represents the meta command
 var metaCmd = &cobra.Command{
 	Use:   "meta",
-	Short: "A brief description of your command",
+	Short: "convert meta",
 	//Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if MetaExists("metadata-default.yml") {

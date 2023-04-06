@@ -13,6 +13,7 @@ import (
 	"github.com/ohzqq/avtools/media"
 	"github.com/ohzqq/avtools/meta"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -289,5 +290,8 @@ func initConfig() {
 	cobra.CheckErr(err)
 	path := filepath.Join(home, ".config/avtools/profiles.yml")
 	ff.ReadConfig(path)
+	viper.SetConfigName("profiles")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
 	//fmt.Printf("%+V\n", yygif.Profiles)
 }
