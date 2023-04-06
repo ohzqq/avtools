@@ -30,6 +30,7 @@ type Stream struct {
 
 func New(input string) *Media {
 	m := avtools.NewMedia()
+
 	med := &Media{
 		Media: m,
 		Input: NewFile(input),

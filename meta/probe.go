@@ -9,6 +9,7 @@ import (
 
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
+	"github.com/ohzqq/dur"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -68,10 +69,19 @@ func DumpFFMeta(file string) *ff.Cmd {
 func (m ProbeMeta) Chapters() []*avtools.Chapter {
 	var ch []*avtools.Chapter
 	for _, c := range m.ChapterEntry {
+		ss, err := dur.Parse(c.Start)
+		if err != nil {
+			panic(err)
+		}
+		to, err := dur.Parse(c.End)
+		if err != nil {
+			panic(err)
+		}
+		println(ss.HHMMSS(), to.HHMMSS())
 		chap := &avtools.Chapter{
-			StartTime: avtools.Timestamp(avtools.ParseDuration(c.Start + "s")),
-			EndTime:   avtools.Timestamp(avtools.ParseDuration(c.End + "s")),
-			ChapTitle: c.Title(),
+			StartStamp: ss,
+			EndStamp:   to,
+			ChapTitle:  c.Title(),
 		}
 		ch = append(ch, chap)
 	}

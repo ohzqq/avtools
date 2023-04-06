@@ -49,12 +49,12 @@ func Load(input string) (avtools.Metaz, error) {
 		}
 
 		for _, ch := range sections {
-			var c FFMetaChapter
-			err := ch.MapTo(&c)
-			if err != nil {
-				return ffmeta, err
-			}
-			ffmeta.chapters = append(ffmeta.chapters, c)
+			//var c FFMetaChapter
+			//err := ch.MapTo(&c)
+			//if err != nil {
+			//return ffmeta, err
+			//}
+			ffmeta.chapters = append(ffmeta.chapters, Chapter{Section: ch})
 		}
 	}
 

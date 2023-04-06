@@ -301,14 +301,14 @@ func CutChapter(media *Media, chapter *avtools.Chapter) ff.Cmd {
 
 	title := chapter.ChapTitle
 	if title == "" {
-		title = fmt.Sprintf("-%s-%s", chapter.StartTime.Dur, chapter.EndTime.Dur)
+		title = fmt.Sprintf("-%s-%s", chapter.Start().HHMMSS(), chapter.End().HHMMSS())
 	}
 	out.Suffix(title)
 
 	cmd := media.Command()
 
-	cmd.Input.Start(chapter.StartTime.String()).
-		End(chapter.EndTime.String())
+	cmd.Input.Start(chapter.Start().String()).
+		End(chapter.End().String())
 
 	cmd.Output.Name(out.Join()).Pad("")
 

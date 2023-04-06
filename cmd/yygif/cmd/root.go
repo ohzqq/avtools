@@ -10,8 +10,8 @@ import (
 
 	"github.com/ohzqq/avtools"
 	"github.com/ohzqq/avtools/ff"
+	"github.com/ohzqq/avtools/ffmeta"
 	"github.com/ohzqq/avtools/media"
-	"github.com/ohzqq/avtools/meta"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -47,16 +47,14 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		meta := getMedia(cmd)
-		//c := media.CutChapter(meta, meta.Chapters()[0])
-		//c.Run()
 
 		for _, ch := range getChapters(cmd, meta) {
+			//g := media.CutChapter(meta, ch)
 			g := media.CutChapter(meta, ch)
 			if c, ok := ch.Tags["crop"]; ok {
 				crop := strings.Split(c, ":")
 				g.Filters.Set("crop", crop...)
 			}
-			//  g := gif.MkGif(meta.Input.Abs, ch)
 			ff := ParseFlags(cmd, &g)
 			ff.Compile()
 
@@ -74,8 +72,11 @@ var rootCmd = &cobra.Command{
 }
 
 func LoadGifMeta(input string) *media.Media {
-	meta := meta.LoadIni(input)
-	src := avtools.NewMedia().SetMeta(meta)
+	meta, err := ffmeta.Load(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+	src := avtools.NewMedia().SetMetaz(meta)
 	vid := meta.Tags()["title"]
 	return &media.Media{
 		Media:   src,
@@ -92,9 +93,13 @@ func getMedia(cmd *cobra.Command) *media.Media {
 	}
 	if cmd.Flags().Changed("meta") {
 		if cmd.Flags().Changed("input") {
-			meta.LoadIni(metadata)
+			m, err := ffmeta.Load(metadata)
+			if err != nil {
+				log.Fatal(err)
+			}
+			meta.SetMetaz(m)
 		} else {
-			meta = LoadGifMeta(metadata)
+			//meta = LoadGifMeta(metadata)
 		}
 	}
 	if meta == nil {
@@ -114,7 +119,7 @@ func getChapters(cmd *cobra.Command, meta *media.Media) []*avtools.Chapter {
 			log.Fatal("this command requires an input video src")
 		}
 
-		start := "00:00"
+		start := "0"
 		if cmd.Flags().Changed("ss") {
 			start = startTime
 		}
@@ -125,7 +130,7 @@ func getChapters(cmd *cobra.Command, meta *media.Media) []*avtools.Chapter {
 		}
 
 		ch := &avtools.Chapter{
-			Title: fmt.Sprintf("%s-%s-%s", meta.Input.Name, start, end),
+			ChapTitle: fmt.Sprintf("%s-%s-%s", meta.Input.Name, start, end),
 		}
 		ch.SS(start).To(end)
 		chapters = append(chapters, ch)
@@ -255,6 +260,21 @@ func Execute() {
 }
 
 func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	viper.SetDefault("gif.input.y", "")
+	viper.SetDefault("gif.input.loglevel", "error")
+	viper.SetDefault("gif.input.hide_banner", "")
+	viper.SetDefault("gif.output.ext", ".gif")
+	viper.SetDefault("gif.filters.fps.fps", "24")
+	viper.SetDefault("gif.filters.scale.w", "540")
+	viper.SetDefault("gif.filters.scale.flags", "lanczos")
+	viper.SetDefault("gif.filters.smartblur.ls", "-1.0")
+	viper.SetDefault("gif.filters.palette.stats_mode", "full")
+	viper.SetDefault("gif.filters.palette.new", "1")
+	viper.SetDefault("gif.filters.palette.dither", "bayer")
+	viper.SetDefault("gif.filters.palette.bs", "3")
+
 	cobra.OnInitialize(initConfig)
 	mime.AddExtensionType(".ini", "text/plain")
 	mime.AddExtensionType(".cue", "text/plain")
@@ -272,14 +292,14 @@ func init() {
 
 	// filters
 	rootCmd.PersistentFlags().StringSliceVarP(&filterFlag, "filter", "f", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&scale, "scale", "a", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&crop, "crop", "c", []string{}, "")
-	rootCmd.PersistentFlags().StringSliceVarP(&eq, "eq", "e", []string{}, "")
+	rootCmd.PersistentFlags().StringSliceVarP(&scale, "scale", "a", []string{}, "w=540,h=-2,flags=lanczos")
+	rootCmd.PersistentFlags().StringSliceVarP(&crop, "crop", "c", []string{}, "w=iw,h=ih")
+	rootCmd.PersistentFlags().StringSliceVarP(&eq, "eq", "e", []string{}, "b=0.0,c=1.0,g=1.0,s=1.0")
 	rootCmd.PersistentFlags().StringVar(&bayerScale, "bs", "3", "")
 	rootCmd.PersistentFlags().StringVarP(&dither, "dither", "d", "bayer", "")
-	rootCmd.PersistentFlags().StringVarP(&smartblur, "smartblur", "b", "0.5", "")
-	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "k", []string{}, "")
-	rootCmd.PersistentFlags().StringVarP(&fps, "fps", "r", "", "")
+	rootCmd.PersistentFlags().StringVarP(&smartblur, "smartblur", "b", "0.5", "1.0")
+	rootCmd.PersistentFlags().StringSliceVarP(&colortemp, "colortemp", "k", []string{}, "t=7000,pl=0")
+	rootCmd.PersistentFlags().StringVarP(&fps, "fps", "r", "", "24")
 	rootCmd.PersistentFlags().StringVar(&setpts, "setpts", "", "")
 	rootCmd.PersistentFlags().BoolVar(&yadif, "yadif", false, "")
 }
@@ -293,5 +313,11 @@ func initConfig() {
 	viper.SetConfigName("profiles")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(filepath.Join(home, ".config/avtools"))
+	err = viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("no config"))
+	}
+
+	//fmt.Printf("%+V\n", viper.AllSettings())
 	//fmt.Printf("%+V\n", yygif.Profiles)
 }

@@ -5,21 +5,76 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ohzqq/dur"
+	"gopkg.in/ini.v1"
 )
 
+type Chapter struct {
+	*ini.Section
+}
+
+func (ch Chapter) Start() time.Duration {
+	if ch.HasKey("START") {
+		t, err := dur.Parse(ch.Key("START").String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		return calculateSecs(t.Dur.Seconds(), ch.GetTag("TIMEBASE"))
+	}
+	return time.Duration(0)
+}
+
+func (ch Chapter) End() time.Duration {
+	if ch.HasKey("START") {
+		t, err := dur.Parse(ch.Key("END").String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		return calculateSecs(t.Dur.Seconds(), ch.GetTag("TIMEBASE"))
+	}
+	return time.Duration(0)
+}
+
+func (ch Chapter) Title() string {
+	if ch.HasKey("title") {
+		return ch.Key("title").String()
+	}
+	return ""
+}
+
+func (ch Chapter) GetTag(t string) string {
+	if ch.HasKey(t) {
+		return ch.Key(t).String()
+	}
+	return ""
+}
+
+func (ch Chapter) Tags() map[string]string {
+	tags := make(map[string]string)
+}
+
 type FFMetaChapter struct {
-	Base      string  `ini:"TIMEBASE"`
-	StartTime float64 `ini:"START"`
-	EndTime   float64 `ini:"END"`
-	ChTitle   string  `ini:"title"`
+	Base      string `ini:"TIMEBASE"`
+	StartTime string `ini:"START"`
+	EndTime   string `ini:"END"`
+	ChTitle   string `ini:"title"`
 }
 
 func (ch FFMetaChapter) Start() time.Duration {
-	return calculateSecs(ch.StartTime, ch.Base)
+	t, err := dur.Parse(ch.StartTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return calculateSecs(t.Dur.Seconds(), ch.Base)
 }
 
 func (ch FFMetaChapter) End() time.Duration {
-	return calculateSecs(ch.EndTime, ch.Base)
+	t, err := dur.Parse(ch.EndTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return calculateSecs(t.Dur.Seconds(), ch.Base)
 }
 
 func (ch FFMetaChapter) Title() string {
@@ -33,6 +88,9 @@ func calculateSecs(num float64, base string) time.Duration {
 }
 
 func timebase(b string) float64 {
+	if b == "" {
+		b = "1/1"
+	}
 	base, err := strconv.Atoi(strings.TrimPrefix(b, "1/"))
 	if err != nil {
 		log.Fatal(err)

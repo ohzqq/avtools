@@ -47,6 +47,7 @@ type ChapterMeta interface {
 	Start() time.Duration
 	End() time.Duration
 	Title() string
+	Tags() map[string]string
 }
 
 type Metaz interface {
@@ -82,7 +83,7 @@ func NewChapter(chap ChapterMeta) *Chapter {
 		ChapTitle:  chap.Title(),
 		StartStamp: ss,
 		EndStamp:   to,
-		Tags:       make(map[string]string),
+		Tags:       chap.Tags(),
 	}
 }
 
@@ -99,6 +100,15 @@ func (m *Media) SetMeta(meta Meta) *Media {
 		m.tags[key] = val
 	}
 	m.chapters = meta.Chapters()
+	m.streams = meta.Streams()
+	return m
+}
+
+func (m *Media) SetMetaz(meta Metaz) *Media {
+	for key, val := range meta.Tags() {
+		m.tags[key] = val
+	}
+	m.chapters = NewChapters(meta.Chapters())
 	m.streams = meta.Streams()
 	return m
 }
@@ -133,14 +143,20 @@ func (ch Chapter) Timebase() string {
 }
 
 func (ch *Chapter) SS(ss string) *Chapter {
-	dur := ParseStamp(ss)
-	ch.StartTime = Timestamp(dur)
+	s, err := dur.Parse(ss)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ch.StartStamp = s
 	return ch
 }
 
 func (ch *Chapter) To(to string) *Chapter {
-	dur := ParseStamp(to)
-	ch.EndTime = Timestamp(dur)
+	e, err := dur.Parse(to)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ch.EndStamp = e
 	return ch
 }
 
@@ -149,7 +165,7 @@ func (ch Chapter) Start() dur.Timestamp {
 }
 
 func (ch Chapter) End() dur.Timestamp {
-	return ch.StartStamp
+	return ch.EndStamp
 }
 
 func (ch Chapter) Title() string {

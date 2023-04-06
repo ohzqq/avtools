@@ -2,7 +2,6 @@ package meta
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -123,20 +122,17 @@ func (ff FFMeta) Chapters() []*avtools.Chapter {
 		for key, val := range chapter {
 			switch key {
 			case "start":
-				//d := ParseStamp(val, base)
 				d, err := dur.Parse(val)
 				if err != nil {
 					log.Fatal(err)
 				}
-				println(d.HHMMSS())
-				//ch.Start = avtools.Timestamp(d.Dur)
+				ch.StartStamp = d
 			case "end":
 				d, err := dur.Parse(val)
 				if err != nil {
 					log.Fatal(err)
 				}
-				fmt.Println(d.MMSS())
-				//ch.End = avtools.Timestamp(d.Dur)
+				ch.EndStamp = d
 			case "title":
 				ch.ChapTitle = val
 			default:
