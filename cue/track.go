@@ -11,9 +11,15 @@ type Track struct {
 func (t Track) Start() time.Duration {
 	return t.start
 }
+
 func (t Track) End() time.Duration {
 	return t.end
 }
+
 func (t Track) Title() string {
 	return t.title
+}
+
+func (t Track) Tags() map[string]string {
+	return map[string]string{}
 }

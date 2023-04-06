@@ -49,7 +49,6 @@ var rootCmd = &cobra.Command{
 		meta := getMedia(cmd)
 
 		for _, ch := range getChapters(cmd, meta) {
-			//g := media.CutChapter(meta, ch)
 			g := media.CutChapter(meta, ch)
 			if c, ok := ch.Tags["crop"]; ok {
 				crop := strings.Split(c, ":")
@@ -99,7 +98,7 @@ func getMedia(cmd *cobra.Command) *media.Media {
 			}
 			meta.SetMetaz(m)
 		} else {
-			//meta = LoadGifMeta(metadata)
+			meta = LoadGifMeta(metadata)
 		}
 	}
 	if meta == nil {

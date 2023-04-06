@@ -12,7 +12,7 @@ type Chapter struct {
 	StartTime    string            `json:"start_time" ini:"START"`
 	EndTime      string            `json:"end_time" ini:"END"`
 	ChapterTitle string            `ini:"title"`
-	Tags         map[string]string `json:"tags"`
+	CTags        map[string]string `json:"tags"`
 }
 
 func (c Chapter) Start() time.Duration {
@@ -36,4 +36,8 @@ func (c Chapter) Title() string {
 		return t
 	}
 	return c.ChapterTitle
+}
+
+func (c Chapter) Tags() map[string]string {
+	return c.CTags
 }

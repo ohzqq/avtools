@@ -52,33 +52,14 @@ func (ch Chapter) GetTag(t string) string {
 
 func (ch Chapter) Tags() map[string]string {
 	tags := make(map[string]string)
-}
-
-type FFMetaChapter struct {
-	Base      string `ini:"TIMEBASE"`
-	StartTime string `ini:"START"`
-	EndTime   string `ini:"END"`
-	ChTitle   string `ini:"title"`
-}
-
-func (ch FFMetaChapter) Start() time.Duration {
-	t, err := dur.Parse(ch.StartTime)
-	if err != nil {
-		log.Fatal(err)
+	for _, k := range ch.Keys() {
+		switch n := k.Name(); n {
+		case "TIMEBASE", "title", "START", "END":
+		default:
+			tags[n] = k.String()
+		}
 	}
-	return calculateSecs(t.Dur.Seconds(), ch.Base)
-}
-
-func (ch FFMetaChapter) End() time.Duration {
-	t, err := dur.Parse(ch.EndTime)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return calculateSecs(t.Dur.Seconds(), ch.Base)
-}
-
-func (ch FFMetaChapter) Title() string {
-	return ch.ChTitle
+	return tags
 }
 
 func calculateSecs(num float64, base string) time.Duration {
